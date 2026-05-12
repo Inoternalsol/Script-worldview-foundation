@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+:root {
+  --background: 249 250 251;
+  --foreground: 28 40 51;
+
+  --brand-primary: 26 58 92;
+  --brand-secondary: 46 125 50;
+  --brand-cta: 230 81 0;
+  --brand-muted: 93 109 126;
+
+  --success: 39 174 96;
+  --error: 231 76 60;
+
+  /* shadcn/ui component tokens */
+  --card: 255 255 255;
+  --card-foreground: 28 40 51;
+  --popover: 255 255 255;
+  --popover-foreground: 28 40 51;
+  --primary: 26 58 92;
+  --primary-foreground: 255 255 255;
+  --secondary: 241 243 245;
+  --secondary-foreground: 28 40 51;
+  --muted: 241 243 245;
+  --muted-foreground: 93 109 126;
+  --accent: 241 243 245;
+  --accent-foreground: 28 40 51;
+  --destructive: 231 76 60;
+  --destructive-foreground: 255 255 255;
+  --border: 222 226 230;
+  --input: 222 226 230;
+  --ring: 26 58 92;
+
+  --font-heading: var(--font-playfair);
+  --font-body: var(--font-inter);
+  --font-accent: var(--font-lora);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+@theme inline {
+  --color-background: rgb(var(--background));
+  --color-foreground: rgb(var(--foreground));
+  
+  --color-brand-primary: rgb(var(--brand-primary));
+  --color-brand-secondary: rgb(var(--brand-secondary));
+  --color-brand-cta: rgb(var(--brand-cta));
+  --color-brand-muted: rgb(var(--brand-muted));
+
+  --color-success: rgb(var(--success));
+  --color-error: rgb(var(--error));
+
+  /* shadcn/ui color tokens */
+  --color-card: rgb(var(--card));
+  --color-card-foreground: rgb(var(--card-foreground));
+  --color-popover: rgb(var(--popover));
+  --color-popover-foreground: rgb(var(--popover-foreground));
+  --color-primary: rgb(var(--primary));
+  --color-primary-foreground: rgb(var(--primary-foreground));
+  --color-secondary: rgb(var(--secondary));
+  --color-secondary-foreground: rgb(var(--secondary-foreground));
+  --color-muted: rgb(var(--muted));
+  --color-muted-foreground: rgb(var(--muted-foreground));
+  --color-accent: rgb(var(--accent));
+  --color-accent-foreground: rgb(var(--accent-foreground));
+  --color-destructive: rgb(var(--destructive));
+  --color-destructive-foreground: rgb(var(--destructive-foreground));
+  --color-border: rgb(var(--border));
+  --color-input: rgb(var(--input));
+  --color-ring: rgb(var(--ring));
+
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+  --font-accent: var(--font-accent);
+  --font-mono: var(--font-mono);
+
+  --shadow-card: 0 8px 20px rgba(16, 24, 40, 0.08);
+  --shadow-card-hover: 0 14px 30px rgba(16, 24, 40, 0.12);
+
+  --radius-xl: 12px;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  background: rgb(var(--background));
+  color: rgb(var(--foreground));
+  font-family: var(--font-body);
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

@@ -1,0 +1,38 @@
+import type { Config } from 'tailwindcss'
+
+const config: Config = {
+  darkMode: 'class',
+  content: ['./app/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './lib/**/*.{ts,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        background: 'rgb(var(--background))',
+        foreground: 'rgb(var(--foreground))',
+        brand: {
+          primary: 'rgb(var(--brand-primary))',
+          secondary: 'rgb(var(--brand-secondary))',
+          cta: 'rgb(var(--brand-cta))',
+          muted: 'rgb(var(--brand-muted))',
+        },
+        success: 'rgb(var(--success))',
+        error: 'rgb(var(--error))',
+      },
+      borderRadius: {
+        xl: '12px',
+      },
+      fontFamily: {
+        heading: ['var(--font-heading)'],
+        body: ['var(--font-body)'],
+        accent: ['var(--font-accent)'],
+        mono: ['var(--font-mono)'],
+      },
+      boxShadow: {
+        card: '0 8px 20px rgba(16, 24, 40, 0.08)',
+        cardHover: '0 14px 30px rgba(16, 24, 40, 0.12)',
+      },
+    },
+  },
+}
+
+export default config
+

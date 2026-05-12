@@ -1,0 +1,12 @@
+name = "script-worldview-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "script-worldview-db"
+database_id = "f91625b7-923f-4d97-a898-e2dbded2cba4"
+
+[vars]
+ENVIRONMENT = "development"
+

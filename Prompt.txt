@@ -1,0 +1,1192 @@
+
+## Complete Instructions to Build the Full Website Platform from Scratch
+
+---
+
+> **Project:** Script Worldview Foundation Official Website
+> **Tagline:** "Shaping Minds. Transforming Communities."
+> **Classification:** Full-stack NGO digital platform — enterprise grade
+> **Build Mode:** From scratch, no existing codebase
+
+---
+
+## 🧭 AGENT MISSION STATEMENT
+
+You are a senior full-stack engineer tasked with building a complete, production-ready, enterprise-grade website platform for **Script Worldview Foundation** — a faith-inspired Nigerian NGO focused on education, humanitarian response, and community development.
+
+This is NOT a simple brochure website. You are building a **full-featured digital platform** with 22 public pages, a role-based admin CMS, donation/payment processing, an AI chatbot, a transactional email system, a media library, and a structured relational database. The platform must rival the online presence of leading NGOs like UNICEF, World Vision, and Oxfam — while remaining distinctly warm, faith-inspired, and values-driven.
+
+Work **phase by phase, file by file, feature by feature** until the entire platform is complete. Never stop mid-phase. Never skip a feature. Confirm each phase is done before moving to the next.
+
+---
+
+## ⚙️ TECHNOLOGY STACK — USE EXACTLY THESE TECHNOLOGIES
+
+### Frontend
+| Technology | Purpose |
+|---|---|
+| **Next.js 14** (App Router) | React framework — SSR, SSG, ISR, routing |
+| **TypeScript** | All code must be fully typed — no `any` types |
+| **Tailwind CSS** | All styling — no CSS modules or styled-components |
+| **Shadcn/UI + Radix UI** | Accessible component library for UI elements |
+| **Framer Motion** | Page transitions and scroll-triggered animations |
+| **React Hook Form + Zod** | All form validation — client and shared schema |
+| **TipTap** | WYSIWYG rich text editor inside the CMS |
+| **Zustand** | State management for dashboard and complex UI |
+| **Next-Intl** | i18n setup (English first, multilingual-ready) |
+| **Next-SEO** | SEO metadata, Open Graph, JSON-LD schema |
+
+### Backend & Database
+| Technology | Purpose |
+|---|---|
+| **Cloudflare Workers** | Serverless API runtime — globally distributed |
+| **Hono.js** | Web framework for Cloudflare Workers API routes |
+| **Cloudflare D1** (SQLite) | Primary relational database |
+| **Drizzle ORM** | Type-safe SQL ORM for D1 |
+| **Cloudflare R2** | Object/media file storage |
+| **NextAuth.js (Auth.js v5)** | Authentication — JWT sessions, secure cookies |
+| **bcrypt** | Password hashing (minimum 12 salt rounds) |
+| **Jose** | JWT validation for API protection |
+| **Zod** | Server-side input validation on all API routes |
+
+### Third-Party Services
+| Service | Purpose |
+|---|---|
+| **Paystack** | Primary payment gateway (Nigeria, NGN) |
+| **Stripe** | International payment gateway (USD/GBP/EUR) |
+| **Resend.com** | Transactional + bulk email |
+| **React Email** | Branded HTML email templates |
+| **Anthropic Claude API** (preferred) or OpenAI API | AI chatbot |
+| **Vercel AI SDK** | Streaming chatbot responses |
+| **Google reCAPTCHA v3** | Bot protection on all public forms |
+| **Vercel** | Frontend hosting + analytics |
+| **Sentry** | Error monitoring in production |
+
+---
+
+## 🎨 DESIGN SYSTEM — ENFORCE THROUGHOUT
+
+### Brand Colors
+```
+Primary:    #1A3A5C  (Deep Navy Blue)    — headers, buttons, primary UI
+Secondary:  #2E7D32  (Forest Green)      — accents, highlights, success
+CTA/Action: #E65100  (Warm Orange)       — donation buttons, urgent CTAs
+Background: #F9FAFB  (Off-white)         — page backgrounds
+Text Dark:  #1C2833  (Deep Charcoal)     — body text
+Text Muted: #5D6D7E  (Slate Gray)        — captions, labels
+Success:    #27AE60  (Green)             — confirmations
+Error:      #E74C3C  (Red)               — validation errors
+```
+
+### Typography
+```
+Heading:   Playfair Display (serif)   — trust, authority
+Body:      Inter or Nunito Sans       — clean, legible
+Quotes:    Lora (serif)               — testimonials, pull quotes
+Code:      JetBrains Mono             — technical content
+```
+Load all fonts via `next/font` for performance.
+
+### Component Design Rules
+- Card border-radius: `12px`
+- Button height: `48px` minimum (touch target compliance)
+- Button variants: Primary (filled navy), Secondary (outlined), Ghost, Danger (red)
+- Cards: hover elevation (subtle shadow increase + 2px translateY)
+- Navigation: sticky header, transparent→solid on scroll, mobile hamburger drawer
+- Hero sections: full-width, video/parallax support, overlay, animated text entry
+- Forms: floating labels, real-time Zod validation, clear error states
+- Loading states: skeleton screens (not spinners) for content areas
+- Toast notifications (Shadcn Toast) for all async actions
+
+---
+
+## 🗃️ DATABASE SCHEMA — CLOUDFLARE D1
+
+Create all 15 tables with Drizzle ORM migrations. Every table must include `created_at` and `updated_at` timestamps (auto-managed).
+
+```sql
+-- 1. users
+id, name, email, password_hash, role ENUM('super_admin','dept_admin','content_editor','viewer'),
+department, status ENUM('active','suspended'), avatar_url, last_login, created_at, updated_at
+
+-- 2. roles_permissions
+id, role_name, permissions_json TEXT, created_by, created_at, updated_at
+
+-- 3. pages
+id, slug UNIQUE, title, content_json TEXT, meta_title, meta_desc, og_image,
+status ENUM('draft','published'), author_id FK→users, created_at, updated_at
+
+-- 4. blog_posts
+id, title, slug UNIQUE, content TEXT, excerpt, category_id, author_id FK→users,
+featured_image, status ENUM('draft','published','archived'), published_at,
+view_count DEFAULT 0, read_time_minutes, created_at, updated_at
+
+-- 5. programs
+id, name, slug UNIQUE, description, category ENUM('education','humanitarian','community','research','capacity'),
+icon, featured_image, status ENUM('active','inactive'), sort_order, created_at, updated_at
+
+-- 6. events
+id, title, slug, date, end_date, location, address, description, capacity,
+registrations_count DEFAULT 0, featured_image, speakers_json TEXT,
+status ENUM('upcoming','ongoing','past','cancelled'), created_by FK→users, created_at, updated_at
+
+-- 7. event_registrations
+id, event_id FK→events, name, email, phone, organization, role_title,
+dietary_needs, accessibility_needs, status ENUM('confirmed','cancelled','waitlist'),
+registered_at, created_at, updated_at
+
+-- 8. donations
+id, donor_name, donor_email, donor_phone, amount, currency, campaign_id FK→campaigns,
+payment_ref UNIQUE, gateway ENUM('paystack','stripe'), status ENUM('pending','completed','failed','refunded'),
+anonymous BOOLEAN DEFAULT false, dedication_message, donated_at, created_at, updated_at
+
+-- 9. campaigns
+id, title, slug, goal_amount, raised_amount DEFAULT 0, deadline,
+description, featured_image, status ENUM('active','completed','paused'),
+donor_count DEFAULT 0, created_by FK→users, created_at, updated_at
+
+-- 10. contacts
+id, name, email, phone, subject, department ENUM('general','education','humanitarian','community','hr','press','partnership'),
+message, type ENUM('contact','partnership','community','press','humanitarian'),
+status ENUM('new','in_progress','resolved'), assigned_to FK→users,
+replied_at, source, created_at, updated_at
+
+-- 11. volunteers
+id, name, email, phone, location, skills_json TEXT, availability_json TEXT,
+languages, motivation, how_did_you_hear,
+status ENUM('pending','approved','active','rejected'), applied_at, created_at, updated_at
+
+-- 12. newsletter_subscribers
+id, email UNIQUE, first_name, last_name, preferences_json TEXT,
+status ENUM('active','unsubscribed'), subscribed_at, unsubscribed_at, created_at, updated_at
+
+-- 13. job_postings
+id, title, department, location, type ENUM('full_time','part_time','contract','volunteer','internship'),
+description, requirements, deadline, status ENUM('open','closed','archived'),
+created_by FK→users, created_at, updated_at
+
+-- 14. job_applications
+id, job_id FK→job_postings, name, email, phone, years_experience,
+cv_url, cover_letter, linkedin_url,
+status ENUM('received','reviewing','shortlisted','rejected','hired'),
+applied_at, created_at, updated_at
+
+-- 15. media_library
+id, filename, url, type ENUM('image','video','document'), size_bytes,
+alt_text, category, tags_json TEXT, uploaded_by FK→users, created_at, updated_at
+
+-- 16. audit_logs
+id, user_id FK→users, action, resource, resource_id, details_json TEXT,
+ip_address, user_agent, timestamp
+```
+
+---
+
+## 🗂️ COMPLETE FILE & FOLDER STRUCTURE
+
+```
+/
+├── app/                          ← Next.js App Router
+│   ├── (public)/                 ← Public pages layout group
+│   │   ├── layout.tsx            ← Public layout (header, footer, chatbot)
+│   │   ├── page.tsx              ← Home /
+│   │   ├── about/
+│   │   │   ├── page.tsx          ← /about
+│   │   │   └── leadership/
+│   │   │       └── page.tsx      ← /about/leadership
+│   │   ├── programs/
+│   │   │   ├── page.tsx          ← /programs
+│   │   │   ├── education/page.tsx
+│   │   │   ├── humanitarian/page.tsx
+│   │   │   ├── community/page.tsx
+│   │   │   ├── research/page.tsx
+│   │   │   └── capacity/page.tsx
+│   │   ├── blog/
+│   │   │   ├── page.tsx          ← /blog (listing)
+│   │   │   └── [slug]/page.tsx   ← /blog/[slug] (single post)
+│   │   ├── events/
+│   │   │   ├── page.tsx
+│   │   │   └── [slug]/page.tsx
+│   │   ├── donate/page.tsx
+│   │   ├── campaigns/
+│   │   │   ├── page.tsx
+│   │   │   └── [slug]/page.tsx
+│   │   ├── get-involved/page.tsx
+│   │   ├── stories/page.tsx
+│   │   ├── partners/page.tsx
+│   │   ├── volunteers/page.tsx
+│   │   ├── careers/
+│   │   │   ├── page.tsx
+│   │   │   └── [id]/page.tsx
+│   │   ├── gallery/page.tsx
+│   │   ├── newsletter/page.tsx
+│   │   ├── contact/page.tsx
+│   │   ├── search/page.tsx
+│   │   ├── privacy/page.tsx
+│   │   ├── terms/page.tsx
+│   │   └── accessibility/page.tsx
+│   ├── (auth)/
+│   │   └── admin/login/page.tsx  ← Admin login
+│   ├── (admin)/                  ← Protected admin area
+│   │   ├── layout.tsx            ← Admin layout with sidebar
+│   │   └── admin/
+│   │       ├── page.tsx          ← Dashboard home
+│   │       ├── content/
+│   │       │   ├── pages/
+│   │       │   ├── blog/
+│   │       │   ├── programs/
+│   │       │   └── events/
+│   │       ├── donations/page.tsx
+│   │       ├── campaigns/page.tsx
+│   │       ├── forms/
+│   │       │   ├── contacts/page.tsx
+│   │       │   ├── volunteers/page.tsx
+│   │       │   ├── careers/page.tsx
+│   │       │   └── subscribers/page.tsx
+│   │       ├── media/page.tsx
+│   │       ├── users/page.tsx
+│   │       ├── email/page.tsx
+│   │       ├── chatbot/page.tsx
+│   │       ├── analytics/page.tsx
+│   │       ├── audit-log/page.tsx
+│   │       └── settings/page.tsx
+│   ├── api/                      ← Next.js API routes (auth only)
+│   │   └── auth/[...nextauth]/route.ts
+│   └── not-found.tsx             ← Custom 404
+├── components/
+│   ├── public/                   ← Public-facing components
+│   │   ├── layout/
+│   │   │   ├── Header.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── MobileMenu.tsx
+│   │   │   └── ChatbotWidget.tsx
+│   │   ├── home/
+│   │   │   ├── HeroSection.tsx
+│   │   │   ├── ImpactCounter.tsx
+│   │   │   ├── MissionStrip.tsx
+│   │   │   ├── FeaturedPrograms.tsx
+│   │   │   ├── LatestNews.tsx
+│   │   │   ├── DonateSection.tsx
+│   │   │   ├── UpcomingEvents.tsx
+│   │   │   ├── TestimonialsCarousel.tsx
+│   │   │   ├── PartnersMarquee.tsx
+│   │   │   └── NewsletterSignup.tsx
+│   │   ├── forms/
+│   │   │   ├── ContactForm.tsx
+│   │   │   ├── DonationForm.tsx
+│   │   │   ├── EventRegistrationForm.tsx
+│   │   │   ├── VolunteerForm.tsx
+│   │   │   ├── CareerApplicationForm.tsx
+│   │   │   ├── NewsletterForm.tsx
+│   │   │   ├── PartnershipForm.tsx
+│   │   │   ├── CommunityProgramForm.tsx
+│   │   │   ├── TrainingRegistrationForm.tsx
+│   │   │   ├── MediaPressForm.tsx
+│   │   │   ├── HumanitarianAidForm.tsx
+│   │   │   └── PublicationGateForm.tsx
+│   │   └── shared/
+│   │       ├── PageHero.tsx
+│   │       ├── SectionHeader.tsx
+│   │       ├── ProgramCard.tsx
+│   │       ├── BlogCard.tsx
+│   │       ├── EventCard.tsx
+│   │       ├── CampaignCard.tsx
+│   │       ├── StoryCard.tsx
+│   │       ├── TeamMemberCard.tsx
+│   │       ├── DonationProgressBar.tsx
+│   │       ├── GalleryLightbox.tsx
+│   │       └── CookieConsent.tsx
+│   ├── admin/
+│   │   ├── layout/
+│   │   │   ├── AdminSidebar.tsx
+│   │   │   ├── AdminHeader.tsx
+│   │   │   └── AdminBreadcrumb.tsx
+│   │   ├── dashboard/
+│   │   │   ├── StatCard.tsx
+│   │   │   ├── RecentActivity.tsx
+│   │   │   ├── DonationChart.tsx
+│   │   │   └── SystemHealthBar.tsx
+│   │   ├── content/
+│   │   │   ├── TipTapEditor.tsx
+│   │   │   ├── ContentTable.tsx
+│   │   │   ├── SEOForm.tsx
+│   │   │   └── MediaPicker.tsx
+│   │   └── shared/
+│   │       ├── DataTable.tsx
+│   │       ├── ConfirmDialog.tsx
+│   │       ├── StatusBadge.tsx
+│   │       └── ExportButton.tsx
+│   └── ui/                       ← Shadcn components live here
+├── lib/
+│   ├── db/
+│   │   ├── schema.ts             ← Drizzle ORM schema (all 16 tables)
+│   │   ├── migrations/           ← SQL migration files
+│   │   └── seed.ts               ← Seed data for dev
+│   ├── auth/
+│   │   ├── config.ts             ← NextAuth config
+│   │   └── permissions.ts        ← Role permission matrix
+│   ├── api/
+│   │   ├── client.ts             ← API client for frontend→Workers
+│   │   └── types.ts              ← Shared API response types
+│   ├── email/
+│   │   ├── templates/            ← React Email templates
+│   │   └── sender.ts             ← Resend.com wrapper
+│   ├── payments/
+│   │   ├── paystack.ts           ← Paystack integration
+│   │   └── stripe.ts             ← Stripe integration
+│   ├── chatbot/
+│   │   ├── knowledge-base.ts     ← RAG knowledge base loader
+│   │   └── chat.ts               ← AI SDK streaming handler
+│   ├── validations/
+│   │   └── schemas.ts            ← All Zod schemas (shared client/server)
+│   └── utils/
+│       ├── cn.ts                 ← Tailwind class merger
+│       ├── format.ts             ← Currency, date, number formatters
+│       └── seo.ts                ← SEO metadata generators
+├── workers/                      ← Cloudflare Workers API
+│   ├── src/
+│   │   ├── index.ts              ← Hono app entry point
+│   │   ├── middleware/
+│   │   │   ├── auth.ts           ← JWT verification middleware
+│   │   │   ├── cors.ts           ← CORS configuration
+│   │   │   ├── rateLimit.ts      ← Rate limiting
+│   │   │   └── validation.ts     ← Zod request validation
+│   │   └── routes/
+│   │       ├── auth.ts
+│   │       ├── pages.ts
+│   │       ├── blog.ts
+│   │       ├── programs.ts
+│   │       ├── events.ts
+│   │       ├── donations.ts
+│   │       ├── campaigns.ts
+│   │       ├── contacts.ts
+│   │       ├── volunteers.ts
+│   │       ├── newsletter.ts
+│   │       ├── careers.ts
+│   │       ├── media.ts
+│   │       ├── users.ts
+│   │       ├── email.ts
+│   │       ├── chatbot.ts
+│   │       ├── analytics.ts
+│   │       └── webhooks/
+│   │           ├── paystack.ts
+│   │           └── stripe.ts
+│   ├── wrangler.toml
+│   └── package.json
+├── emails/                       ← React Email templates
+│   ├── ContactConfirmation.tsx
+│   ├── DonationReceipt.tsx
+│   ├── EventConfirmation.tsx
+│   ├── VolunteerAcknowledgment.tsx
+│   ├── CareerAcknowledgment.tsx
+│   ├── NewsletterWelcome.tsx
+│   ├── PasswordReset.tsx
+│   ├── StaffAccountCreated.tsx
+│   ├── NewBlogPost.tsx
+│   ├── EventReminder.tsx
+│   ├── CampaignUpdate.tsx
+│   └── MonthlyDonorSummary.tsx
+├── public/
+│   ├── images/                   ← Static images (logo, og-image, etc.)
+│   ├── icons/                    ← SVG icons
+│   └── robots.txt
+├── middleware.ts                 ← Next.js middleware (auth protection)
+├── next.config.mjs
+├── tailwind.config.ts
+├── tsconfig.json
+├── .env.example                  ← All required env vars documented
+└── package.json
+```
+
+---
+
+## 📋 PHASE-BY-PHASE BUILD INSTRUCTIONS
+
+### ═══ PHASE 1: FOUNDATION SETUP (Do this first, completely) ═══
+
+**1.1 — Initialize Project**
+```bash
+npx create-next-app@latest script-worldview-foundation \
+  --typescript --tailwind --eslint --app --src-dir=false \
+  --import-alias "@/*"
+cd script-worldview-foundation
+```
+
+**1.2 — Install ALL Dependencies**
+```bash
+# UI & Animation
+npm install @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-select \
+  @radix-ui/react-tabs @radix-ui/react-tooltip @radix-ui/react-popover \
+  framer-motion lucide-react class-variance-authority clsx tailwind-merge
+
+# Shadcn UI setup
+npx shadcn@latest init
+npx shadcn@latest add button card dialog dropdown-menu form input label \
+  select sheet table tabs toast tooltip badge separator avatar progress \
+  popover command skeleton switch textarea checkbox radio-group alert \
+  breadcrumb calendar date-picker pagination scroll-area
+
+# Forms & Validation
+npm install react-hook-form @hookform/resolvers zod
+
+# TipTap Editor
+npm install @tiptap/react @tiptap/pm @tiptap/starter-kit \
+  @tiptap/extension-image @tiptap/extension-link @tiptap/extension-table \
+  @tiptap/extension-youtube @tiptap/extension-code-block-lowlight \
+  @tiptap/extension-placeholder @tiptap/extension-character-count \
+  @tiptap/extension-text-align @tiptap/extension-highlight lowlight
+
+# State Management
+npm install zustand
+
+# Auth
+npm install next-auth@beta @auth/core
+
+# Database & ORM
+npm install drizzle-orm @cloudflare/d1
+npm install -D drizzle-kit
+
+# Email
+npm install resend @react-email/components @react-email/render
+
+# Payments
+npm install @paystack/inline-js stripe
+
+# AI Chatbot
+npm install ai @anthropic-ai/sdk  # or openai
+
+# SEO & i18n
+npm install next-intl next-seo
+
+# Security & Utils
+npm install bcryptjs jose date-fns nanoid
+
+# Monitoring
+npm install @sentry/nextjs
+
+# Type Definitions
+npm install -D @types/bcryptjs @types/node
+```
+
+**1.3 — Configure Tailwind**
+Update `tailwind.config.ts` with the full design system — add all brand colors as CSS custom properties and extend the Tailwind theme. Configure `darkMode: 'class'`.
+
+**1.4 — Set Up Global CSS**
+In `app/globals.css`, define CSS variables for all brand colors. Set `--font-heading`, `--font-body`, `--font-accent` variables. Import Google Fonts via `next/font`.
+
+**1.5 — Create `.env.example`**
+Document every required environment variable:
+```
+# Database
+DATABASE_URL=
+CLOUDFLARE_ACCOUNT_ID=
+CLOUDFLARE_API_TOKEN=
+D1_DATABASE_ID=
+
+# Auth
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=
+
+# Payments
+PAYSTACK_SECRET_KEY=
+PAYSTACK_PUBLIC_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_PUBLIC_KEY=
+STRIPE_WEBHOOK_SECRET=
+
+# Email
+RESEND_API_KEY=
+EMAIL_FROM=noreply@scriptworldviewfoundation.org
+
+# AI
+ANTHROPIC_API_KEY=
+# OR: OPENAI_API_KEY=
+
+# reCAPTCHA
+RECAPTCHA_SITE_KEY=
+RECAPTCHA_SECRET_KEY=
+
+# Storage
+CLOUDFLARE_R2_BUCKET=
+CLOUDFLARE_R2_ACCOUNT_ID=
+CLOUDFLARE_R2_ACCESS_KEY_ID=
+CLOUDFLARE_R2_SECRET_ACCESS_KEY=
+R2_PUBLIC_URL=
+
+# Monitoring
+SENTRY_DSN=
+
+# App
+NEXT_PUBLIC_APP_URL=https://scriptworldviewfoundation.org
+NEXT_PUBLIC_API_URL=https://api.scriptworldviewfoundation.org
+```
+
+**1.6 — Database Schema**
+Create `lib/db/schema.ts` with ALL 16 Drizzle ORM table definitions (users, roles_permissions, pages, blog_posts, programs, events, event_registrations, donations, campaigns, contacts, volunteers, newsletter_subscribers, job_postings, job_applications, media_library, audit_logs). Include all indexes and foreign key relationships.
+
+**1.7 — Auth Setup**
+Configure NextAuth.js v5 with credentials provider (email + password), JWT strategy, and the user database table. Create `middleware.ts` to protect all `/admin/*` routes.
+
+---
+
+### ═══ PHASE 2: SHARED LAYOUT & DESIGN SYSTEM ═══
+
+**2.1 — Public Layout** (`app/(public)/layout.tsx`)
+Render `<Header />`, `{children}`, `<Footer />`, and `<ChatbotWidget />`.
+
+**2.2 — Header Component**
+- Logo (left) + primary navigation (center/right) + "Donate Now" CTA button (orange)
+- Navigation links: Home, About, Our Work (dropdown: Education, Humanitarian, Community, Research, Capacity), Get Involved, Blog, Contact
+- Scroll behavior: transparent at top → solid `#1A3A5C` background on scroll (use Framer Motion)
+- Mobile: hamburger icon → full-screen slide-in drawer with all links
+- Active link indicator
+
+**2.3 — Footer Component**
+4-column layout:
+- Col 1: Logo + mission tagline + social icons (Facebook, Twitter/X, Instagram, LinkedIn, YouTube)
+- Col 2: Quick Links (About, Programs, Donate, Volunteer, Careers, Blog)
+- Col 3: Programs (Education, Humanitarian, Community, Research, Capacity)
+- Col 4: Contact (address, phone, email) + newsletter signup (single input)
+- Bottom bar: Copyright + Privacy Policy + Terms of Use + Accessibility Statement
+
+**2.4 — Reusable Components**
+Build all shared public components (PageHero, SectionHeader, ProgramCard, BlogCard, EventCard, CampaignCard, StoryCard, TeamMemberCard, DonationProgressBar). Each must be fully typed with TypeScript interfaces.
+
+**2.5 — Admin Layout** (`app/(admin)/layout.tsx`)
+- Left sidebar (collapsible on mobile): logo, nav sections (Dashboard, Content, Donations, Forms, Media, Users, Email, Reports, Settings)
+- Top admin header: user avatar, role badge, notifications bell, logout
+- Role-based sidebar — only show menu items the current user's role can access
+- Responsive: sidebar collapses to icon-only on tablet, drawer on mobile
+
+---
+
+### ═══ PHASE 3: ALL 22 PUBLIC PAGES ═══
+
+Build each page completely — no placeholders, no "TODO" comments. Every section must be implemented.
+
+**3.1 — Home Page** (`/`)
+
+Sections in order:
+1. **Hero**: Full-width background (video-ready with `<video>` autoplay muted loop, fallback to image), animated headline using Framer Motion, subtext, dual CTAs ("Donate Now" → `/donate`, "Learn About Us" → `/about`). Overlay gradient for text legibility.
+2. **Impact Counter Bar**: 4 stats (2,000+ Lives Impacted, 12 Communities Served, 5 Active Programs, ₦500k+ Raised). Numbers animate up using `useInView` + Framer Motion when scrolled into view.
+3. **Mission Strip**: 3 icon+text cards (Education, Humanitarian, Community) in a colored band.
+4. **Featured Programs**: 3–4 program cards loaded from API, with icon, title, short description, and "Learn More" link. Skeleton loader while fetching.
+5. **Latest News**: 3 most recent blog posts, each with featured image, category badge, title, excerpt, date, author, and "Read More" link.
+6. **Donate Section**: Preset buttons (₦5,000 / ₦10,000 / ₦25,000 / ₦50,000 / Custom), "One-time / Monthly" toggle, donor name/email fields, "Donate Now" button that opens Paystack Inline.
+7. **Upcoming Events**: 2–3 next events as horizontal cards with date badge, title, location, and "Register" button.
+8. **Testimonials Carousel**: Auto-advancing carousel (Framer Motion) with beneficiary quotes, name, location.
+9. **Partners Marquee**: Horizontal scrolling logo strip (CSS `marquee` or Framer Motion infinite scroll).
+10. **Newsletter CTA**: Full-width colored band, email input, subscribe button.
+11. **Footer** (from layout).
+
+**3.2 — About Page** (`/about`)
+- Mission, Vision, Values section (3 visually designed cards)
+- Organization story with timeline (use vertical timeline component)
+- "Faith-inspired, values-driven" identity statement
+- 5 departments with icons and descriptions
+- Board overview (2–3 featured trustees + "See Full Leadership" CTA)
+- Annual Report download button
+- CTAs: Join Us / Partner With Us
+
+**3.3 — Leadership & Team** (`/about/leadership`)
+- Board of Trustees: CSS grid of photo cards, name, title; click opens a modal with full bio
+- Executive Director: Featured large card with photo, full bio, and vision statement
+- Department Heads: Grid of smaller photo cards
+- All data dynamically loaded from API (admin-managed)
+
+**3.4 — Programs Overview** (`/programs`)
+- 3 program pillar cards with icons (Education, Humanitarian, Community)
+- Impact numbers per program
+- Navigation to sub-pages
+- Featured success story per pillar
+
+**3.5 — Education & Training** (`/programs/education`)
+- Program overview text
+- Upcoming training listings (date, duration, format badge, register button)
+- Trainer profiles
+- Downloadable resources section
+- Registration form (inline or modal)
+
+**3.6 — Humanitarian Services** (`/programs/humanitarian`)
+- Mission statement
+- Active/past interventions list with location
+- Photo/video gallery strip
+- Donation CTA section (specific to humanitarian fund)
+- Partner orgs
+- Volunteer deployment inquiry form
+
+**3.7 — Community Development** (`/programs/community`)
+- Program descriptions
+- Case studies with photos
+- Peacebuilding and advocacy initiatives
+- Community participation application form
+
+**3.8 — Research & Publications** (`/programs/research`)
+- Filterable resource library (type, year, topic)
+- Resource cards with title, type badge, year, author, download button
+- Gated resources trigger `PublicationGateForm` (email capture) before download link is emailed
+
+**3.9 — Capacity Building** (`/programs/capacity`)
+- Training workshop listings with schedule, format (online/in-person), certification
+- Past cohort statistics
+- Training registration form
+
+**3.10 — Blog & News** (`/blog`)
+- Featured/pinned article at top (full-width card)
+- Filterable article grid by category (News, Reports, Stories, Publications, Op-Eds)
+- Search bar (queries API)
+- Pagination (10 per page)
+- Each blog post page (`/blog/[slug]`): Full TipTap rendered content, author card, reading time, share buttons, related articles
+
+**3.11 — Events** (`/events`)
+- Toggle: Upcoming / Past events
+- Event cards with date badge, title, location, capacity indicator, "Register" button
+- Individual event page (`/events/[slug]`): Full description, date/time, Google Maps embed (static image), speakers list, registration form (EventRegistrationForm)
+
+**3.12 — Donate Page** (`/donate`)
+- Preset amounts (₦5,000 / ₦10,000 / ₦25,000 / ₦50,000 / Custom)
+- Frequency toggle: One-time / Monthly
+- Campaign selector (General Fund, Education, Humanitarian, Community)
+- Donor info form
+- Currency selector: NGN (Paystack) / USD/GBP/EUR (Stripe) — swap payment widget accordingly
+- Post-donation: redirect to `/donate/thank-you` with personalized message + share buttons
+- Donation wall (public donors list, with `anonymous` opt-out)
+- Active campaign progress bars
+
+**3.13 — Campaigns** (`/campaigns` and `/campaigns/[slug]`)
+- Campaign listing with progress bars
+- Individual campaign: story, progress bar with goal/raised/deadline countdown, share buttons, recent donors list, campaign-specific donation form
+
+**3.14 — Get Involved** (`/get-involved`)
+- 4 pathway cards: Volunteer, Partner, Advocate, Donate
+- Volunteer section: VolunteerForm with skills multi-select, availability
+- Partnership section: types + PartnershipForm
+- Advocacy: downloadable toolkit (PDF links), social share assets
+
+**3.15 — Our Stories / Impact** (`/stories`)
+- Masonry grid of impact story cards (photo, excerpt, location, program tag)
+- Click → opens full story in modal or dedicated page
+
+**3.16 — Partners & Funders** (`/partners`)
+- Partner logo grid with organization name, type, and brief description
+- Categories: Corporate, Academic, Faith-based, International NGO, Government
+
+**3.17 — Volunteers** (`/volunteers`)
+- Current volunteer profiles grid
+- "Join Us" CTA with VolunteerForm
+
+**3.18 — Careers** (`/careers` and `/careers/[id]`)
+- Active job listings: role title, department badge, location, type badge, deadline
+- Individual job page: full description, requirements, responsibilities
+- CareerApplicationForm with CV file upload (via Cloudflare R2)
+
+**3.19 — Media Gallery** (`/gallery`)
+- Filter by Program, Event, Year, Category
+- Masonry grid layout
+- Click → Lightbox viewer (full-size image with prev/next, caption, share)
+- Embedded YouTube/Vimeo videos in grid
+
+**3.20 — Newsletter Signup** (`/newsletter`)
+- Full-page subscription form with preference checkboxes (Education, Humanitarian, Events, Reports)
+- Value proposition copy
+- Recent newsletter preview thumbnails
+
+**3.21 — Contact Us** (`/contact`)
+- ContactForm (department routing dropdown)
+- Contact details per department (General, Education, Humanitarian, HR, Press)
+- Embedded Google Maps (static iframe or API)
+- Office hours
+- Social links
+
+**3.22 — Legal & Utility Pages**
+- `/privacy` — Full NDPR/GDPR-compliant privacy policy
+- `/terms` — Website terms of use
+- `/accessibility` — WCAG 2.1 AA compliance statement
+- `/search` — Site-wide search results (query all content from API)
+- `not-found.tsx` — Custom 404 with navigation help and "Go Home" button
+
+---
+
+### ═══ PHASE 4: ALL 12 FORMS ═══
+
+Build every form using `react-hook-form` + `zod`. All forms must:
+- Have full client-side validation with real-time error messages
+- Submit to the Cloudflare Workers API
+- Show a loading spinner on the submit button while submitting
+- Show a Shadcn Toast on success or error
+- Include Google reCAPTCHA v3 (attach token to submission)
+- Store data in the correct D1 database table via API
+- Trigger the correct automated email (see Email section)
+
+| # | Form | Target Table | Emails Triggered |
+|---|---|---|---|
+| 1 | ContactForm | contacts | Confirmation → sender, Alert → department |
+| 2 | DonationForm | donations | Receipt → donor, Alert → finance |
+| 3 | EventRegistrationForm | event_registrations | Confirmation + .ics → registrant |
+| 4 | VolunteerForm | volunteers | Acknowledgment → applicant, Alert → HR |
+| 5 | CareerApplicationForm | job_applications | Receipt → applicant, Alert → HR |
+| 6 | NewsletterForm | newsletter_subscribers | Welcome email → subscriber |
+| 7 | PartnershipForm | contacts (type=partnership) | Inquiry ack → org, Alert → management |
+| 8 | CommunityProgramForm | contacts (type=community) | Receipt → community → humanitarian dept |
+| 9 | TrainingRegistrationForm | event_registrations | Enrollment confirmation + materials |
+| 10 | MediaPressForm | contacts (type=press) | Auto-reply + PR contact details |
+| 11 | HumanitarianAidForm | contacts (type=humanitarian) | URGENT alert → humanitarian dept |
+| 12 | PublicationGateForm | newsletter_subscribers | Download link via email |
+
+---
+
+### ═══ PHASE 5: CLOUDFLARE WORKERS API ═══
+
+Build the complete Hono.js API in the `/workers` directory.
+
+**5.1 — Hono App Entry** (`workers/src/index.ts`)
+- Configure CORS (allow frontend domain)
+- Register all middleware (auth, rate limit, validation, logging)
+- Mount all route modules
+- Set up Cloudflare D1 binding
+
+**5.2 — Auth Middleware**
+- Verify JWT token on every protected route
+- Extract user ID and role from token
+- Attach user to context for downstream route handlers
+- Return 401 if token missing/expired/invalid
+
+**5.3 — Route Handlers**
+For EVERY route, implement full CRUD:
+
+```
+GET    /api/blog           → list (with pagination, filter by category/status)
+POST   /api/blog           → create (auth: content_editor+)
+GET    /api/blog/:slug     → single post
+PUT    /api/blog/:id       → update (auth: content_editor+)
+DELETE /api/blog/:id       → soft delete (auth: dept_admin+)
+```
+
+Apply this pattern to: `pages`, `programs`, `events`, `donations`, `campaigns`, `contacts`, `volunteers`, `newsletter`, `careers/jobs`, `careers/applications`, `media`, `users`.
+
+**5.4 — Payment Webhooks**
+- `/api/webhooks/paystack` — verify HMAC signature, update donation status in D1, trigger receipt email
+- `/api/webhooks/stripe` — verify Stripe webhook signature, update donation status, trigger email
+
+**5.5 — Email Route**
+- POST `/api/email/send` — send individual email (auth: dept_admin+)
+- POST `/api/email/bulk` — send newsletter to segment (auth: super_admin)
+- GET `/api/email/logs` — email send history (auth: dept_admin+)
+
+**5.6 — Chatbot Route**
+- POST `/api/chatbot/chat` — receive message, query knowledge base, stream AI response using Vercel AI SDK
+
+---
+
+### ═══ PHASE 6: PAYMENT GATEWAY INTEGRATION ═══
+
+**6.1 — Paystack (Nigerian Donors)**
+```typescript
+// lib/payments/paystack.ts
+// - initializeTransaction(amount, email, metadata) → returns authorization_url + reference
+// - verifyTransaction(reference) → returns verified transaction data
+// - createPlan(amount, interval) → for monthly recurring donations
+// - subscribeToPlan(planCode, email) → create subscription
+
+// In DonationForm:
+// 1. Collect amount, frequency, campaign, donor info
+// 2. Call /api/donations to create pending donation record (get donation ID)
+// 3. Call Paystack Initialize with metadata: {donation_id, campaign_id, donor_name}
+// 4. Redirect to Paystack hosted payment page OR use Paystack Inline popup
+// 5. Paystack webhook confirms payment → update donation status → send receipt email
+```
+
+**6.2 — Stripe (International Donors)**
+```typescript
+// lib/payments/stripe.ts
+// - createPaymentIntent(amount, currency, metadata) → client_secret
+// - createSubscription(priceId, customerId) → subscription
+// - createCustomer(email, name) → customerId
+
+// In DonationForm (when international currency selected):
+// 1. Create PaymentIntent via API
+// 2. Render Stripe Elements (CardElement or PaymentElement)
+// 3. Confirm payment on client
+// 4. Stripe webhook confirms → update donation → send receipt
+```
+
+**6.3 — Donation Receipt Email**
+Auto-generate a branded PDF or HTML receipt with: donation ID, donor name, amount, currency, date, campaign, transaction reference. Send via Resend.
+
+---
+
+### ═══ PHASE 7: EMAIL SYSTEM (ALL 12 TEMPLATES) ═══
+
+**7.1 — React Email Templates**
+Build ALL 12 email templates in `/emails/`. Each template must:
+- Use `@react-email/components` (Html, Head, Body, Container, Section, Text, Button, Img, Hr, Link, Preview)
+- Apply brand colors (`#1A3A5C` header, white body, `#E65100` CTA buttons)
+- Include Foundation logo in header
+- Mobile-responsive layout
+- Footer with: unsubscribe link, physical address, social links (CAN-SPAM compliant)
+
+Templates to build:
+1. `ContactConfirmation.tsx` — "We received your message, expect reply in 2 business days"
+2. `DonationReceipt.tsx` — Full receipt: amount, currency, date, reference, campaign, tax info
+3. `EventConfirmation.tsx` — Event details, add-to-calendar (.ics attachment via API)
+4. `VolunteerAcknowledgment.tsx` — Next steps timeline for volunteer review
+5. `CareerAcknowledgment.tsx` — Application received, timeline for review
+6. `NewsletterWelcome.tsx` — Welcome message, preferences summary, unsubscribe link
+7. `PasswordReset.tsx` — Secure reset link, valid 15 minutes
+8. `StaffAccountCreated.tsx` — Login URL, temporary credentials, role description
+9. `NewBlogPost.tsx` — Article summary, featured image, "Read More" CTA button
+10. `EventReminder.tsx` — 48-hour reminder, event details, location link
+11. `CampaignUpdate.tsx` — Progress milestone (25%/50%/75%/100%), impact message
+12. `MonthlyDonorSummary.tsx` — Admin-only: total donations, donor count, top campaigns, key metrics
+
+**7.2 — Email Sender Wrapper** (`lib/email/sender.ts`)
+```typescript
+import { Resend } from 'resend'
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+export async function sendEmail({ to, subject, template, data }: SendEmailOptions) {
+  // Render React Email template to HTML
+  // Send via Resend
+  // Log to audit table
+  // Return message ID
+}
+```
+
+---
+
+### ═══ PHASE 8: AI CHATBOT ═══
+
+**8.1 — Chatbot Widget** (`components/public/layout/ChatbotWidget.tsx`)
+- Floating button (bottom-right, orange) with speech bubble icon
+- Opens chat drawer/modal with conversation history
+- Typing indicator (animated dots) while AI responds
+- Session-persistent conversation history (localStorage)
+- "Talk to a human" escalation button → opens ContactForm pre-filled
+
+**8.2 — RAG Knowledge Base** (`lib/chatbot/knowledge-base.ts`)
+Build a structured knowledge base from:
+- Foundation mission, vision, values, About content
+- All program descriptions (Education, Humanitarian, Community, Research, Capacity)
+- FAQs (loaded dynamically from database)
+- Contact details per department
+- Donation process guide
+- Volunteer and career process
+
+Format as structured text chunks for inclusion in system prompt.
+
+**8.3 — Chat API Route** (`workers/src/routes/chatbot.ts`)
+```typescript
+// POST /api/chatbot/chat
+// Body: { messages: ChatMessage[], sessionId: string }
+// 
+// System prompt includes:
+// - Foundation identity and instructions
+// - Full knowledge base text
+// - Personality: warm, helpful, professional, faith-inspired tone
+// - Instructions: guide users to correct pages, collect name/email before escalating
+//
+// Stream response using Vercel AI SDK
+// Log conversation (anonymized) to database
+```
+
+**8.4 — Admin Chatbot Management** (`/admin/chatbot`)
+- View/edit FAQ knowledge base items
+- View anonymized conversation logs
+- Set greeting message
+- View chatbot volume analytics
+- Add custom trigger→response pairs
+
+---
+
+### ═══ PHASE 9: ADMIN CMS & DASHBOARDS ═══
+
+**9.1 — Super Admin Dashboard** (`/admin`)
+
+Overview panel with real-time stats cards:
+- Website visitors today (Vercel Analytics API)
+- Today's donations / this month's total (with trend vs last month)
+- New form submissions since last login (count by type)
+- New newsletter subscribers this week
+- Latest blog posts with view counts
+- Upcoming events (next 7 days) with registration counts
+- System health indicators (API ping, email delivery rate)
+
+Charts (use Recharts):
+- Monthly donations trend (line chart, 12 months)
+- Donations by campaign (pie/donut chart)
+- Form submissions by type (bar chart, 30 days)
+- Traffic overview (if Vercel Analytics API available)
+
+**9.2 — Content Manager**
+For blog posts, programs, events, pages — build full CRUD list + form views:
+- List view: DataTable with columns (title, status badge, author, date, actions)
+- Create/Edit form: TipTap editor, meta fields, status toggle, media picker
+- Auto-save draft every 30 seconds (debounced API call)
+- Preview button (open public page in new tab)
+- Publish/Unpublish toggle
+
+**9.3 — TipTap Editor Component**
+Full-featured WYSIWYG editor with toolbar:
+- Format: Bold, Italic, Underline, Strikethrough, Code
+- Headings: H1, H2, H3, H4
+- Lists: Ordered, Unordered, Checklist
+- Alignment: Left, Center, Right, Justify
+- Block: Quote, Callout Box
+- Insert: Image (from media library), Link, Table, YouTube embed
+- Code Block with syntax highlighting
+- Word count + reading time display
+- Auto-save indicator ("Saved 2 minutes ago")
+
+**9.4 — Media Library** (`/admin/media`)
+- Grid view of all uploaded files (images, documents, videos)
+- Filter by type, category, date
+- Upload zone (drag-and-drop or click-to-browse)
+- Upload to Cloudflare R2 via pre-signed URL
+- Edit alt text and tags
+- Copy URL button
+- Bulk delete
+
+**9.5 — User Management** (`/admin/users`) — Super Admin only
+- Table of all staff accounts (name, email, role badge, department, status, last login)
+- "Create User" form: name, email, temporary password, role, department
+- Edit role and permissions
+- Activate/Suspend toggle
+- Send password reset email
+- View user activity log (last 50 actions)
+
+**9.6 — Donations Manager** (`/admin/donations`)
+- Full donation history table (sortable, filterable by campaign/gateway/status/date range)
+- Donation detail modal
+- Export to CSV button
+- Campaign performance cards (goal vs raised progress bars)
+- Failed payments list with retry option
+
+**9.7 — Forms & Submissions**
+One page per form type (Contacts, Volunteers, Careers, Subscribers, Event Registrations):
+- Table with all submissions
+- Status management (New → In Progress → Resolved)
+- Department assignment
+- Reply button (pre-fills email compose modal)
+- Export to CSV
+
+**9.8 — Email Manager** (`/admin/email`)
+- Compose email: To (individual or segment), Subject, Body (visual email builder)
+- Subscriber segmentation: filter by preferences, status, date
+- Send Now or Schedule
+- Email history table with open rate, click rate, status
+- Preview email before sending
+
+**9.9 — Audit Log** (`/admin/audit-log`) — Super Admin only
+- Timestamped table: user, action, resource, resource ID, IP, timestamp
+- Filter by user, action type, date range
+- Cannot be edited or deleted
+
+**9.10 — Settings** (`/admin/settings`) — Super Admin only
+- Site info: name, tagline, logo upload, contact email, social links
+- SEO defaults: default meta title template, default OG image
+- Chatbot: system prompt, greeting message, FAQ management
+- Email: Resend API key test, from address, reply-to
+- Payments: Paystack/Stripe key management, webhook URL display
+- Danger Zone: system-level actions with confirmation dialogs
+
+---
+
+### ═══ PHASE 10: SECURITY IMPLEMENTATION ═══
+
+**10.1 — Authentication**
+- bcrypt password hashing (12 rounds) on account creation
+- JWT sessions via NextAuth.js — secure, httpOnly cookies
+- Session expiry: 8 hours inactivity, 24 hours maximum
+- Failed login lockout: 5 attempts → 15-minute lockout (track in D1)
+- MFA for Super Admin: TOTP (use `otplib`) or email OTP
+
+**10.2 — API Security**
+- Zod schema validation on ALL API inputs (throw 400 on invalid)
+- Parameterized queries via Drizzle ORM (prevents SQL injection)
+- CSRF protection: validate Origin header on state-changing routes
+- Rate limiting: Cloudflare rate limiting rules per IP per endpoint
+- IP-based blocking for repeated abuse
+
+**10.3 — Headers**
+Configure in `next.config.mjs`:
+```javascript
+headers: [
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+  { key: 'Content-Security-Policy', value: "default-src 'self'; ..." },
+]
+```
+
+**10.4 — Compliance**
+- Cookie consent banner (Shadcn Dialog): Essential (required), Analytics (optional), Marketing (optional). Store preference in localStorage.
+- Privacy Policy page with NDPR/GDPR-grade content
+- Unsubscribe endpoint: `GET /api/newsletter/unsubscribe?token=...` — one-click, no login required
+- Right to erasure: Super Admin can permanently delete user data from all tables
+
+---
+
+### ═══ PHASE 11: SEO & PERFORMANCE ═══
+
+**11.1 — Metadata**
+Every page must export a `generateMetadata()` function returning:
+```typescript
+{
+  title: string,          // "Page Title | Script Worldview Foundation"
+  description: string,    // unique per page, 150–160 chars
+  openGraph: { title, description, images: [{ url, width, height }] },
+  twitter: { card: 'summary_large_image', ... },
+  robots: { index: true, follow: true },
+  canonical: string
+}
+```
+
+**11.2 — JSON-LD Structured Data**
+Add to relevant pages:
+- Home: `Organization` schema (name, description, url, logo, contactPoint, sameAs)
+- Blog posts: `Article` schema
+- Events: `Event` schema
+- Programs: `Service` schema
+
+**11.3 — Performance**
+- All images use `next/image` with proper `sizes` attribute and `priority` on hero images
+- Lazy load all images below the fold
+- Fonts loaded via `next/font` (no layout shift)
+- ISR revalidation on blog (`revalidate: 3600`), programs (`revalidate: 86400`), events (`revalidate: 1800`)
+- Optimize bundle: use dynamic imports for TipTap, charts, and heavy components
+- Auto-generate `sitemap.xml` with `next-sitemap`
+- Configure `robots.txt`: disallow `/admin/`
+
+**11.4 — Accessibility**
+- All interactive elements keyboard navigable (visible focus rings)
+- All images have `alt` text
+- Color contrast ratio ≥ 4.5:1 for body text (verify with brand colors)
+- All form inputs have associated `<label>`
+- ARIA attributes on custom components (modals, tooltips, dropdowns)
+- Skip-to-main-content link as first element in body
+
+---
+
+## 🔌 CLOUDFLARE WORKERS DEPLOYMENT
+
+**`workers/wrangler.toml`:**
+```toml
+name = "script-worldview-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "script-worldview-db"
+database_id = "YOUR_D1_ID"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "script-worldview-media"
+
+[vars]
+ENVIRONMENT = "production"
+
+[[routes]]
+pattern = "api.scriptworldviewfoundation.org/*"
+zone_name = "scriptworldviewfoundation.org"
+```
+
+---
+
+## 📊 PERFORMANCE TARGETS (MUST MEET)
+
+| Metric | Target |
+|---|---|
+| Lighthouse Performance | ≥ 90 |
+| Lighthouse Accessibility | ≥ 95 |
+| Lighthouse SEO | ≥ 95 |
+| LCP | < 2.5 seconds |
+| CLS | < 0.1 |
+| INP | < 200ms |
+| TTFB | < 200ms |
+| Mobile Performance | ≥ 85 |
+
+---
+
+## 🚀 DEPLOYMENT CONFIGURATION
+
+**Vercel (`vercel.json`):**
+```json
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "regions": ["iad1"],
+  "headers": [...security headers...],
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://api.scriptworldviewfoundation.org/:path*" }
+  ]
+}
+```
+
+**GitHub Actions CI/CD:**
+Create `.github/workflows/deploy.yml`:
+- On push to `main`: run `npm run build`, run tests, deploy to Vercel
+- On PR: run lint + type-check + preview deployment
+
+---
+
+## ✅ BUILD CHECKLIST — VERIFY BEFORE MARKING COMPLETE
+
+### Public Website
+- [ ] All 22 pages built, styled, and content-populated
+- [ ] All 12 forms validate, submit, store to DB, and trigger emails
+- [ ] Mobile responsive on all breakpoints (320px – 1920px)
+- [ ] All navigation links work correctly
+- [ ] Donation flow works end-to-end (Paystack + Stripe)
+- [ ] Blog listing, filtering, search, and individual post pages work
+- [ ] Events listing, registration, and individual event pages work
+- [ ] Gallery lightbox works
+- [ ] Chatbot widget opens, chats, and escalates
+- [ ] Cookie consent banner appears on first visit
+
+### Admin Portal
+- [ ] Login/logout works with JWT session
+- [ ] Role-based access enforced on all admin routes
+- [ ] Super Admin can see all sections
+- [ ] Staff dashboard adapts to role
+- [ ] TipTap editor creates/edits/publishes content
+- [ ] Media library uploads to R2, displays all files
+- [ ] User management: create/edit/suspend staff
+- [ ] Donations table shows all donations, exports to CSV
+- [ ] All form submission tables viewable
+- [ ] Email compose and send works via Resend
+- [ ] Audit log records all admin actions
+- [ ] Analytics page shows charts
+
+### Technical
+- [ ] TypeScript: zero `any` types, all code fully typed
+- [ ] No console.errors in production
+- [ ] All API routes protected by auth middleware
+- [ ] All SQL uses parameterized queries (no raw string interpolation)
+- [ ] All passwords hashed with bcrypt
+- [ ] All payment webhooks verify signatures before processing
+- [ ] Sentry error tracking configured
+- [ ] Environment variables documented in `.env.example`
+- [ ] Drizzle migrations run cleanly on fresh D1 database
+
+---
+
+## 🎯 IMPORTANT AGENT RULES
+
+1. **Never use placeholder content** — write real, meaningful copy for Script Worldview Foundation in all pages.
+2. **Never leave TODO comments** — if you can't complete something, say so explicitly and explain why.
+3. **Work phase by phase** — complete Phase 1 entirely before moving to Phase 2.
+4. **TypeScript everywhere** — every file must be `.ts` or `.tsx`, fully typed.
+5. **Mobile-first** — design for 375px first, then scale up. Test all components at 375px, 768px, 1280px.
+6. **Accessibility first** — every interactive component must be keyboard navigable and screen-reader friendly.
+7. **Error handling** — every API call must have try/catch, every form must show error states, every loading state must show a skeleton.
+8. **Consistency** — use the design system colors, typography, and spacing throughout. No one-off styles.
+9. **Security** — never trust client input. Always validate on the server with Zod. Always verify webhook signatures.
+10. **Performance** — use `next/image` for every image. Use `dynamic()` imports for heavy components. No blocking scripts.
+
+---
+
+*This prompt was generated for Script Worldview Foundation — "Shaping Minds. Transforming Communities."*
+*Build with care. Every line of code serves a mission.*

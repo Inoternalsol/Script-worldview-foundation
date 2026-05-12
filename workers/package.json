@@ -1,0 +1,27 @@
+{
+  "name": "script-worldview-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node node_modules/wrangler/bin/wrangler.js dev",
+    "deploy": "node node_modules/wrangler/bin/wrangler.js deploy",
+    "db:generate": "node node_modules/drizzle-kit/bin.cjs generate",
+    "db:apply:local": "node node_modules/wrangler/bin/wrangler.js d1 migrations apply DB --local"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.8.0",
+    "bcryptjs": "^2.4.3",
+    "drizzle-orm": "^0.44.4",
+    "hono": "^4.9.0",
+    "jose": "^6.1.0",
+    "nanoid": "^5.1.5",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250501.0",
+    "drizzle-kit": "^0.31.4",
+    "typescript": "^5",
+    "wrangler": "^4.20.0"
+  }
+}
