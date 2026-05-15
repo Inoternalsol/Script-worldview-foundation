@@ -3,6 +3,7 @@
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { ChevronDown, Menu, X } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
@@ -59,15 +60,21 @@ export function Header() {
         className="absolute inset-0 bg-brand-primary/95 backdrop-blur-md shadow-md"
       />
       <div className="relative mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-8">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/10 text-white">
-            SW
+        <Link href="/" className="flex items-center gap-3">
+          <div className="relative h-12 w-12 overflow-hidden rounded-lg bg-white p-1">
+            <Image 
+              src="/logo.png" 
+              alt="Script Worldview Foundation" 
+              fill 
+              className="object-contain"
+              priority
+            />
           </div>
           <div className="hidden sm:block">
-            <div className="font-heading text-sm font-semibold text-white">
+            <div className="font-heading text-sm font-semibold text-white leading-tight">
               Script Worldview Foundation
             </div>
-            <div className="text-xs text-white/80">Shaping Minds. Transforming Communities.</div>
+            <div className="text-[10px] text-white/80 uppercase tracking-wider mt-0.5">Shaping Minds. Transforming Communities.</div>
           </div>
         </Link>
 
