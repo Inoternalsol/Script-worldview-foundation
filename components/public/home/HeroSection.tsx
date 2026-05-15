@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -9,9 +10,15 @@ export function HeroSection() {
     <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden bg-brand-primary">
       {/* Background image fallback (could be replaced with video later) */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-primary/90 to-brand-primary/60 mix-blend-multiply" />
-        {/* Placeholder for background image */}
-        <div className="h-full w-full bg-brand-primary" />
+        <Image
+          src="/images/home-hero.png"
+          alt="Community coming together"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-primary/90 via-brand-primary/75 to-brand-primary/50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-primary/80 via-transparent to-transparent" />
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 py-20 md:px-8 text-center text-white">

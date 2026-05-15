@@ -2,6 +2,7 @@ import { PageHero } from '@/components/public/shared/PageHero'
 import { SectionHeader } from '@/components/public/shared/SectionHeader'
 import { Button } from '@/components/ui/button'
 import { Target, Eye, Heart, BookOpen, HeartHandshake, Users, FlaskConical, GraduationCap } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export default function AboutPage() {
@@ -10,6 +11,7 @@ export default function AboutPage() {
       <PageHero
         title="Who We Are"
         subtitle="We are a faith-inspired organization committed to shaping minds and transforming communities across Nigeria through education, humanitarian response, and sustainable development."
+        backgroundImage="/images/about-hero.png"
       />
 
       {/* Mission, Vision, Values */}
@@ -131,15 +133,50 @@ export default function AboutPage() {
 
       {/* Leadership Overview */}
       <section className="bg-white py-20 text-center">
-        <div className="mx-auto max-w-4xl px-4">
+        <div className="mx-auto max-w-6xl px-4 md:px-8">
           <SectionHeader
             eyebrow="Leadership"
             title="Guided by Experience"
-            description="Our board of trustees brings decades of experience in community development, faith-based leadership, and corporate governance."
+            description="Our board of trustees and executive team bring decades of experience in community development, faith-based leadership, and organizational governance."
           />
-          <div className="mt-12 flex justify-center">
-            <Button asChild variant="cta" size="lg">
-              <Link href="/about/leadership">See Full Leadership Team</Link>
+          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-col items-center">
+              <div className="relative mb-6 h-64 w-full overflow-hidden rounded-2xl">
+                <Image src="/images/team-founder.png" alt="Founder" fill className="object-cover" />
+              </div>
+              <h3 className="font-heading text-xl font-bold text-brand-primary">Rev. Joshua Sati</h3>
+              <p className="mt-1 text-sm font-medium uppercase tracking-wider text-brand-cta">Founder & Chairman</p>
+              <p className="mt-4 text-sm text-brand-muted px-4">
+                Visionary leader with over 15 years of experience in faith-inspired humanitarian work and rural community development across West Africa.
+              </p>
+            </div>
+            
+            <div className="flex flex-col items-center">
+              <div className="relative mb-6 h-64 w-full overflow-hidden rounded-2xl">
+                <Image src="/images/team-staff1.png" alt="Executive Director" fill className="object-cover" />
+              </div>
+              <h3 className="font-heading text-xl font-bold text-brand-primary">Sarah Nnamdi</h3>
+              <p className="mt-1 text-sm font-medium uppercase tracking-wider text-brand-cta">Executive Director</p>
+              <p className="mt-4 text-sm text-brand-muted px-4">
+                Spearheads operational strategy and partnerships, ensuring every initiative brings sustainable, measurable impact to communities.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center">
+              <div className="relative mb-6 h-64 w-full overflow-hidden rounded-2xl">
+                <Image src="/images/team-staff2.png" alt="Operations Manager" fill className="object-cover" />
+              </div>
+              <h3 className="font-heading text-xl font-bold text-brand-primary">David Adeyemi</h3>
+              <p className="mt-1 text-sm font-medium uppercase tracking-wider text-brand-cta">Director of Programs</p>
+              <p className="mt-4 text-sm text-brand-muted px-4">
+                Oversees on-the-ground implementation of education and humanitarian projects, deeply connected with local community leaders.
+              </p>
+            </div>
+          </div>
+          
+          <div className="mt-16 flex justify-center">
+            <Button asChild variant="secondary" size="lg">
+              <Link href="/about/leadership">See Full Board of Trustees</Link>
             </Button>
           </div>
         </div>
