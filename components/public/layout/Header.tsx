@@ -71,10 +71,9 @@ export function Header() {
             />
           </div>
           <div className="hidden sm:block">
-            <div className="font-heading text-sm font-semibold text-white leading-tight">
+            <div className="font-heading text-xl font-bold uppercase tracking-wide text-white leading-tight">
               Script Worldview Foundation
             </div>
-            <div className="text-[10px] text-white/80 uppercase tracking-wider mt-0.5">Shaping Minds. Transforming Communities.</div>
           </div>
         </Link>
 
