@@ -70,9 +70,12 @@ export function Header() {
               priority
             />
           </div>
-          <div className="hidden sm:block">
-            <div className="font-heading text-xl font-bold uppercase tracking-wide text-white leading-tight">
+          <div className="hidden sm:flex sm:flex-col justify-center">
+            <div className="font-heading text-base font-bold uppercase tracking-wide text-white whitespace-nowrap leading-none">
               Script Worldview Foundation
+            </div>
+            <div className="text-[9px] text-white/80 uppercase tracking-[0.11em] mt-1.5 whitespace-nowrap">
+              Shaping Minds. Transforming Communities.
             </div>
           </div>
         </Link>
