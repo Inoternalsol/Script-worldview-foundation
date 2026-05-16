@@ -11,6 +11,7 @@ import { newsletterRoutes } from './routes/newsletter'
 import { careerRoutes } from './routes/careers'
 import donationRoutes from './routes/donations'
 import paystackWebhook from './routes/webhooks/paystack'
+import { adminRoutes } from './routes/admin'
 import stripeWebhook from './routes/webhooks/stripe'
 import { Env } from './types'
 
@@ -19,7 +20,7 @@ const app = new Hono<{ Bindings: Env }>()
 app.use(
   '*',
   cors({
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:3000', 'https://swf.vercel.app'],
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
   }),
@@ -37,6 +38,7 @@ app.route('/api/volunteers', volunteerRoutes)
 app.route('/api/newsletter', newsletterRoutes)
 app.route('/api/careers', careerRoutes)
 app.route('/api/donations', donationRoutes)
+app.route('/api/admin', adminRoutes)
 app.route('/api/webhooks/paystack', paystackWebhook)
 app.route('/api/webhooks/stripe', stripeWebhook)
 

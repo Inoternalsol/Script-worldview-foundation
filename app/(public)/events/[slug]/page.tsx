@@ -1,42 +1,88 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, MapPin, Clock, Users } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { ArrowLeft, Calendar, MapPin, Clock } from 'lucide-react'
+import { EventRegistrationSection } from '@/components/public/events/EventRegistrationSection'
 
 // Mock Data
-const mockEvent = {
-  id: '1',
-  title: 'Annual Community Outreach 2024',
-  slug: 'annual-community-outreach-2024',
-  date: new Date('2024-06-15T09:00:00').getTime(),
-  endDate: new Date('2024-06-15T16:00:00').getTime(),
-  location: 'Lagos City Hall',
-  address: '123 Broad St, Lagos Island, Lagos',
-  description: `
-    <p>Join us for our largest community outreach program of the year. We will be providing free medical checkups, distributing educational materials, and offering business seminars for local entrepreneurs.</p>
-    <h3>What to Expect</h3>
-    <ul>
-      <li>Free medical screenings (Blood pressure, sugar levels, vision)</li>
-      <li>Distribution of 1,000 back-to-school kits</li>
-      <li>Micro-business workshop (12:00 PM - 2:00 PM)</li>
-      <li>Community town hall meeting</li>
-    </ul>
-    <h3>Who Should Attend?</h3>
-    <p>This event is open to everyone in the community. Medical services and educational kits will be provided on a first-come, first-served basis.</p>
-  `,
-  capacity: 500,
-  registrationsCount: 342,
-  featuredImage: null,
-  speakers: [
-    { name: 'Dr. Emmanuel Okonkwo', role: 'Keynote Speaker' },
-    { name: 'Mrs. Amina Yusuf', role: 'Panelist' }
-  ],
-  status: 'upcoming' as const
-}
+const mockEvents = [
+  {
+    id: '1',
+    title: 'Annual Community Outreach 2024',
+    slug: 'annual-community-outreach-2024',
+    date: new Date('2024-06-15T09:00:00').getTime(),
+    endDate: new Date('2024-06-15T16:00:00').getTime(),
+    location: 'Lagos City Hall',
+    address: '123 Broad St, Lagos Island, Lagos',
+    description: `
+      <p>Join us for our largest community outreach program of the year. We will be providing free medical checkups, distributing educational materials, and offering business seminars for local entrepreneurs.</p>
+      <h3>What to Expect</h3>
+      <ul>
+        <li>Free medical screenings (Blood pressure, sugar levels, vision)</li>
+        <li>Distribution of 1,000 back-to-school kits</li>
+        <li>Micro-business workshop (12:00 PM - 2:00 PM)</li>
+        <li>Community town hall meeting</li>
+      </ul>
+      <h3>Who Should Attend?</h3>
+      <p>This event is open to everyone in the community. Medical services and educational kits will be provided on a first-come, first-served basis.</p>
+    `,
+    capacity: 500,
+    registrationsCount: 342,
+    featuredImage: null,
+    speakers: [
+      { name: 'Dr. Emmanuel Okonkwo', role: 'Keynote Speaker' },
+      { name: 'Mrs. Amina Yusuf', role: 'Panelist' }
+    ],
+    status: 'upcoming' as const
+  },
+  {
+    id: '2',
+    title: 'Youth Leadership Seminar',
+    slug: 'youth-leadership-seminar',
+    date: new Date('2024-07-20T10:00:00').getTime(),
+    endDate: new Date('2024-07-21T16:00:00').getTime(),
+    location: 'Jos Resource Center',
+    address: 'Jos, Plateau State',
+    description: `
+      <p>A 2-day intensive seminar focusing on civic responsibility, leadership skills, and community engagement for young people between the ages of 18 and 30.</p>
+      <h3>Seminar Highlights</h3>
+      <ul>
+        <li>Leadership Ethics and Values</li>
+        <li>Public Speaking and Communication</li>
+        <li>Community Project Planning</li>
+        <li>Networking with Industry Leaders</li>
+      </ul>
+    `,
+    capacity: 100,
+    registrationsCount: 75,
+    featuredImage: null,
+    speakers: [
+      { name: 'Rev. Joshua Sati', role: 'Founder' },
+      { name: 'Sarah Nnamdi', role: 'Executive Director' }
+    ],
+    status: 'upcoming' as const
+  },
+  {
+    id: '3',
+    title: 'Education Fundraiser Gala 2023',
+    slug: 'education-fundraiser-gala-2023',
+    date: new Date('2023-11-10T18:00:00').getTime(),
+    endDate: new Date('2023-11-10T22:00:00').getTime(),
+    location: 'Hill Station Hotel, Jos',
+    address: 'Tudun Wada, Jos, Plateau State',
+    description: `
+      <p>Our annual gala to raise funds for the next academic year. All proceeds go directly to our Scholarship Fund and School Infrastructure programs.</p>
+    `,
+    capacity: 200,
+    registrationsCount: 198,
+    featuredImage: null,
+    speakers: [],
+    status: 'past' as const
+  }
+]
 
 export default function EventPage({ params }: { params: { slug: string } }) {
   // Mock fetching
-  const event = params.slug === mockEvent.slug ? mockEvent : null
+  const event = mockEvents.find(e => e.slug === params.slug)
 
   if (!event) {
     notFound()
@@ -105,48 +151,13 @@ export default function EventPage({ params }: { params: { slug: string } }) {
 
           {/* Sidebar / Registration */}
           <div>
-            <div className="sticky top-24 rounded-2xl border border-black/10 bg-white p-6 shadow-card">
-              <h3 className="mb-6 font-heading text-xl font-bold text-brand-primary">Event Details</h3>
-              
-              <div className="mb-6 space-y-4 text-sm text-brand-muted">
-                <div>
-                  <strong className="block text-foreground">Date</strong>
-                  {dateStr}
-                </div>
-                <div>
-                  <strong className="block text-foreground">Time</strong>
-                  {timeStr}
-                </div>
-                <div>
-                  <strong className="block text-foreground">Venue</strong>
-                  {event.location}
-                  <br />
-                  <span className="text-xs">{event.address}</span>
-                </div>
-                {event.capacity && (
-                  <div>
-                    <strong className="block text-foreground">Availability</strong>
-                    <div className="mt-1 flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      <span>{event.capacity - event.registrationsCount} seats remaining</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="pt-2">
-                {event.status === 'upcoming' ? (
-                  <Button variant="cta" className="w-full">
-                    Register Now
-                  </Button>
-                ) : (
-                  <Button variant="secondary" disabled className="w-full">
-                    Event Ended
-                  </Button>
-                )}
-                {/* Note: In Phase 4, the register button will open EventRegistrationForm */}
-              </div>
-            </div>
+            <EventRegistrationSection 
+              eventId={event.id}
+              eventTitle={event.title}
+              status={event.status}
+              capacity={event.capacity}
+              registrationsCount={event.registrationsCount}
+            />
           </div>
 
         </div>

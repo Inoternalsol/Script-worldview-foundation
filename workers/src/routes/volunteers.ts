@@ -38,19 +38,30 @@ volunteerRoutes.post('/', async (c) => {
 
   const newVolunteer = {
     id,
-    ...parsed.data,
+    name: parsed.data.name,
+    email: parsed.data.email.toLowerCase(),
+    phone: parsed.data.phone || null,
+    location: parsed.data.location || null,
+    skillsJson: parsed.data.skillsJson || null,
+    availabilityJson: parsed.data.availabilityJson || null,
+    languages: parsed.data.languages || null,
+    motivation: parsed.data.motivation || null,
+    howDidYouHear: parsed.data.howDidYouHear || null,
     status: 'pending' as const,
     appliedAt: new Date(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
   }
 
   try {
     await db.insert(volunteers).values(newVolunteer)
     return c.json({ success: true, id }, 201)
-  } catch (err) {
+  } catch (err: any) {
     console.error('Failed to save volunteer:', err)
-    return c.json({ error: 'Database error' }, 500)
+    
+    if (err.message && err.message.includes('UNIQUE constraint failed')) {
+      return c.json({ error: 'Conflict', message: 'An application with this email already exists.' }, 409)
+    }
+
+    return c.json({ error: 'Database error', message: err.message }, 500)
   }
 })
 

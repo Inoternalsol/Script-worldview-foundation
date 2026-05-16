@@ -131,3 +131,69 @@ eventsRoutes.delete('/:id', requireRole(['super_admin', 'dept_admin']), async (c
 
   return c.json({ success: true })
 })
+
+// POST /api/events/:id/register - Public event registration
+eventsRoutes.post('/:id/register', async (c) => {
+  const eventId = c.req.param('id')
+  const body = await c.req.json().catch(() => ({}))
+  
+  const registrationSchema = z.object({
+    name: z.string().min(1),
+    email: z.string().email(),
+    phone: z.string().optional(),
+    organization: z.string().optional(),
+    roleTitle: z.string().optional(),
+    dietaryNeeds: z.string().optional(),
+    accessibilityNeeds: z.string().optional(),
+  })
+
+  const parsed = registrationSchema.safeParse(body)
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid input', details: parsed.error.format() }, 400)
+  }
+
+  const db = createDb(c.env.DB)
+
+  // 1. Check event exists and has capacity
+  const eventList = await db.select().from(events).where(eq(events.id, eventId)).limit(1)
+  if (!eventList.length) {
+    return c.json({ error: 'Event not found' }, 404)
+  }
+
+  const event = eventList[0]
+  if (event.status === 'past' || event.status === 'cancelled') {
+    return c.json({ error: 'Event is no longer open for registration' }, 400)
+  }
+
+  if (event.capacity && event.registrationsCount >= event.capacity) {
+    return c.json({ error: 'Event is at full capacity' }, 400)
+  }
+
+  // 2. Record registration
+  const registrationId = nanoid()
+  const newRegistration = {
+    id: registrationId,
+    eventId,
+    ...parsed.data,
+    status: 'confirmed' as const,
+    registeredAt: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }
+
+  try {
+    const { eventRegistrations } = require('../db/schema')
+    await db.insert(eventRegistrations).values(newRegistration)
+    
+    // Update count on event
+    await db.update(events)
+      .set({ registrationsCount: (event.registrationsCount || 0) + 1 })
+      .where(eq(events.id, eventId))
+      .run()
+
+    return c.json({ ok: true, registrationId }, 201)
+  } catch (err: any) {
+    console.error('Registration error:', err)
+    return c.json({ error: 'Database error during registration' }, 500)
+  }
+})

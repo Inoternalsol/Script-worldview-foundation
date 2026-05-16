@@ -40,7 +40,10 @@ export default function VolunteersPage() {
           <SectionHeader
             title="Ready to make a difference?"
             description="We are always looking for passionate individuals. Fill out our volunteer application form to get started."
+            light
+            centered
           />
+        </div>
           <div className="mt-8 rounded-2xl bg-white p-8 text-left text-foreground">
             <h3 className="mb-4 font-heading text-xl font-bold text-brand-primary text-center">Volunteer Application</h3>
             <VolunteerForm />

@@ -1,39 +1,60 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Briefcase, MapPin, Clock } from 'lucide-react'
+import { CareerApplicationForm } from '@/components/public/forms/CareerApplicationForm'
 
 // Mock Data
-const mockJob = {
-  id: '1',
-  title: 'Program Manager (Education)',
-  department: 'Programs',
-  location: 'Jos, Plateau State',
-  type: 'Full-time',
-  deadline: 'Oct 30, 2024',
-  description: `
-    <p>We are seeking a highly motivated and experienced Program Manager to lead our Education initiatives. You will be responsible for overseeing the design, implementation, and evaluation of all education-focused projects, including scholarship disbursements, school infrastructure renovations, and teacher training programs.</p>
-    <h3>Key Responsibilities</h3>
-    <ul>
-      <li>Manage the end-to-end lifecycle of the Education Program.</li>
-      <li>Develop partnerships with local schools and education ministries.</li>
-      <li>Monitor project budgets and ensure efficient resource allocation.</li>
-      <li>Prepare comprehensive donor reports and impact assessments.</li>
-      <li>Lead a team of 5 field officers and volunteers.</li>
-    </ul>
-    <h3>Requirements</h3>
-    <ul>
-      <li>Minimum of 5 years of experience in NGO program management.</li>
-      <li>Bachelor's or Master's degree in Education, Development Studies, or a related field.</li>
-      <li>Proven track record of managing grants and large-scale projects.</li>
-      <li>Excellent communication and leadership skills.</li>
-      <li>Willingness to travel frequently to rural communities.</li>
-    </ul>
-  `
-}
+const mockJobs = [
+  {
+    id: '1',
+    title: 'Program Manager (Education)',
+    department: 'Programs',
+    location: 'Jos, Plateau State',
+    type: 'Full-time',
+    deadline: 'Oct 30, 2024',
+    description: `
+      <p>We are seeking a highly motivated and experienced Program Manager to lead our Education initiatives. You will be responsible for overseeing the design, implementation, and evaluation of all education-focused projects, including scholarship disbursements, school infrastructure renovations, and teacher training programs.</p>
+      <h3>Key Responsibilities</h3>
+      <ul>
+        <li>Manage the end-to-end lifecycle of the Education Program.</li>
+        <li>Develop partnerships with local schools and education ministries.</li>
+        <li>Monitor project budgets and ensure efficient resource allocation.</li>
+        <li>Prepare comprehensive donor reports and impact assessments.</li>
+        <li>Lead a team of 5 field officers and volunteers.</li>
+      </ul>
+      <h3>Requirements</h3>
+      <ul>
+        <li>Minimum of 5 years of experience in NGO program management.</li>
+        <li>Bachelor's or Master's degree in Education, Development Studies, or a related field.</li>
+        <li>Proven track record of managing grants and large-scale projects.</li>
+        <li>Excellent communication and leadership skills.</li>
+        <li>Willingness to travel frequently to rural communities.</li>
+      </ul>
+    `
+  },
+  {
+    id: '2',
+    title: 'Monitoring & Evaluation Officer',
+    department: 'Research',
+    location: 'Enugu, Nigeria (Hybrid)',
+    type: 'Contract',
+    deadline: 'Nov 15, 2024',
+    description: `
+      <p>We are looking for an M&E Officer to support our data collection and analysis efforts across multiple program sites. This role is critical for ensuring our interventions are evidence-based and impactful.</p>
+      <h3>Key Responsibilities</h3>
+      <ul>
+        <li>Design and implement M&E frameworks for new projects.</li>
+        <li>Conduct field visits for data collection and verification.</li>
+        <li>Analyze quantitative and qualitative data.</li>
+        <li>Maintain the foundation's impact database.</li>
+      </ul>
+    `
+  }
+]
 
 export default function CareerPage({ params }: { params: { id: string } }) {
   // Mock fetching
-  const job = params.id === mockJob.id ? mockJob : null
+  const job = mockJobs.find(j => j.id === params.id)
 
   if (!job) {
     notFound()
@@ -66,9 +87,8 @@ export default function CareerPage({ params }: { params: { id: string } }) {
             dangerouslySetInnerHTML={{ __html: job.description }}
           />
 
-          <div className="mt-12 rounded-xl bg-gray-50 p-6 text-center border-2 border-dashed border-gray-200">
-            <h3 className="mb-4 font-heading text-xl font-bold text-brand-primary">Apply for this Position</h3>
-            <p className="mb-4 text-brand-muted">CareerApplicationForm component will be implemented here in Phase 4.</p>
+          <div className="mt-12">
+            <CareerApplicationForm jobId={job.id} jobTitle={job.title} />
           </div>
         </div>
 

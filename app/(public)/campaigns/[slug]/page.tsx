@@ -5,29 +5,49 @@ import { Button } from '@/components/ui/button'
 import { DonationProgressBar } from '@/components/public/shared/DonationProgressBar'
 
 // Mock Data
-const mockCampaign = {
-  id: '1',
-  title: 'Back to School Drive 2024',
-  slug: 'back-to-school-2024',
-  description: `
-    <p>Every child deserves the right to education, but for many families in rural areas, the cost of basic school supplies is a barrier too high to overcome. The Back to School Drive aims to equip 1,000 students with everything they need to start the new academic year successfully.</p>
-    <h3>What Your Donation Provides</h3>
-    <ul>
-      <li><strong>₦5,000</strong> provides a complete set of notebooks and stationery.</li>
-      <li><strong>₦15,000</strong> provides two sets of school uniforms and a pair of shoes.</li>
-      <li><strong>₦30,000</strong> provides a fully stocked backpack and covers PTA levies for a term.</li>
-    </ul>
-    <p>Join us in removing these barriers and keeping children in the classroom where they belong.</p>
-  `,
-  goalAmount: 15000000,
-  raisedAmount: 8500000,
-  donorCount: 245,
-  featuredImage: null
-}
+const mockCampaigns = [
+  {
+    id: '1',
+    title: 'Back to School Drive 2024',
+    slug: 'back-to-school-2024',
+    description: `
+      <p>Every child deserves the right to education, but for many families in rural areas, the cost of basic school supplies is a barrier too high to overcome. The Back to School Drive aims to equip 1,000 students with everything they need to start the new academic year successfully.</p>
+      <h3>What Your Donation Provides</h3>
+      <ul>
+        <li><strong>₦5,000</strong> provides a complete set of notebooks and stationery.</li>
+        <li><strong>₦15,000</strong> provides two sets of school uniforms and a pair of shoes.</li>
+        <li><strong>₦30,000</strong> provides a fully stocked backpack and covers PTA levies for a term.</li>
+      </ul>
+      <p>Join us in removing these barriers and keeping children in the classroom where they belong.</p>
+    `,
+    goalAmount: 15000000,
+    raisedAmount: 8500000,
+    donorCount: 245,
+    featuredImage: null
+  },
+  {
+    id: '2',
+    title: 'Emergency Flood Relief Fund',
+    slug: 'emergency-flood-relief',
+    description: `
+      <p>The recent floods have devastated several communities in Plateau State, leaving hundreds of families without shelter or clean water. This emergency fund is dedicated to providing immediate relief and supporting the long-term recovery of those affected.</p>
+      <h3>Relief Priorities</h3>
+      <ul>
+        <li>Emergency food and water supply</li>
+        <li>Temporary shelter and blankets</li>
+        <li>Medical aid and hygiene kits</li>
+      </ul>
+    `,
+    goalAmount: 25000000,
+    raisedAmount: 21000000,
+    donorCount: 512,
+    featuredImage: '/images/blog/flood-relief.png'
+  }
+]
 
 export default function CampaignPage({ params }: { params: { slug: string } }) {
   // Mock fetching
-  const campaign = params.slug === mockCampaign.slug ? mockCampaign : null
+  const campaign = mockCampaigns.find(c => c.slug === params.slug)
 
   if (!campaign) {
     notFound()
