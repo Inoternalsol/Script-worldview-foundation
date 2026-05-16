@@ -11,7 +11,7 @@ const mockPosts = [
     title: 'Transforming Education in Rural Communities',
     slug: 'transforming-education-rural',
     excerpt: 'How our recent intervention in the northern communities has improved literacy rates among young girls.',
-    featuredImage: null,
+    featuredImage: '/images/programs/education.png',
     categoryId: 'news',
     publishedAt: new Date('2024-03-15').getTime(),
     author: { name: 'Sarah Johnson' }
@@ -31,7 +31,7 @@ const mockPosts = [
     title: 'Emergency Response: Flood Relief Efforts',
     slug: 'emergency-response-flood',
     excerpt: 'Our rapid response team has been deployed to assist families affected by the recent flooding.',
-    featuredImage: null,
+    featuredImage: '/images/blog/flood-relief.png',
     categoryId: 'stories',
     publishedAt: new Date('2024-02-10').getTime(),
     author: { name: 'Michael Okorie' }
