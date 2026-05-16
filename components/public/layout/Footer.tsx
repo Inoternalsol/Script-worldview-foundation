@@ -81,7 +81,7 @@ export function Footer() {
         <div className="space-y-3">
           <div className="text-sm font-semibold text-foreground">Contact</div>
           <div className="space-y-2 text-sm text-brand-muted">
-            <div>Abuja, Nigeria</div>
+            <div>Jos, Plateau State</div>
             <div>+234 (0) 000 000 0000</div>
             <div>hello@scriptworldviewfoundation.org</div>
           </div>

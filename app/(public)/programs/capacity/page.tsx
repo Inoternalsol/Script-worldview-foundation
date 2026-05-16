@@ -9,7 +9,7 @@ const workshops = [
     id: 1,
     title: 'Non-Profit Leadership & Governance',
     date: 'August 15-17, 2024',
-    format: 'In-Person (Abuja)',
+    format: 'In-Person (Jos)',
     duration: '3 Days',
     status: 'open'
   },

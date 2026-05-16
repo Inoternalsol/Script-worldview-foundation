@@ -19,7 +19,7 @@ const upcomingEvents = [
     title: 'Youth Leadership Seminar',
     slug: 'youth-leadership-seminar',
     date: new Date('2024-07-20').getTime(),
-    location: 'Abuja Resource Center',
+    location: 'Jos Resource Center',
     description: 'A 2-day intensive seminar focusing on civic responsibility and leadership skills.',
     featuredImage: null,
     status: 'upcoming' as const
@@ -32,7 +32,7 @@ const pastEvents = [
     title: 'Education Fundraiser Gala 2023',
     slug: 'education-fundraiser-gala-2023',
     date: new Date('2023-11-10').getTime(),
-    location: 'Transcorp Hilton, Abuja',
+    location: 'Hill Station Hotel, Jos',
     description: 'Our annual gala to raise funds for the next academic year.',
     featuredImage: null,
     status: 'past' as const

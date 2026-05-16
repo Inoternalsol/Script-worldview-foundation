@@ -33,7 +33,7 @@ export default function ContactPage() {
                     <h3 className="font-bold text-foreground">Our Office</h3>
                     <p className="mt-1 text-brand-muted">
                       123 Foundation Way, <br />
-                      Wuse II, Abuja, Nigeria
+                      Jos, Plateau State, Nigeria
                     </p>
                   </div>
                 </div>

@@ -9,19 +9,19 @@ const testimonials = [
     id: 1,
     quote: "The scholarship provided by Script Worldview Foundation changed my life. I am now the first person in my family to attend university.",
     author: "Grace O.",
-    location: "Enugu State",
+    location: "Jos, Plateau State",
   },
   {
     id: 2,
     quote: "When the floods took our home, the emergency relief team was there within 24 hours. Their support gave us hope when we had none.",
     author: "Ibrahim M.",
-    location: "Kogi State",
+    location: "Mangu, Plateau State",
   },
   {
     id: 3,
     quote: "The youth leadership seminar opened my eyes to my potential. I've since started a community clean-up initiative in my local area.",
     author: "Chidi N.",
-    location: "Lagos",
+    location: "Kogi State",
   }
 ]
 

@@ -19,7 +19,7 @@ const mockEvents = [
     title: 'Youth Leadership Seminar',
     slug: 'youth-leadership-seminar',
     date: new Date('2024-07-20').getTime(),
-    location: 'Abuja Resource Center',
+    location: 'Jos Resource Center',
     description: 'A 2-day intensive seminar focusing on civic responsibility and leadership skills.',
     featuredImage: null,
     status: 'upcoming' as const

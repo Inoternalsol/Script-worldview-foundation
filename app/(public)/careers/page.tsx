@@ -9,7 +9,7 @@ const jobs = [
     id: '1',
     title: 'Program Manager (Education)',
     department: 'Programs',
-    location: 'Abuja, Nigeria',
+    location: 'Jos, Plateau State',
     type: 'Full-time',
     deadline: 'Oct 30, 2024'
   },
