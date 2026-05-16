@@ -28,7 +28,7 @@ export function HeroSection() {
           transition={{ duration: 0.6 }}
           className="font-heading text-4xl font-bold leading-tight md:text-6xl lg:text-7xl"
         >
-          Shaping Minds. <br /> Transforming Communities.
+          Shaping Minds. <br className="hidden sm:block" /> Transforming Communities.
         </motion.h1>
         
         <motion.p
