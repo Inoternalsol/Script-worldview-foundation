@@ -46,7 +46,7 @@ export function FeaturedPrograms() {
               key={program.id} 
               title={program.name}
               description={program.description}
-              href={`/programs/${program.slug}`}
+              href={`/programs/${program.category}`}
               category={program.category}
             />
           ))}
