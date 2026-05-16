@@ -30,7 +30,7 @@ const contactFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   phone: z.string().optional(),
-  department: z.enum(['general', 'education', 'humanitarian', 'community', 'hr', 'press', 'partnership']),
+  department: z.enum(['general', 'education', 'humanitarian', 'community', 'sports', 'hr', 'press', 'partnership']),
   subject: z.string().min(5, { message: 'Subject must be at least 5 characters.' }),
   message: z.string().min(10, { message: 'Message must be at least 10 characters.' }),
 });
@@ -147,6 +147,7 @@ export function ContactForm() {
                     <SelectItem value="education">Education & Training</SelectItem>
                     <SelectItem value="humanitarian">Humanitarian Services</SelectItem>
                     <SelectItem value="community">Community Development</SelectItem>
+                    <SelectItem value="sports">Sports & Athletics</SelectItem>
                     <SelectItem value="hr">Careers & HR</SelectItem>
                     <SelectItem value="press">Media & Press</SelectItem>
                     <SelectItem value="partnership">Partnerships</SelectItem>

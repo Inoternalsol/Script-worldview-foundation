@@ -1,6 +1,7 @@
+import { Handshake, ShieldCheck, Users } from 'lucide-react'
+import Image from 'next/image'
 import { PageHero } from '@/components/public/shared/PageHero'
 import { SectionHeader } from '@/components/public/shared/SectionHeader'
-import { Users, Handshake, ShieldCheck } from 'lucide-react'
 
 export default function CommunityProgramPage() {
   return (
@@ -55,8 +56,13 @@ export default function CommunityProgramPage() {
             description="How 50 women transformed their local economy through collective savings and skill development."
           />
           <div className="mt-12 overflow-hidden rounded-2xl bg-white shadow-card md:flex">
-            <div className="h-64 bg-gray-200 md:h-auto md:w-1/2">
-              {/* Image Placeholder */}
+            <div className="relative h-64 bg-gray-100 md:h-auto md:w-1/2">
+              <Image 
+                src="/images/programs/community.png" 
+                alt="Community meeting" 
+                fill 
+                className="object-cover"
+              />
             </div>
             <div className="p-8 md:w-1/2 lg:p-12">
               <h3 className="mb-4 font-heading text-2xl font-bold text-brand-primary">Rebuilding Livelihoods</h3>

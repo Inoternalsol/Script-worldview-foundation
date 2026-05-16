@@ -1,7 +1,7 @@
 import { PageHero } from '@/components/public/shared/PageHero'
 import { SectionHeader } from '@/components/public/shared/SectionHeader'
 import { Button } from '@/components/ui/button'
-import { Target, Eye, Heart, BookOpen, HeartHandshake, Users, FlaskConical, GraduationCap } from 'lucide-react'
+import { Target, Eye, Heart, BookOpen, HeartHandshake, Users, FlaskConical, GraduationCap, Activity } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -89,7 +89,7 @@ export default function AboutPage() {
           <SectionHeader
             eyebrow="What We Do"
             title="Our Departments"
-            description="Our work is organized into five key areas of intervention."
+            description="Our work is organized into six key areas of intervention."
           />
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <div className="flex items-start gap-4 rounded-xl bg-white p-6 shadow-sm">
@@ -125,6 +125,13 @@ export default function AboutPage() {
               <div>
                 <h3 className="font-heading font-bold text-brand-primary">Capacity Building</h3>
                 <p className="mt-1 text-sm text-brand-muted">Training and organizational development.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 rounded-xl bg-white p-6 shadow-sm">
+              <Activity className="h-8 w-8 text-brand-primary shrink-0" />
+              <div>
+                <h3 className="font-heading font-bold text-brand-primary">Sports & Athletics</h3>
+                <p className="mt-1 text-sm text-brand-muted">Youth empowerment and leadership through basketball.</p>
               </div>
             </div>
           </div>

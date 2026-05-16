@@ -75,6 +75,9 @@ export function Footer() {
             <Link className="text-brand-muted hover:text-brand-primary" href="/programs/capacity">
               Capacity
             </Link>
+            <Link className="text-brand-muted hover:text-brand-primary" href="/programs/sports">
+              Sports
+            </Link>
           </div>
         </div>
 

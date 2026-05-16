@@ -45,6 +45,14 @@ const programs = [
     description: 'Training workshops and organizational development for community leaders and partner NGOs.',
     category: 'capacity' as const,
     icon: 'GraduationCap'
+  },
+  {
+    id: '6',
+    name: 'Sports & Athletics',
+    slug: 'sports',
+    description: 'Empowering youth through athletics, teamwork, and basketball development.',
+    category: 'sports' as const,
+    icon: 'Activity'
   }
 ]
 

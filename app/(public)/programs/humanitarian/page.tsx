@@ -2,6 +2,7 @@ import { PageHero } from '@/components/public/shared/PageHero'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { HeartHandshake, AlertCircle } from 'lucide-react'
+import Image from 'next/image'
 
 export default function HumanitarianProgramPage() {
   return (
@@ -14,8 +15,13 @@ export default function HumanitarianProgramPage() {
       <section className="bg-white py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            <div className="order-2 lg:order-1 aspect-square rounded-2xl bg-gray-200">
-              {/* Image Placeholder */}
+            <div className="relative order-2 lg:order-1 aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-xl">
+              <Image 
+                src="/images/programs/humanitarian.png" 
+                alt="Humanitarian relief efforts" 
+                fill 
+                className="object-cover"
+              />
             </div>
             <div className="order-1 lg:order-2">
               <div className="mb-4 inline-flex items-center rounded-full bg-brand-primary/10 px-3 py-1 text-sm font-semibold text-brand-primary">

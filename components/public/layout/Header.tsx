@@ -28,6 +28,7 @@ const nav: NavItem[] = [
       { label: 'Community', href: '/programs/community' },
       { label: 'Research', href: '/programs/research' },
       { label: 'Capacity', href: '/programs/capacity' },
+      { label: 'Sports', href: '/programs/sports' },
     ],
   },
   { label: 'Get Involved', href: '/get-involved' },
