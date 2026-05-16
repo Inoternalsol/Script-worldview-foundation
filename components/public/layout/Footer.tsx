@@ -86,9 +86,9 @@ export function Footer() {
             <div>hello@scriptworldviewfoundation.org</div>
           </div>
           <div className="pt-2">
-            <div className="text-sm font-semibold text-foreground">Newsletter</div>
+            <label htmlFor="footer-newsletter-email" className="text-sm font-semibold text-foreground block">Newsletter</label>
             <div className="mt-2 flex gap-2">
-              <Input placeholder="Email address" type="email" />
+              <Input id="footer-newsletter-email" name="email" autoComplete="email" placeholder="Email address" type="email" />
               <Button type="button" variant="secondary">
                 Join
               </Button>

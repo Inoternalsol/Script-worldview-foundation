@@ -33,7 +33,11 @@ export function NewsletterSignup() {
         </p>
         
         <form onSubmit={handleSubmit} className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row">
+          <label htmlFor="home-newsletter-email" className="sr-only">Email address</label>
           <Input
+            id="home-newsletter-email"
+            name="email"
+            autoComplete="email"
             type="email"
             placeholder="Enter your email address"
             required
