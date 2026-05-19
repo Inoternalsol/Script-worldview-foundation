@@ -16,6 +16,7 @@ import {
   Shield,
   Terminal,
   TrendingUp,
+  Target,
 } from 'lucide-react'
 
 const navSections = [
@@ -31,6 +32,7 @@ const navSections = [
     items: [
       { href: '/admin/volunteers', label: 'Volunteers', icon: Users },
       { href: '/admin/donations', label: 'Donations', icon: Heart },
+      { href: '/admin/campaigns', label: 'Fundraisers', icon: Target },
       { href: '/admin/contacts', label: 'Messages', icon: MessageSquare },
       { href: '/admin/newsletter', label: 'Newsletter', icon: Mail },
     ],
@@ -38,6 +40,7 @@ const navSections = [
   {
     label: 'Content',
     items: [
+      { href: '/admin/content/pages', label: 'Static Pages', icon: FileText },
       { href: '/admin/blog', label: 'Blog Posts', icon: FileText },
       { href: '/admin/events', label: 'Events', icon: Calendar },
       { href: '/admin/careers', label: 'Careers', icon: Briefcase },
@@ -49,11 +52,13 @@ const navSections = [
     items: [
       { href: '/admin/users', label: 'Staff Accounts', icon: Shield },
       { href: '/admin/chatbot', label: 'AI Chatbot', icon: MessageSquare },
+      { href: '/admin/email', label: 'Email Dispatcher', icon: Mail },
       { href: '/admin/audit-log', label: 'Audit Logs', icon: Terminal },
       { href: '/admin/settings', label: 'Settings', icon: Settings },
     ],
   },
 ]
+
 
 
 export default async function AdminLayout({
