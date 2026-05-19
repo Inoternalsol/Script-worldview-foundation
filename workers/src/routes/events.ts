@@ -3,15 +3,19 @@ import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import { eq, desc } from 'drizzle-orm'
 import { createDb } from '../db/client'
-import { events } from '../db/schema'
+import { events, eventRegistrations } from '../db/schema'
 import { authMiddleware, requireRole } from '../middleware/auth'
+import { sendEmail } from '../utils/email'
+import { getEventConfirmationHtml } from '../utils/email-templates'
 
 type Bindings = {
   DB: D1Database
   ENVIRONMENT: string
+  RESEND_API_KEY: string
+  EMAIL_FROM: string
 }
 
-export const eventsRoutes = new Hono<{ Bindings: Bindings }>()
+export const eventsRoutes = new Hono<{ Bindings: Bindings; Variables: { user: any } }>()
 
 const eventSchema = z.object({
   title: z.string().min(1).max(255),
@@ -107,7 +111,7 @@ eventsRoutes.put('/:id', requireRole(['super_admin', 'dept_admin', 'content_edit
     updatedAt: new Date(),
   }
 
-  const result = await db.update(events).set(updateData).where(eq(events.id, id)).returning()
+  const result = await db.update(events).set(updateData).where(eq(events.id, id!)).returning()
 
   if (!result.length) {
     return c.json({ error: 'Event not found' }, 404)
@@ -123,7 +127,7 @@ eventsRoutes.delete('/:id', requireRole(['super_admin', 'dept_admin']), async (c
 
   // Hard delete for events, or could soft delete if we change schema
   // We'll just hard delete for now
-  const result = await db.delete(events).where(eq(events.id, id)).returning()
+  const result = await db.delete(events).where(eq(events.id, id!)).returning()
 
   if (!result.length) {
     return c.json({ error: 'Event not found' }, 404)
@@ -155,7 +159,7 @@ eventsRoutes.post('/:id/register', async (c) => {
   const db = createDb(c.env.DB)
 
   // 1. Check event exists and has capacity
-  const eventList = await db.select().from(events).where(eq(events.id, eventId)).limit(1)
+  const eventList = await db.select().from(events).where(eq(events.id, eventId!)).limit(1)
   if (!eventList.length) {
     return c.json({ error: 'Event not found' }, 404)
   }
@@ -182,14 +186,29 @@ eventsRoutes.post('/:id/register', async (c) => {
   }
 
   try {
-    const { eventRegistrations } = require('../db/schema')
     await db.insert(eventRegistrations).values(newRegistration)
     
     // Update count on event
     await db.update(events)
       .set({ registrationsCount: (event.registrationsCount || 0) + 1 })
-      .where(eq(events.id, eventId))
+      .where(eq(events.id, eventId!))
       .run()
+
+    // Trigger Event Registration Confirmation Email (Phase 7)
+    const dateStr = new Date(event.date).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+    const emailHtml = getEventConfirmationHtml(parsed.data.name, event.title, dateStr, event.location || undefined)
+    await sendEmail(c.env, {
+      to: parsed.data.email,
+      subject: `Registration Confirmed: ${event.title} - Script Worldview Foundation`,
+      html: emailHtml,
+    })
 
     return c.json({ ok: true, registrationId }, 201)
   } catch (err: any) {

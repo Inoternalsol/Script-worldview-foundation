@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import * as schema from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import { sendEmail } from '../../utils/email';
+import { getDonationReceiptHtml } from '../../utils/email-templates';
 
 import { Env } from '../../types';
 
@@ -53,11 +54,11 @@ paystackWebhook.post('/', async (c) => {
       const donation = result[0];
       
       // Trigger receipt email
+      const receiptHtml = getDonationReceiptHtml(donation.donorName, donation.amount, donation.currency, donation.id);
       await sendEmail(c.env, {
         to: donation.donorEmail,
         subject: 'Thank You for Your Donation - Script Worldview Foundation',
-        // In a real scenario, we'd use React Email to generate this HTML
-        html: `<h1>Thank You, ${donation.donorName}!</h1><p>We received your donation of ${donation.currency} ${donation.amount}. Your support helps us transform lives.</p>`,
+        html: receiptHtml,
       });
     }
   }

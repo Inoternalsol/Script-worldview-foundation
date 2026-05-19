@@ -8,6 +8,8 @@ import { nanoid } from 'nanoid';
 
 import { Env } from '../types';
 
+import { rateLimit } from '../middleware/rateLimit';
+
 const donations = new Hono<{ Bindings: Env }>();
 
 const initializeDonationSchema = z.object({
@@ -24,7 +26,7 @@ const initializeDonationSchema = z.object({
 });
 
 // Initialize a donation
-donations.post('/', zValidator('json', initializeDonationSchema), async (c) => {
+donations.post('/', rateLimit({ windowMs: 600000, maxRequests: 10, endpointLabel: 'donation initialization' }), zValidator('json', initializeDonationSchema), async (c) => {
   const db = drizzle(c.env.DB);
   const data = c.req.valid('json');
   const donationId = nanoid();

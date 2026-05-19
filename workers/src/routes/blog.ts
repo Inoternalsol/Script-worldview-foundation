@@ -8,7 +8,7 @@ import { authMiddleware, requireRole } from '../middleware/auth'
 
 import { Env } from '../types'
 
-export const blogRoutes = new Hono<{ Bindings: Env }>()
+export const blogRoutes = new Hono<{ Bindings: Env; Variables: { user: any } }>()
 
 const blogSchema = z.object({
   title: z.string().min(1).max(255),
@@ -115,7 +115,7 @@ blogRoutes.put('/:id', requireRole(['super_admin', 'dept_admin', 'content_editor
     ...(parsed.data.status === 'published' ? { publishedAt: new Date() } : {})
   }
 
-  const result = await db.update(blogPosts).set(updateData).where(eq(blogPosts.id, id)).returning()
+  const result = await db.update(blogPosts).set(updateData).where(eq(blogPosts.id, id!)).returning()
 
   if (!result.length) {
     return c.json({ error: 'Post not found' }, 404)
@@ -132,7 +132,7 @@ blogRoutes.delete('/:id', requireRole(['super_admin', 'dept_admin']), async (c) 
   // Soft delete by setting status to archived
   const result = await db.update(blogPosts)
     .set({ status: 'archived', updatedAt: new Date() })
-    .where(eq(blogPosts.id, id))
+    .where(eq(blogPosts.id, id!))
     .returning()
 
   if (!result.length) {

@@ -5,12 +5,16 @@ import { eq, desc, and } from 'drizzle-orm'
 import { createDb } from '../db/client'
 import { jobPostings, jobApplications } from '../db/schema'
 import { authMiddleware, requireRole } from '../middleware/auth'
+import { sendEmail } from '../utils/email'
+import { getCareerAcknowledgmentHtml } from '../utils/email-templates'
 
 type Bindings = {
   DB: D1Database
+  RESEND_API_KEY: string
+  EMAIL_FROM: string
 }
 
-export const careerRoutes = new Hono<{ Bindings: Bindings }>()
+export const careerRoutes = new Hono<{ Bindings: Bindings; Variables: { user: any } }>()
 
 // GET /api/careers/jobs - Public list of open jobs
 careerRoutes.get('/jobs', async (c) => {
@@ -72,6 +76,15 @@ careerRoutes.post('/applications', async (c) => {
 
   try {
     await db.insert(jobApplications).values(newApplication)
+
+    // Trigger Career Application Acknowledgment Email (Phase 7)
+    const emailHtml = getCareerAcknowledgmentHtml(parsed.data.name, job[0].title)
+    await sendEmail(c.env, {
+      to: parsed.data.email,
+      subject: `Application Received: ${job[0].title} - Script Worldview Foundation`,
+      html: emailHtml,
+    })
+
     return c.json({ success: true, id }, 201)
   } catch (err) {
     console.error('Failed to save application:', err)

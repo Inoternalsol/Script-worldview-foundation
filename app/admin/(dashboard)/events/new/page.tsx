@@ -33,8 +33,8 @@ export default function NewEventPage() {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
-      const res = await fetch(`${apiUrl}/api/admin/events`, {
+      // Fetch securely through the Next.js API proxy (Phase 9)
+      const res = await fetch('/api/admin/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -85,6 +85,7 @@ export default function NewEventPage() {
             <select
               id="status"
               name="status"
+              title="Status"
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="upcoming">Upcoming</option>

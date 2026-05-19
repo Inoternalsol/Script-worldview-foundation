@@ -151,9 +151,18 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-brand-muted">Share:</span>
-            <button className="rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-brand-primary hover:text-white transition-colors"><Facebook className="h-4 w-4" /></button>
-            <button className="rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-brand-primary hover:text-white transition-colors"><Twitter className="h-4 w-4" /></button>
-            <button className="rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-brand-primary hover:text-white transition-colors"><Linkedin className="h-4 w-4" /></button>
+            <button aria-label="Share on Facebook" title="Share on Facebook" className="rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-brand-primary hover:text-white transition-colors">
+              <Facebook className="h-4 w-4" />
+              <span className="sr-only">Facebook</span>
+            </button>
+            <button aria-label="Share on Twitter" title="Share on Twitter" className="rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-brand-primary hover:text-white transition-colors">
+              <Twitter className="h-4 w-4" />
+              <span className="sr-only">Twitter</span>
+            </button>
+            <button aria-label="Share on LinkedIn" title="Share on LinkedIn" className="rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-brand-primary hover:text-white transition-colors">
+              <Linkedin className="h-4 w-4" />
+              <span className="sr-only">LinkedIn</span>
+            </button>
           </div>
         </footer>
 

@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { nanoid } from 'nanoid'
-import { eq, desc, sql, count } from 'drizzle-orm'
+import { eq, desc, sql, count, and } from 'drizzle-orm'
 import { createDb } from '../db/client'
 import {
   volunteers,
@@ -16,8 +16,12 @@ import {
   campaigns,
 } from '../db/schema'
 import { Env } from '../types'
+import { authMiddleware } from '../middleware/auth'
 
 export const adminRoutes = new Hono<{ Bindings: Env }>()
+
+// Enforce authentication on all admin endpoints (Phase 9)
+adminRoutes.use('*', authMiddleware)
 
 // ─── Dashboard Stats ──────────────────────────────────────────────
 adminRoutes.get('/stats', async (c) => {
@@ -71,17 +75,18 @@ adminRoutes.get('/volunteers', async (c) => {
   const db = createDb(c.env.DB)
   const status = c.req.query('status')
 
-  let query = db.select().from(volunteers).orderBy(desc(volunteers.appliedAt)).limit(200)
+  const conditions = []
   if (status) {
-    query = db
-      .select()
-      .from(volunteers)
-      .where(eq(volunteers.status, status as any))
-      .orderBy(desc(volunteers.appliedAt))
-      .limit(200)
+    conditions.push(eq(volunteers.status, status as any))
   }
 
-  const data = await query
+  const data = await db
+    .select()
+    .from(volunteers)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(desc(volunteers.appliedAt))
+    .limit(200)
+
   return c.json({ data })
 })
 
@@ -126,17 +131,18 @@ adminRoutes.get('/contacts', async (c) => {
   const db = createDb(c.env.DB)
   const status = c.req.query('status')
 
-  let query = db.select().from(contacts).orderBy(desc(contacts.createdAt)).limit(200)
+  const conditions = []
   if (status) {
-    query = db
-      .select()
-      .from(contacts)
-      .where(eq(contacts.status, status as any))
-      .orderBy(desc(contacts.createdAt))
-      .limit(200)
+    conditions.push(eq(contacts.status, status as any))
   }
 
-  const data = await query
+  const data = await db
+    .select()
+    .from(contacts)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(desc(contacts.createdAt))
+    .limit(200)
+
   return c.json({ data })
 })
 

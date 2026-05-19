@@ -9,4 +9,6 @@ database_id = "f91625b7-923f-4d97-a898-e2dbded2cba4"
 
 [vars]
 ENVIRONMENT = "development"
+JWT_SECRET = "development_jwt_secret_key_12345"
+
 

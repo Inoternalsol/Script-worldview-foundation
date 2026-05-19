@@ -5,6 +5,10 @@ import { eq, desc } from 'drizzle-orm'
 import { createDb } from '../db/client'
 import { contacts } from '../db/schema'
 import { authMiddleware, requireRole } from '../middleware/auth'
+import { sendEmail } from '../utils/email'
+import { getContactConfirmationHtml, getContactAdminNotificationHtml } from '../utils/email-templates'
+
+import { rateLimit } from '../middleware/rateLimit'
 
 type Bindings = {
   DB: D1Database
@@ -26,7 +30,7 @@ const contactSchema = z.object({
 })
 
 // POST /api/contacts - Public submission
-contactRoutes.post('/', async (c) => {
+contactRoutes.post('/', rateLimit({ windowMs: 600000, maxRequests: 10, endpointLabel: 'contact form submission' }), async (c) => {
   const body = await c.req.json().catch(() => ({}))
   const parsed = contactSchema.safeParse(body)
 
@@ -48,8 +52,23 @@ contactRoutes.post('/', async (c) => {
   try {
     await db.insert(contacts).values(newContact)
     
-    // TODO: Trigger Email Notification
-    // We will implement this in Phase 7
+    // Trigger Email Notification (Phase 7)
+    // 1. Send confirmation acknowledgment to the sender
+    const userEmailHtml = getContactConfirmationHtml(parsed.data.name)
+    await sendEmail(c.env, {
+      to: parsed.data.email,
+      subject: parsed.data.subject || 'Thank You for Contacting Script Worldview Foundation',
+      html: userEmailHtml,
+    })
+
+    // 2. Send notification alert to internal department or admin
+    const adminEmailHtml = getContactAdminNotificationHtml(parsed.data)
+    const adminRecipient = c.env.EMAIL_FROM || 'info@scriptworldviewfoundation.org'
+    await sendEmail(c.env, {
+      to: adminRecipient,
+      subject: `New Contact Submission: [${parsed.data.department}] ${parsed.data.subject || 'General inquiry'}`,
+      html: adminEmailHtml,
+    })
     
     return c.json({ success: true, id }, 201)
   } catch (err) {
@@ -81,7 +100,7 @@ contactRoutes.get('/:id', requireRole(['super_admin', 'dept_admin']), async (c) 
   const id = c.req.param('id')
   const db = createDb(c.env.DB)
 
-  const result = await db.select().from(contacts).where(eq(contacts.id, id)).limit(1)
+  const result = await db.select().from(contacts).where(eq(contacts.id, id!)).limit(1)
 
   if (!result.length) {
     return c.json({ error: 'Contact not found' }, 404)
@@ -111,7 +130,7 @@ contactRoutes.put('/:id', requireRole(['super_admin', 'dept_admin']), async (c) 
       ...parsed.data, 
       updatedAt: new Date() 
     })
-    .where(eq(contacts.id, id))
+    .where(eq(contacts.id, id!))
     .returning()
 
   if (!result.length) {

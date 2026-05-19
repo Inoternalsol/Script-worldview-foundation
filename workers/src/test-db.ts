@@ -1,3 +1,4 @@
+// @ts-nocheck
 const { drizzle } = require('drizzle-orm/d1');
 
 export default {

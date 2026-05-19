@@ -11,7 +11,7 @@ type Bindings = {
   ENVIRONMENT: string
 }
 
-export const programsRoutes = new Hono<{ Bindings: Bindings }>()
+export const programsRoutes = new Hono<{ Bindings: Bindings; Variables: { user: any } }>()
 
 const programSchema = z.object({
   name: z.string().min(1).max(255),
@@ -109,7 +109,7 @@ programsRoutes.put('/:id', requireRole(['super_admin', 'dept_admin']), async (c)
     updatedAt: new Date(),
   }
 
-  const result = await db.update(programs).set(updateData).where(eq(programs.id, id)).returning()
+  const result = await db.update(programs).set(updateData).where(eq(programs.id, id!)).returning()
 
   if (!result.length) {
     return c.json({ error: 'Program not found' }, 404)
@@ -123,7 +123,7 @@ programsRoutes.delete('/:id', requireRole(['super_admin']), async (c) => {
   const id = c.req.param('id')
   const db = createDb(c.env.DB)
 
-  const result = await db.delete(programs).where(eq(programs.id, id)).returning()
+  const result = await db.delete(programs).where(eq(programs.id, id!)).returning()
 
   if (!result.length) {
     return c.json({ error: 'Program not found' }, 404)

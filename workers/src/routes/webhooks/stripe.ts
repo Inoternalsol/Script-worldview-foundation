@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import * as schema from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import { sendEmail } from '../../utils/email';
+import { getDonationReceiptHtml } from '../../utils/email-templates';
 
 import { Env } from '../../types';
 
@@ -68,10 +69,11 @@ stripeWebhook.post('/', async (c) => {
       if (result.length > 0) {
         const donation = result[0];
         
+        const receiptHtml = getDonationReceiptHtml(donation.donorName, donation.amount, donation.currency, donation.id);
         await sendEmail(c.env, {
           to: donation.donorEmail,
           subject: 'Thank You for Your Donation - Script Worldview Foundation',
-          html: `<h1>Thank You, ${donation.donorName}!</h1><p>We received your donation of ${donation.currency} ${donation.amount}. Your support helps us transform lives.</p>`,
+          html: receiptHtml,
         });
       }
     }

@@ -31,8 +31,8 @@ export default function NewBlogPostPage() {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
-      const res = await fetch(`${apiUrl}/api/admin/blog`, {
+      // Fetch securely through the Next.js API proxy (Phase 9)
+      const res = await fetch('/api/admin/blog', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -83,6 +83,7 @@ export default function NewBlogPostPage() {
             <select
               id="categoryId"
               name="categoryId"
+              title="Category"
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="">Select category</option>
@@ -113,6 +114,7 @@ export default function NewBlogPostPage() {
             <select
               id="status"
               name="status"
+              title="Status"
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <option value="draft">Draft</option>

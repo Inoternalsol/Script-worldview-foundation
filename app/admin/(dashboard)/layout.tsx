@@ -5,7 +5,6 @@ import {
   Users,
   Heart,
   Mail,
-  Newspaper,
   FileText,
   Calendar,
   Briefcase,
@@ -13,6 +12,10 @@ import {
   LogOut,
   ChevronRight,
   MessageSquare,
+  Image,
+  Shield,
+  Terminal,
+  TrendingUp,
 } from 'lucide-react'
 
 const navSections = [
@@ -20,6 +23,7 @@ const navSections = [
     label: 'Overview',
     items: [
       { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/admin/analytics', label: 'Analytics', icon: TrendingUp },
     ],
   },
   {
@@ -37,9 +41,20 @@ const navSections = [
       { href: '/admin/blog', label: 'Blog Posts', icon: FileText },
       { href: '/admin/events', label: 'Events', icon: Calendar },
       { href: '/admin/careers', label: 'Careers', icon: Briefcase },
+      { href: '/admin/media', label: 'Media Library', icon: Image },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { href: '/admin/users', label: 'Staff Accounts', icon: Shield },
+      { href: '/admin/chatbot', label: 'AI Chatbot', icon: MessageSquare },
+      { href: '/admin/audit-log', label: 'Audit Logs', icon: Terminal },
+      { href: '/admin/settings', label: 'Settings', icon: Settings },
     ],
   },
 ]
+
 
 export default async function AdminLayout({
   children,

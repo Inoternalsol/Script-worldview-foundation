@@ -5,9 +5,15 @@ import { eq, desc } from 'drizzle-orm'
 import { createDb } from '../db/client'
 import { volunteers } from '../db/schema'
 import { authMiddleware, requireRole } from '../middleware/auth'
+import { sendEmail } from '../utils/email'
+import { getVolunteerAcknowledgmentHtml } from '../utils/email-templates'
+
+import { rateLimit } from '../middleware/rateLimit'
 
 type Bindings = {
   DB: D1Database
+  RESEND_API_KEY: string
+  EMAIL_FROM: string
 }
 
 export const volunteerRoutes = new Hono<{ Bindings: Bindings }>()
@@ -25,7 +31,7 @@ const volunteerSchema = z.object({
 })
 
 // POST /api/volunteers - Public submission
-volunteerRoutes.post('/', async (c) => {
+volunteerRoutes.post('/', rateLimit({ windowMs: 600000, maxRequests: 10, endpointLabel: 'volunteer application submission' }), async (c) => {
   const body = await c.req.json().catch(() => ({}))
   const parsed = volunteerSchema.safeParse(body)
 
@@ -53,6 +59,15 @@ volunteerRoutes.post('/', async (c) => {
 
   try {
     await db.insert(volunteers).values(newVolunteer)
+
+    // Trigger Volunteer Acknowledgment Email (Phase 7)
+    const emailHtml = getVolunteerAcknowledgmentHtml(parsed.data.name)
+    await sendEmail(c.env, {
+      to: parsed.data.email,
+      subject: 'Volunteer Application Received - Script Worldview Foundation',
+      html: emailHtml,
+    })
+
     return c.json({ success: true, id }, 201)
   } catch (err: any) {
     console.error('Failed to save volunteer:', err)
@@ -79,7 +94,7 @@ volunteerRoutes.get('/', requireRole(['super_admin', 'dept_admin']), async (c) =
 volunteerRoutes.get('/:id', requireRole(['super_admin', 'dept_admin']), async (c) => {
   const id = c.req.param('id')
   const db = createDb(c.env.DB)
-  const result = await db.select().from(volunteers).where(eq(volunteers.id, id)).limit(1)
+  const result = await db.select().from(volunteers).where(eq(volunteers.id, id!)).limit(1)
 
   if (!result.length) {
     return c.json({ error: 'Volunteer not found' }, 404)
@@ -108,7 +123,7 @@ volunteerRoutes.put('/:id', requireRole(['super_admin', 'dept_admin']), async (c
       ...parsed.data, 
       updatedAt: new Date() 
     })
-    .where(eq(volunteers.id, id))
+    .where(eq(volunteers.id, id!))
     .returning()
 
   if (!result.length) {

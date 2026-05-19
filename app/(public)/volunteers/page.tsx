@@ -43,7 +43,6 @@ export default function VolunteersPage() {
             light
             centered
           />
-        </div>
           <div className="mt-8 rounded-2xl bg-white p-8 text-left text-foreground">
             <h3 className="mb-4 font-heading text-xl font-bold text-brand-primary text-center">Volunteer Application</h3>
             <VolunteerForm />

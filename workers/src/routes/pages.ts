@@ -11,7 +11,7 @@ type Bindings = {
   ENVIRONMENT: string
 }
 
-export const pagesRoutes = new Hono<{ Bindings: Bindings }>()
+export const pagesRoutes = new Hono<{ Bindings: Bindings; Variables: { user: any } }>()
 
 const pageSchema = z.object({
   title: z.string().min(1).max(255),
@@ -103,7 +103,7 @@ pagesRoutes.put('/:id', requireRole(['super_admin', 'dept_admin', 'content_edito
     updatedAt: new Date(),
   }
 
-  const result = await db.update(pages).set(updateData).where(eq(pages.id, id)).returning()
+  const result = await db.update(pages).set(updateData).where(eq(pages.id, id!)).returning()
 
   if (!result.length) {
     return c.json({ error: 'Page not found' }, 404)
@@ -117,7 +117,7 @@ pagesRoutes.delete('/:id', requireRole(['super_admin']), async (c) => {
   const id = c.req.param('id')
   const db = createDb(c.env.DB)
 
-  const result = await db.delete(pages).where(eq(pages.id, id)).returning()
+  const result = await db.delete(pages).where(eq(pages.id, id!)).returning()
 
   if (!result.length) {
     return c.json({ error: 'Page not found' }, 404)
