@@ -10,10 +10,10 @@ export function Footer() {
         <div className="space-y-4">
           <div className="flex flex-col items-center md:items-start">
             <div className="flex flex-col items-center justify-center text-center">
-              <span className="font-heading text-lg font-bold uppercase tracking-wide text-[#E65100] leading-none">
+              <span className="font-heading text-xl font-black uppercase tracking-wider text-brand-primary leading-none">
                 Script Worldview
               </span>
-              <span className="font-heading text-xs font-bold uppercase tracking-[0.24em] text-[#E65100] mt-1.5 leading-none">
+              <span className="font-heading text-[13px] font-black uppercase tracking-[0.3em] text-brand-primary mt-1.5 leading-none">
                 Foundation
               </span>
             </div>

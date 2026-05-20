@@ -72,10 +72,10 @@ export function Header() {
             />
           </div>
           <div className="flex flex-col items-center justify-center text-center">
-            <span className="font-heading text-[13px] sm:text-base font-bold uppercase tracking-wide text-[#E65100] whitespace-nowrap leading-none">
+            <span className="font-heading text-[15px] sm:text-[18px] font-black uppercase tracking-wider text-white whitespace-nowrap leading-none">
               Script Worldview
             </span>
-            <span className="font-heading text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.24em] text-[#E65100] mt-1.5 leading-none">
+            <span className="font-heading text-[10px] sm:text-[11px] font-black uppercase tracking-[0.3em] text-white mt-1.5 leading-none">
               Foundation
             </span>
           </div>
