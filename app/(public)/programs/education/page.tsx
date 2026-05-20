@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { BookOpen, CheckCircle2 } from 'lucide-react'
 import Image from 'next/image'
 
+export const revalidate = 3600; // Cache and statically regenerate page at most once per hour
+
 export default function EducationProgramPage() {
   return (
     <div>

@@ -7,6 +7,7 @@ import { contacts } from '../db/schema'
 import { authMiddleware, requireRole } from '../middleware/auth'
 import { sendEmail } from '../utils/email'
 import { getContactConfirmationHtml, getContactAdminNotificationHtml } from '../utils/email-templates'
+import { sendSms } from '../utils/sms'
 
 import { rateLimit } from '../middleware/rateLimit'
 
@@ -14,9 +15,17 @@ type Bindings = {
   DB: D1Database
   RESEND_API_KEY: string
   EMAIL_FROM: string
+  SMS_GATEWAY?: string
+  TERMII_API_KEY?: string
+  TERMII_SENDER_ID?: string
+  TWILIO_ACCOUNT_SID?: string
+  TWILIO_AUTH_TOKEN?: string
+  TWILIO_FROM_NUMBER?: string
+  EMERGENCY_COORDINATOR_PHONE?: string
 }
 
 export const contactRoutes = new Hono<{ Bindings: Bindings }>()
+
 
 const contactSchema = z.object({
   name: z.string().min(1).max(255),
@@ -69,6 +78,19 @@ contactRoutes.post('/', rateLimit({ windowMs: 600000, maxRequests: 10, endpointL
       subject: `New Contact Submission: [${parsed.data.department}] ${parsed.data.subject || 'General inquiry'}`,
       html: adminEmailHtml,
     })
+
+    // 3. Trigger real-time SMS broadcast if it is an urgent humanitarian emergency (Phase 13 recommendation)
+    if (parsed.data.type === 'humanitarian' && c.env.EMERGENCY_COORDINATOR_PHONE) {
+      const smsMessage = `URGENT RELIEF ALERT: A new humanitarian request has been logged.\nReporter: ${parsed.data.name}\nPhone: ${parsed.data.phone || 'N/A'}\nSubject: ${parsed.data.subject || 'Flood/Displacement relief'}\nReview immediately in your Admin Center.`;
+      
+      // Fire-and-forget so that it does not block the HTTP client response cycle
+      c.executionCtx.waitUntil(
+        sendSms(c.env, {
+          to: c.env.EMERGENCY_COORDINATOR_PHONE,
+          message: smsMessage,
+        })
+      );
+    }
     
     return c.json({ success: true, id }, 201)
   } catch (err) {

@@ -4,6 +4,9 @@ import { SectionHeader } from '@/components/public/shared/SectionHeader'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
+export const revalidate = 3600; // Cache and statically regenerate page at most once per hour
+
+
 // Mock Data
 const programs = [
   {
