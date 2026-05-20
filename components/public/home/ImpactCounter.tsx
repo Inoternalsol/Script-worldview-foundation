@@ -7,7 +7,7 @@ const stats = [
   { value: 2000, suffix: '+', label: 'Lives Impacted' },
   { value: 12, suffix: '', label: 'Communities Served' },
   { value: 5, suffix: '', label: 'Active Programs' },
-  { value: 500, prefix: '₦', suffix: 'k+', label: 'Raised' },
+  { value: 500, suffix: '+', label: 'Scholarships Awarded' },
 ]
 
 function Counter({ value }: { value: number }) {
@@ -52,7 +52,6 @@ export function ImpactCounter() {
             className="flex flex-col items-center justify-center space-y-2"
           >
             <div className="font-heading text-4xl font-bold md:text-5xl">
-              {stat.prefix}
               <Counter value={stat.value} />
               {stat.suffix}
             </div>
