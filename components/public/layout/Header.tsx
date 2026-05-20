@@ -71,13 +71,13 @@ export function Header() {
               priority
             />
           </div>
-          <div className="flex flex-col justify-center">
-            <div className="font-heading text-[13px] sm:text-base font-bold uppercase tracking-wide text-white whitespace-nowrap leading-none">
-              Script Worldview Foundation
-            </div>
-            <div className="hidden sm:block text-[9px] text-white/80 uppercase tracking-[0.11em] mt-1.5 whitespace-nowrap">
-              Shaping Minds. Transforming Communities.
-            </div>
+          <div className="flex flex-col items-center justify-center text-center">
+            <span className="font-heading text-[13px] sm:text-base font-bold uppercase tracking-wide text-[#E65100] whitespace-nowrap leading-none">
+              Script Worldview
+            </span>
+            <span className="font-heading text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.24em] text-[#E65100] mt-1.5 leading-none">
+              Foundation
+            </span>
           </div>
         </Link>
 

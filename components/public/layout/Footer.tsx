@@ -8,11 +8,15 @@ export function Footer() {
     <footer className="border-t border-black/10 bg-white">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-4 md:px-8">
         <div className="space-y-4">
-          <div className="font-heading text-lg font-semibold text-brand-primary">
-            Script Worldview Foundation
-          </div>
-          <div className="text-sm text-brand-muted">
-            Shaping Minds. Transforming Communities.
+          <div className="flex flex-col items-center md:items-start">
+            <div className="flex flex-col items-center justify-center text-center">
+              <span className="font-heading text-lg font-bold uppercase tracking-wide text-[#E65100] leading-none">
+                Script Worldview
+              </span>
+              <span className="font-heading text-xs font-bold uppercase tracking-[0.24em] text-[#E65100] mt-1.5 leading-none">
+                Foundation
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <a className="text-brand-muted hover:text-brand-primary" href="#" aria-label="Facebook">
