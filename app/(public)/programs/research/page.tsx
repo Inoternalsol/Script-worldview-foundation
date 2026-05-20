@@ -1,7 +1,19 @@
+'use client';
+
+import { useState } from 'react'
 import { PageHero } from '@/components/public/shared/PageHero'
 import { SectionHeader } from '@/components/public/shared/SectionHeader'
 import { Button } from '@/components/ui/button'
 import { FileText, Download } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { PublicationGateForm } from '@/components/public/forms/PublicationGateForm'
 
 // Mock Data for Publications
 const publications = [
@@ -29,6 +41,8 @@ const publications = [
 ]
 
 export default function ResearchProgramPage() {
+  const [activePubId, setActivePubId] = useState<number | null>(null);
+
   return (
     <div>
       <PageHero
@@ -70,10 +84,30 @@ export default function ResearchProgramPage() {
                 </div>
                 <div className="mt-auto pt-4 border-t border-gray-100">
                   <p className="mb-4 text-sm text-brand-muted">By {pub.author}</p>
-                  {/* Note: In Phase 4, this will trigger the PublicationGateForm */}
-                  <Button variant="secondary" className="w-full gap-2">
-                    <Download className="h-4 w-4" /> Download PDF
-                  </Button>
+                  
+                  <Dialog 
+                    open={activePubId === pub.id} 
+                    onOpenChange={(open) => setActivePubId(open ? pub.id : null)}
+                  >
+                    <DialogTrigger asChild>
+                      <Button variant="secondary" className="w-full gap-2">
+                        <Download className="h-4 w-4" /> Download PDF
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md">
+                      <DialogHeader>
+                        <DialogTitle className="text-xl font-bold text-brand-primary">Access Publication</DialogTitle>
+                        <DialogDescription>
+                          Unlock the publication file for direct download.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <PublicationGateForm
+                        publicationTitle={pub.title}
+                        downloadUrl={`/files/publications/pub-${pub.id}.pdf`}
+                        onSuccess={() => setActivePubId(null)}
+                      />
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             ))}
@@ -83,3 +117,4 @@ export default function ResearchProgramPage() {
     </div>
   )
 }
+

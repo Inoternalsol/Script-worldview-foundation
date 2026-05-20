@@ -1,7 +1,19 @@
+'use client';
+
 import { Handshake, ShieldCheck, Users } from 'lucide-react'
 import Image from 'next/image'
 import { PageHero } from '@/components/public/shared/PageHero'
 import { SectionHeader } from '@/components/public/shared/SectionHeader'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { CommunityProgramForm } from '@/components/public/forms/CommunityProgramForm'
 
 export default function CommunityProgramPage() {
   return (
@@ -47,7 +59,7 @@ export default function CommunityProgramPage() {
         </div>
       </section>
 
-      {/* Case Study Placeholder */}
+      {/* Case Study */}
       <section className="bg-background py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <SectionHeader
@@ -77,6 +89,37 @@ export default function CommunityProgramPage() {
           </div>
         </div>
       </section>
+
+      {/* Report a Community Need Section */}
+      <section className="bg-brand-primary/5 py-24 text-center">
+        <div className="mx-auto max-w-2xl px-4">
+          <SectionHeader
+            title="Report a Community Need"
+            description="Are you a grassroots leader or local community representative? Submit a request for program assessment."
+          />
+          <div className="mt-8">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="cta" size="lg">
+                  Submit Outreach Request
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold text-brand-primary">Report Community Need</DialogTitle>
+                  <DialogDescription>
+                    Provide details about the local needs in your community. We review all submissions for field assessment.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="mt-4 text-left">
+                  <CommunityProgramForm />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
+

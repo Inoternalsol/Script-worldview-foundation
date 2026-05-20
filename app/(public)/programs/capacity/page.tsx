@@ -1,7 +1,18 @@
+'use client';
+
 import { PageHero } from '@/components/public/shared/PageHero'
 import { SectionHeader } from '@/components/public/shared/SectionHeader'
 import { Button } from '@/components/ui/button'
 import { Calendar, Clock, MapPin } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { TrainingRegistrationForm } from '@/components/public/forms/TrainingRegistrationForm'
 
 // Mock Data
 const workshops = [
@@ -89,9 +100,30 @@ export default function CapacityBuildingPage() {
                   </div>
                 </div>
                 <div>
-                  <Button variant={workshop.status === 'open' ? 'cta' : 'secondary'} disabled={workshop.status !== 'open'}>
-                    {workshop.status === 'open' ? 'Register Now' : 'Registration Closed'}
-                  </Button>
+                  {workshop.status === 'open' ? (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="cta">
+                          Register Now
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="text-2xl font-bold text-brand-primary">Register for Workshop</DialogTitle>
+                          <DialogDescription>
+                            Sign up for "{workshop.title}". Fill out the details below to complete your registration.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="mt-4 text-left">
+                          <TrainingRegistrationForm />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  ) : (
+                    <Button variant="secondary" disabled>
+                      Registration Closed
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
@@ -101,3 +133,4 @@ export default function CapacityBuildingPage() {
     </div>
   )
 }
+

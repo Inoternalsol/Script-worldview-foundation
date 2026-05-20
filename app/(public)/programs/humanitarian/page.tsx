@@ -1,8 +1,19 @@
+'use client';
+
 import { PageHero } from '@/components/public/shared/PageHero'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { HeartHandshake, AlertCircle } from 'lucide-react'
 import Image from 'next/image'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { HumanitarianAidForm } from '@/components/public/forms/HumanitarianAidForm'
 
 export default function HumanitarianProgramPage() {
   return (
@@ -60,14 +71,36 @@ export default function HumanitarianProgramPage() {
       {/* Active Interventions Alert */}
       <section className="bg-red-50 py-12">
         <div className="mx-auto max-w-4xl px-4 text-center">
-          <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-500" />
+          <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-500 animate-pulse" />
           <h3 className="mb-2 font-heading text-2xl font-bold text-red-700">Urgent: Flood Relief Appeal</h3>
           <p className="mb-6 text-red-600">
             Thousands have been displaced by recent flooding in the central regions. Our teams are on the ground, but we need your help to provide clean water and temporary shelter.
           </p>
-          <Button asChild variant="cta" className="bg-red-600 hover:bg-red-700">
-            <Link href="/donate?campaign=emergency-flood">Donate to Flood Relief</Link>
-          </Button>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button asChild variant="cta" className="bg-red-600 hover:bg-red-700">
+              <Link href="/donate?campaign=emergency-flood">Donate to Flood Relief</Link>
+            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="secondary" className="border-red-600 text-red-600 hover:bg-red-100 hover:text-red-700">
+                  Report Emergency Incident
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold text-red-700 flex items-center gap-2">
+                    <AlertCircle className="h-6 w-6 text-red-600" /> Report Emergency
+                  </DialogTitle>
+                  <DialogDescription>
+                    Submit an emergency relief request for your community. Our rapid response team will review this immediately.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="mt-4 text-left">
+                  <HumanitarianAidForm />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </section>
 
@@ -88,3 +121,4 @@ export default function HumanitarianProgramPage() {
     </div>
   )
 }
+

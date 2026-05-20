@@ -1,7 +1,17 @@
+'use client';
+
 import { PageHero } from '@/components/public/shared/PageHero'
 import { SectionHeader } from '@/components/public/shared/SectionHeader'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { PartnershipForm } from '@/components/public/forms/PartnershipForm'
 
 // Mock Data
 const partners = [
@@ -44,13 +54,28 @@ export default function PartnersPage() {
             description="Are you an organization looking to make a sustainable impact in Nigeria? Let's discuss how we can work together."
           />
           <div className="mt-8">
-            {/* Note: In Phase 4, this will open the PartnershipForm */}
-            <Button asChild variant="cta" size="lg">
-              <Link href="/contact">Inquire About Partnership</Link>
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="cta" size="lg">
+                  Inquire About Partnership
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold text-brand-primary">Partnership Proposal</DialogTitle>
+                  <DialogDescription>
+                    Fill out this form to submit your partnership inquiry. Our management team will review your proposal.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="mt-4">
+                  <PartnershipForm />
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </section>
     </div>
   )
 }
+
