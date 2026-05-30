@@ -16,19 +16,75 @@ type ChatMessage = {
 
 function createReply(text: string) {
   const t = text.toLowerCase()
-  if (t.includes('donat') || t.includes('paystack') || t.includes('stripe')) {
-    return 'You can donate on the Donate page. Choose NGN for Paystack or international currencies for Stripe.'
+
+  // 1. Identity & Overview
+  if (t.includes('who are you') || t.includes('what is swf') || t.includes('script worldview') || t.includes('about')) {
+    return "Script Worldview Foundation is a faith-inspired Nigerian NGO focused on education, humanitarian response, and community development across Nigeria. We believe that true transformation starts with a renewed worldview."
   }
-  if (t.includes('volunteer')) {
-    return 'We’d love your support. Visit Get Involved to apply and tell us your skills and availability.'
+
+  // 2. Mission, Vision, Values
+  if (t.includes('mission')) {
+    return "Our Mission is to empower individuals and communities with the knowledge, resources, and support they need to build dignified and self-sustaining futures."
   }
-  if (t.includes('program') || t.includes('education') || t.includes('humanitarian') || t.includes('community')) {
-    return 'Our work focuses on Education, Humanitarian Response, and Community Development. Tell me which area you care about most.'
+  if (t.includes('vision')) {
+    return "Our Vision is a world where every community has the capacity to thrive, driven by educated minds and compassionate hearts."
   }
-  if (t.includes('contact') || t.includes('email') || t.includes('phone')) {
-    return 'You can reach us via the Contact page. If you share your name and email here, we can guide you to the right department.'
+  if (t.includes('value')) {
+    return "Our core values are: Faith-inspired service, absolute integrity, compassionate action, and a commitment to sustainable excellence."
   }
-  return 'Thanks for reaching out. Ask me about programs, donating, volunteering, or how to contact the right team.'
+
+  // 3. History & Founding
+  if (t.includes('history') || t.includes('founded') || t.includes('start') || t.includes('years') || t.includes('when')) {
+    return "We started in 2010 as a small literacy program for out-of-school children in rural communities. In 2015, we officially registered as an NGO and expanded into humanitarian response. By 2023, we reached nationwide scale, impacting over 2,000,000 lives across 12 communities with 5 active programs."
+  }
+
+  // 4. Leadership & Team
+  if (t.includes('leader') || t.includes('founder') || t.includes('chairman') || t.includes('board') || t.includes('team') || t.includes('sati') || t.includes('nnamdi') || t.includes('adeyemi')) {
+    return "Our core leadership includes:\n• Rev. Joshua Sati — Founder & Chairman, with 15+ years in faith-inspired community development.\n• Sarah Nnamdi — Executive Director, leading operational strategy.\n• David Adeyemi — Director of Programs, managing local on-the-ground project implementation."
+  }
+
+  // 5. Intervention Pillars & Departments
+  if (t.includes('education') || t.includes('scholarship') || t.includes('literacy') || t.includes('school')) {
+    return "Our Education department focuses on literacy campaigns, building school infrastructure, and awarding academic scholarships (over 500 scholarships awarded to date!)."
+  }
+  if (t.includes('humanitarian') || t.includes('emergency') || t.includes('relief') || t.includes('flood') || t.includes('food')) {
+    return "Our Humanitarian department coordinates emergency relief, food security distributions, and local healthcare interventions in response to crises such as central Nigeria floods."
+  }
+  if (t.includes('community') || t.includes('leadership') || t.includes('peacebuilding') || t.includes('empower')) {
+    return "Our Community department facilitates local empowerment, peacebuilding training, and local leadership development to ensure bottom-up sustainable progress."
+  }
+  if (t.includes('research') || t.includes('data') || t.includes('policy')) {
+    return "Our Research department is dedicated to collecting data-driven insights, conducting local surveys, and executing policy advocacy across key humanitarian sectors."
+  }
+  if (t.includes('capacity') || t.includes('training') || t.includes('cbo')) {
+    return "Our Capacity Building program shares frameworks, training modules, and best practices with Community-Based Organizations (CBOs), local leaders, and educators."
+  }
+  if (t.includes('sport') || t.includes('basketball') || t.includes('athletics')) {
+    return "Our Sports & Athletics department uses basketball programs to empower youth, foster teamwork, and develop character and leadership among young people."
+  }
+
+  // 6. Donations & Payment
+  if (t.includes('donat') || t.includes('paystack') || t.includes('stripe') || t.includes('money') || t.includes('contribute') || t.includes('give')) {
+    return "You can securely donate on our /donate page! We support direct NGN donations via Paystack (cards, bank transfers, USSD) and international currencies via Stripe."
+  }
+
+  // 7. Volunteering
+  if (t.includes('volunteer') || t.includes('apply') || t.includes('join')) {
+    return "We welcome volunteers! We offer three main tracks:\n1. Field Volunteers (medical outreaches, emergency relief)\n2. Skill-Based Volunteering (tech, design, writing, photography)\n3. Remote Ambassadors (advocacy, fundraising)\nApply today on our /volunteers page!"
+  }
+
+  // 8. Contact & Location
+  if (t.includes('contact') || t.includes('email') || t.includes('phone') || t.includes('office') || t.includes('address') || t.includes('where') || t.includes('headquarter') || t.includes('jos') || t.includes('plateau')) {
+    return "You can reach us directly:\n• Office: 123 Foundation Way, Jos, Plateau State, Nigeria\n• Phone: +234 (0) 000 000 0000 (Mon-Fri, 9am - 5pm WAT)\n• Email: hello@scriptworldviewfoundation.org\n• Contact Form: Visit our /contact page to send a direct message!"
+  }
+
+  // 9. Partnerships
+  if (t.includes('partner') || t.includes('collaboration') || t.includes('corporate')) {
+    return "We actively collaborate with corporations, other NGOs, and government bodies. To explore structural partnerships, please visit our Get Involved page or contact our partnership desk at hello@scriptworldviewfoundation.org."
+  }
+
+  // 10. General Fallback
+  return "Thanks for reaching out! I can guide you with exact details on our departments (Education, Humanitarian, Community, Sports), leadership (Rev. Sati, Sarah Nnamdi), office location in Jos, volunteer tracks, or donation methods (Paystack/Stripe). What can I help you with today?"
 }
 
 export function ChatbotWidget() {

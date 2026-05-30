@@ -11,9 +11,13 @@ import { MessageSquare, Save, Settings, Database, Plus, Trash2 } from 'lucide-re
 
 // Mock FAQ chunks
 const initialFaqs = [
-  { id: '1', question: 'How can I donate NGN?', answer: 'You can contribute NGN directly via our Paystack gateway using cards, bank transfers or USSD.' },
-  { id: '2', question: 'What is your core mission?', answer: 'We are a faith-inspired NGO focused on shaping minds, transforming communities, education, and humanitarian services.' },
-  { id: '3', question: 'Are volunteer applications open?', answer: 'Yes! Applications are always open. You can apply on our Volunteer form page.' }
+  { id: '1', question: 'How can I donate NGN or international currencies?', answer: 'You can securely donate on our /donate page. We support direct NGN donations via Paystack (cards, transfers, USSD) and international currencies via Stripe.' },
+  { id: '2', question: 'What is the core mission of Script Worldview Foundation?', answer: 'Our mission is to empower individuals and communities with the knowledge, resources, and support they need to build dignified and self-sustaining futures.' },
+  { id: '3', question: 'Are volunteer applications open, and what are the tracks?', answer: 'Yes, applications are always open on our /volunteers page! We offer Field Volunteer, Skill-Based, and Remote Ambassador tracks.' },
+  { id: '4', question: 'Who founded the NGO and who leads it?', answer: 'Script Worldview Foundation was founded by Rev. Joshua Sati (Chairman). Operations are led by Sarah Nnamdi (Executive Director) and David Adeyemi (Director of Programs).' },
+  { id: '5', question: 'Where is your headquarters located and how can I contact you?', answer: 'Our headquarters is located at 123 Foundation Way, Jos, Plateau State, Nigeria. Reach us at hello@scriptworldviewfoundation.org or call +234 (0) 000 000 0000.' },
+  { id: '6', question: 'What are the main intervention areas or departments?', answer: 'Our work is structured across six key pillars: Education (scholarships & literacy), Humanitarian response (emergency relief), Community development, Research, Capacity Building, and Sports (youth basketball programs).' },
+  { id: '7', question: 'What is the history and background of the organization?', answer: 'Founded in 2010 as a small rural literacy initiative, officially registered as an NGO in 2015, and expanded to nationwide reach in 2023, impacting over 2,000,000 lives across 12 communities.' }
 ]
 
 export default function ChatbotConfigurationPage() {
