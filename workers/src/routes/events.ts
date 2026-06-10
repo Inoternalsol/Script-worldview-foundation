@@ -88,10 +88,11 @@ eventsRoutes.post('/', requireRole(['super_admin', 'dept_admin', 'content_editor
     await db.insert(events).values(newEvent)
     return c.json({ data: newEvent }, 201)
   } catch (err: any) {
+    console.error('Database insertion error for new event:', err)
     if (err.message?.includes('UNIQUE')) {
       return c.json({ error: 'Slug already exists' }, 409)
     }
-    return c.json({ error: 'Database error' }, 500)
+    return c.json({ error: 'Database error', message: err.message }, 500)
   }
 })
 

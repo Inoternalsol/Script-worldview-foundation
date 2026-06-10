@@ -42,7 +42,7 @@ export default function NewEventPage() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || 'Failed to create event')
+        throw new Error(data.message || data.error || 'Failed to create event')
       }
 
       router.push('/admin/events')

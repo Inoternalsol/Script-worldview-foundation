@@ -80,6 +80,7 @@ export const {
         ...session,
         user: {
           ...session.user,
+          id: token.sub as string,
           role: (token as any).role,
           department: (token as any).department,
           status: (token as any).status,
