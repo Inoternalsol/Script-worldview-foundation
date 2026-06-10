@@ -1,6 +1,7 @@
 import { PageHero } from '@/components/public/shared/PageHero'
 import { SectionHeader } from '@/components/public/shared/SectionHeader'
 import { TeamMemberCard } from '@/components/public/shared/TeamMemberCard'
+import Image from 'next/image'
 
 // Mock Data
 const board = [
@@ -31,7 +32,7 @@ const executive = {
   name: 'Rev. David Chukwuma',
   role: 'Executive Director',
   bio: 'David leads the foundation with a passion for transformative education and faith-driven humanitarian service. Under his leadership, the organization has expanded its reach to 12 communities nationwide.',
-  imageUrl: null
+  imageUrl: '/images/team-staff1.png'
 }
 
 const team = [
@@ -70,8 +71,15 @@ export default function LeadershipPage() {
       <section className="bg-white py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <div className="grid gap-12 md:grid-cols-2 md:items-center">
-            <div className="aspect-square rounded-2xl bg-gray-200">
-              {/* Executive Director Photo Placeholder */}
+            <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-200">
+              <Image
+                src={executive.imageUrl}
+                alt={executive.name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+              />
             </div>
             <div>
               <div className="mb-2 text-sm font-semibold uppercase tracking-wider text-brand-secondary">

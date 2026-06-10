@@ -71,11 +71,19 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Map (Static placeholder) */}
-      <section className="h-96 w-full bg-gray-200">
-        <div className="flex h-full items-center justify-center text-brand-muted">
-          Google Maps Embed
-        </div>
+      {/* Map (Real Google Maps iframe embed) */}
+      <section className="relative h-96 w-full">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d125792.83648057403!2d8.824248425126867!3d9.895556272445839!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x10f3db537db1bf79%3A0x8673a5a73e658e45!2sJos%2C%20Plateau!5e0!3m2!1sen!2sng!4v1716900000000!5m2!1sen!2sng"
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          allowFullScreen
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          title="Office Location Map"
+          className="absolute inset-0"
+        ></iframe>
       </section>
     </div>
   )
