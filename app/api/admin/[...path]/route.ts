@@ -24,17 +24,17 @@ export async function DELETE(req: NextRequest, { params }: { params: { path: str
 }
 
 async function handleProxy(req: NextRequest, pathSegments: string[]) {
-  const session = await auth()
-  if (!session || !session.user) {
-    return NextResponse.json({ error: 'Unauthorized: Access Denied' }, { status: 401 })
-  }
-
   let env
   try {
     env = getServerEnv()
   } catch (err: any) {
     console.error('Env validation failed on Next.js server:', err)
     return NextResponse.json({ error: 'Server Env Configuration Error', message: err.message || String(err) }, { status: 500 })
+  }
+
+  const session = await auth()
+  if (!session || !session.user) {
+    return NextResponse.json({ error: 'Unauthorized: Access Denied' }, { status: 401 })
   }
 
   const jwtSecret = process.env.JWT_SECRET
