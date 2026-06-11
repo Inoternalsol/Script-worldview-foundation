@@ -29,11 +29,18 @@ async function handleProxy(req: NextRequest, pathSegments: string[]) {
     return NextResponse.json({ error: 'Unauthorized: Access Denied' }, { status: 401 })
   }
 
-  const env = getServerEnv()
+  let env
+  try {
+    env = getServerEnv()
+  } catch (err: any) {
+    console.error('Env validation failed on Next.js server:', err)
+    return NextResponse.json({ error: 'Server Env Configuration Error', message: err.message || String(err) }, { status: 500 })
+  }
+
   const jwtSecret = process.env.JWT_SECRET
   if (!jwtSecret) {
     console.error('JWT_SECRET is not configured on Next.js server')
-    return NextResponse.json({ error: 'Server Configuration Error' }, { status: 500 })
+    return NextResponse.json({ error: 'Server Configuration Error', message: 'JWT_SECRET is missing from environment variables' }, { status: 500 })
   }
 
   const user = session.user as any
