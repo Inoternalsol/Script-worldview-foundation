@@ -1,6 +1,5 @@
 import { getServerEnv } from '@/lib/env'
 import { auth } from '@/auth'
-import { SignJWT } from 'jose'
 
 export async function adminFetch(path: string, options?: RequestInit) {
   const env = getServerEnv()
@@ -10,23 +9,8 @@ export async function adminFetch(path: string, options?: RequestInit) {
   const headers = new Headers(options?.headers || {})
   headers.set('Content-Type', 'application/json')
   
-  if (session?.user) {
-    const jwtSecret = process.env.JWT_SECRET
-    if (jwtSecret) {
-      const user = session.user as any
-      const secretKey = new TextEncoder().encode(jwtSecret)
-      const bearerToken = await new SignJWT({
-        sub: user.id || '',
-        role: user.role || 'viewer',
-        department: user.department || null,
-      })
-        .setProtectedHeader({ alg: 'HS256' })
-        .setIssuedAt()
-        .setExpirationTime('10m') // 10 minutes short expiry
-        .sign(secretKey)
-        
-      headers.set('Authorization', `Bearer ${bearerToken}`)
-    }
+  if (session?.user && (session.user as any).backendToken) {
+    headers.set('Authorization', `Bearer ${(session.user as any).backendToken}`)
   }
   
   const res = await fetch(url, {

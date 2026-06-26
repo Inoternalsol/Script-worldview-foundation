@@ -63,18 +63,30 @@ export function CareerApplicationForm({ jobId, jobTitle }: CareerApplicationForm
 
     setIsUploading(true);
     try {
-      // Simulate R2 upload
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      const simulatedUrl = `https://r2.scriptworldviewfoundation.org/cvs/${Date.now()}-${file.name}`;
-      form.setValue('cvUrl', simulatedUrl);
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/careers/upload', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Upload failed')
+      }
+
+      const data = await res.json()
+      form.setValue('cvUrl', data.url);
+      
       toast({
         title: 'CV Uploaded',
         description: `${file.name} has been uploaded successfully.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Upload Failed',
-        description: 'Failed to upload CV. Please try again.',
+        description: error.message || 'Failed to upload CV. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -115,7 +127,7 @@ export function CareerApplicationForm({ jobId, jobTitle }: CareerApplicationForm
   }
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+    <div className="bg-card p-6 rounded-xl shadow-sm border border-gray-100">
       <h3 className="text-xl font-bold text-[#1A3A5C] mb-6">Apply for {jobTitle}</h3>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -213,7 +225,7 @@ export function CareerApplicationForm({ jobId, jobTitle }: CareerApplicationForm
                   ) : (
                     <>
                       <Upload className="h-6 w-6 text-gray-400" />
-                      <span className="text-gray-500 text-sm">Click to upload CV</span>
+                      <span className="text-muted-foreground text-sm">Click to upload CV</span>
                     </>
                   )}
                 </label>

@@ -1,8 +1,9 @@
 import { SectionHeader } from '@/components/public/shared/SectionHeader'
 import { EventCard } from '@/components/public/shared/EventCard'
 import Link from 'next/link'
+import { apiFetch } from '@/lib/api/client'
 
-// Mock Data
+// Fallback Mock Data
 const mockEvents = [
   {
     id: '1',
@@ -26,7 +27,21 @@ const mockEvents = [
   }
 ]
 
-export function UpcomingEvents() {
+export async function UpcomingEvents() {
+  let events = mockEvents
+
+  try {
+    const res = await apiFetch<any>('/api/events?status=upcoming')
+    if (res.ok && res.data && Array.isArray(res.data) && res.data.length > 0) {
+      events = res.data.slice(0, 2).map((e: any) => ({
+        ...e,
+        date: new Date(e.date).getTime()
+      }))
+    }
+  } catch (err) {
+    console.error('Failed to load upcoming events on homepage:', err)
+  }
+
   return (
     <section className="bg-background py-20">
       <div className="mx-auto max-w-6xl px-4 md:px-8">
@@ -37,13 +52,13 @@ export function UpcomingEvents() {
         />
 
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-          {mockEvents.map((event) => (
+          {events.map((event) => (
             <EventCard 
               key={event.id} 
               title={event.title}
               href={`/events/${event.slug}`}
               date={event.date}
-              location={event.location}
+              location={event.location || 'TBD'}
             />
           ))}
         </div>
@@ -60,3 +75,4 @@ export function UpcomingEvents() {
     </section>
   )
 }
+

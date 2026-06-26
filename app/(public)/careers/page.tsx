@@ -2,9 +2,10 @@ import { PageHero } from '@/components/public/shared/PageHero'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Briefcase, MapPin, Clock } from 'lucide-react'
+import { apiFetch } from '@/lib/api/client'
 
-// Mock Data
-const jobs = [
+// Fallback Mock Data
+const fallbackJobs = [
   {
     id: '1',
     title: 'Program Manager (Education)',
@@ -23,7 +24,25 @@ const jobs = [
   }
 ]
 
-export default function CareersPage() {
+export const revalidate = 3600
+
+export default async function CareersPage() {
+  let jobs = fallbackJobs
+
+  try {
+    const res = await apiFetch<any>('/api/careers/jobs')
+    if (res.ok && res.data && Array.isArray(res.data)) {
+      if (res.data.length > 0) {
+        jobs = res.data.map((job: any) => ({
+          ...job,
+          deadline: job.deadline ? new Date(job.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Open until filled'
+        }))
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load job listings from API:', error)
+  }
+
   return (
     <div>
       <PageHero
@@ -37,13 +56,13 @@ export default function CareersPage() {
           
           <div className="space-y-6">
             {jobs.map((job) => (
-              <div key={job.id} className="flex flex-col justify-between rounded-2xl border border-black/10 bg-white p-6 shadow-sm transition-all hover:shadow-card sm:flex-row sm:items-center">
+              <div key={job.id} className="flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-card sm:flex-row sm:items-center">
                 <div className="mb-6 sm:mb-0">
-                  <div className="mb-2 text-xs font-bold uppercase tracking-wider text-brand-secondary">{job.department}</div>
+                  <div className="mb-2 text-xs font-bold uppercase tracking-wider text-brand-secondary">{job.department || 'General'}</div>
                   <h3 className="font-heading text-xl font-bold text-foreground">{job.title}</h3>
                   <div className="mt-4 flex flex-wrap gap-4 text-sm text-brand-muted">
-                    <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {job.location}</span>
-                    <span className="flex items-center gap-1.5"><Briefcase className="h-4 w-4" /> {job.type}</span>
+                    <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {job.location || 'Remote'}</span>
+                    <span className="flex items-center gap-1.5"><Briefcase className="h-4 w-4" /> {job.type || 'Full-time'}</span>
                     <span className="flex items-center gap-1.5"><Clock className="h-4 w-4" /> Deadline: {job.deadline}</span>
                   </div>
                 </div>
@@ -66,3 +85,4 @@ export default function CareersPage() {
     </div>
   )
 }
+

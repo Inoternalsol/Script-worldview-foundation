@@ -351,3 +351,31 @@ export function getDonationReceiptHtml(
   `
   return wrapEmailTemplate({ title: "Donation Receipt", previewText, contentHtml })
 }
+
+/**
+ * HTML Template: Password Reset Request email
+ */
+export function getPasswordResetHtml(name: string, resetLink: string): string {
+  const previewText = `Reset your password - Script Worldview Foundation`
+  const contentHtml = `
+    <p class="paragraph">Hello ${name},</p>
+    <p class="paragraph">
+      We received a request to reset your password for your staff account at Script Worldview Foundation.
+    </p>
+    <p class="paragraph">
+      Please click the button below to choose a new password. This link is valid for <strong>15 minutes</strong>:
+    </p>
+    <div class="btn-container">
+      <a class="button button-primary" href="${resetLink}" target="_blank">Reset Password</a>
+    </div>
+    <p class="paragraph">
+      If you did not request this password reset, please ignore this email or contact security if you have concerns.
+    </p>
+    <p class="paragraph" style="margin-top: 24px;">
+      Best regards,<br />
+      <strong>IT & Security, Script Worldview Foundation</strong>
+    </p>
+  `
+  return wrapEmailTemplate({ title: "Password Reset Request", previewText, contentHtml })
+}
+

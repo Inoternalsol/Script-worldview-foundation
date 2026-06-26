@@ -2,9 +2,10 @@ import { PageHero } from '@/components/public/shared/PageHero'
 import { SectionHeader } from '@/components/public/shared/SectionHeader'
 import { TeamMemberCard } from '@/components/public/shared/TeamMemberCard'
 import Image from 'next/image'
+import { apiFetch } from '@/lib/api/client'
 
-// Mock Data
-const board = [
+// Fallback Mock Data
+const fallbackBoard = [
   {
     id: '1',
     name: 'Dr. Emmanuel Okonkwo',
@@ -28,14 +29,14 @@ const board = [
   }
 ]
 
-const executive = {
+const fallbackExecutive = {
   name: 'Rev. David Chukwuma',
   role: 'Executive Director',
   bio: 'David leads the foundation with a passion for transformative education and faith-driven humanitarian service. Under his leadership, the organization has expanded its reach to 12 communities nationwide.',
   imageUrl: '/images/team-staff1.png'
 }
 
-const team = [
+const fallbackTeam = [
   {
     id: '4',
     name: 'Sarah Johnson',
@@ -59,7 +60,25 @@ const team = [
   }
 ]
 
-export default function LeadershipPage() {
+export const revalidate = 86400
+
+export default async function LeadershipPage() {
+  let board = fallbackBoard
+  let executive = fallbackExecutive
+  let team = fallbackTeam
+
+  try {
+    const res = await apiFetch<any>('/api/pages/leadership')
+    if (res.ok && res.data && res.data.contentJson) {
+      const parsed = JSON.parse(res.data.contentJson)
+      if (parsed.executive) executive = parsed.executive
+      if (parsed.board && Array.isArray(parsed.board)) board = parsed.board
+      if (parsed.team && Array.isArray(parsed.team)) team = parsed.team
+    }
+  } catch (error) {
+    console.error('Failed to load leadership data from API:', error)
+  }
+
   return (
     <div>
       <PageHero
@@ -68,10 +87,10 @@ export default function LeadershipPage() {
       />
 
       {/* Executive Director */}
-      <section className="bg-white py-20">
+      <section className="bg-card py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <div className="grid gap-12 md:grid-cols-2 md:items-center">
-            <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-200">
+            <div className="relative aspect-square overflow-hidden rounded-2xl bg-secondary/80">
               <Image
                 src={executive.imageUrl}
                 alt={executive.name}
@@ -121,7 +140,7 @@ export default function LeadershipPage() {
       </section>
 
       {/* Management Team */}
-      <section className="bg-white py-20">
+      <section className="bg-card py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <SectionHeader
             title="Department Heads"

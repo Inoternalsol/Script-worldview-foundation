@@ -23,10 +23,10 @@ export default function HumanitarianProgramPage() {
         subtitle="Rapid, coordinated support for families facing urgent needs, displacement, and natural disasters."
       />
 
-      <section className="bg-white py-20">
+      <section className="bg-card py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            <div className="relative order-2 lg:order-1 aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-xl">
+            <div className="relative order-2 lg:order-1 aspect-square overflow-hidden rounded-2xl bg-secondary shadow-xl">
               <Image 
                 src="/images/programs/humanitarian.png" 
                 alt="Humanitarian relief efforts" 
@@ -46,19 +46,19 @@ export default function HumanitarianProgramPage() {
               </p>
               
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-black/5 bg-gray-50 p-4">
+                <div className="rounded-xl border border-border bg-gray-50 p-4">
                   <h3 className="font-bold text-brand-primary">Food Security</h3>
                   <p className="mt-1 text-sm text-brand-muted">Distribution of emergency food rations and nutritional supplements.</p>
                 </div>
-                <div className="rounded-xl border border-black/5 bg-gray-50 p-4">
+                <div className="rounded-xl border border-border bg-gray-50 p-4">
                   <h3 className="font-bold text-brand-primary">Medical Aid</h3>
                   <p className="mt-1 text-sm text-brand-muted">Mobile clinics, essential medicines, and psychosocial support.</p>
                 </div>
-                <div className="rounded-xl border border-black/5 bg-gray-50 p-4">
+                <div className="rounded-xl border border-border bg-gray-50 p-4">
                   <h3 className="font-bold text-brand-primary">WASH</h3>
                   <p className="mt-1 text-sm text-brand-muted">Clean water provision, sanitation facilities, and hygiene kits.</p>
                 </div>
-                <div className="rounded-xl border border-black/5 bg-gray-50 p-4">
+                <div className="rounded-xl border border-border bg-gray-50 p-4">
                   <h3 className="font-bold text-brand-primary">Shelter</h3>
                   <p className="mt-1 text-sm text-brand-muted">Emergency tents, blankets, and essential non-food items for IDPs.</p>
                 </div>
@@ -113,7 +113,7 @@ export default function HumanitarianProgramPage() {
           <p className="mb-8 text-white/80">
             Are you a medical professional, logistics expert, or dedicated volunteer? We need skilled individuals for our deployment roster.
           </p>
-          <Button asChild variant="secondary" size="lg" className="bg-white text-brand-primary hover:bg-gray-100">
+          <Button asChild variant="secondary" size="lg" className="bg-card text-brand-primary hover:bg-accent hover:text-accent-foreground">
             <Link href="/volunteers">Apply to Volunteer</Link>
           </Button>
         </div>

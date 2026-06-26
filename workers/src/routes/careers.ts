@@ -3,10 +3,11 @@ import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import { eq, desc, and } from 'drizzle-orm'
 import { createDb } from '../db/client'
-import { jobPostings, jobApplications } from '../db/schema'
+import { jobPostings, jobApplications } from '../../../lib/db/schema'
 import { authMiddleware, requireRole } from '../middleware/auth'
 import { sendEmail } from '../utils/email'
 import { getCareerAcknowledgmentHtml } from '../utils/email-templates'
+import { rateLimit } from '../middleware/rateLimit'
 
 type Bindings = {
   DB: D1Database
@@ -48,7 +49,7 @@ const applicationSchema = z.object({
 })
 
 // POST /api/careers/applications - Public application submission
-careerRoutes.post('/applications', async (c) => {
+careerRoutes.post('/applications', rateLimit({ windowMs: 3600000, maxRequests: 3, endpointLabel: 'job application' }), async (c) => {
   const body = await c.req.json().catch(() => ({}))
   const parsed = applicationSchema.safeParse(body)
 

@@ -163,8 +163,8 @@ export function ChatbotWidget() {
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40" />
-        <Dialog.Content className="fixed bottom-5 right-5 z-50 w-[min(420px,calc(100vw-40px))] overflow-hidden rounded-2xl border border-black/10 bg-white shadow-card">
-          <div className="flex items-center justify-between border-b border-black/10 px-4 py-3">
+        <Dialog.Content className="fixed bottom-5 right-5 z-50 w-[min(420px,calc(100vw-40px))] overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="min-w-0">
               <div className="truncate font-heading text-base font-semibold text-foreground">
                 SWF Assistant
@@ -200,7 +200,7 @@ export function ChatbotWidget() {
             ))}
           </div>
 
-          <div className="flex items-center gap-2 border-t border-black/10 px-4 py-3">
+          <div className="flex items-center gap-2 border-t border-border px-4 py-3">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}

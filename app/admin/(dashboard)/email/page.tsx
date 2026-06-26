@@ -14,21 +14,50 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useToast } from '@/components/ui/use-toast'
-import { Mail, Send, Eye, Users } from 'lucide-react'
+import { Mail, Send, Eye } from 'lucide-react'
 
 export default function AdminEmailCampaignsPage() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
+  const [segment, setSegment] = useState('all')
+  const [subject, setSubject] = useState('')
+  const [body, setBody] = useState('')
 
-  function handleSend() {
+  async function handleSend() {
+    if (!subject || !body) {
+      toast({
+        title: 'Validation Error',
+        description: 'Subject and Body are required.',
+        variant: 'destructive',
+      })
+      return
+    }
+
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
+    try {
+      const res = await fetch('/api/admin/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ segment, subject, body }),
+      })
+
+      if (!res.ok) throw new Error('Failed to dispatch email')
+      
       toast({
         title: 'Newsletter Dispatched',
         description: 'Successfully queued newsletter to all subscribed segments.',
       })
-    }, 1000)
+      setSubject('')
+      setBody('')
+    } catch (err: any) {
+      toast({
+        title: 'Error',
+        description: err.message,
+        variant: 'destructive',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -40,7 +69,7 @@ export default function AdminEmailCampaignsPage() {
 
       <div className="grid gap-6">
         <Card>
-          <CardHeader className="border-b border-black/5 pb-4">
+          <CardHeader className="border-b border-border pb-4">
             <div className="flex items-center gap-3">
               <Mail className="h-5 w-5 text-brand-primary" />
               <div>
@@ -53,7 +82,7 @@ export default function AdminEmailCampaignsPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="segment">Target Recipient Segment</Label>
-                <Select defaultValue="all">
+                <Select value={segment} onValueChange={setSegment}>
                   <SelectTrigger id="segment">
                     <SelectValue placeholder="Select target segment" />
                   </SelectTrigger>
@@ -73,7 +102,12 @@ export default function AdminEmailCampaignsPage() {
 
             <div className="space-y-2">
               <Label htmlFor="subject">Subject Line</Label>
-              <Input id="subject" placeholder="e.g. Shaping Minds: Monthly Progress Update - May 2026" />
+              <Input 
+                id="subject" 
+                placeholder="e.g. Shaping Minds: Monthly Progress Update - May 2026" 
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+              />
             </div>
 
             <div className="space-y-2">
@@ -82,6 +116,8 @@ export default function AdminEmailCampaignsPage() {
                 id="body"
                 rows={10}
                 placeholder="Write your email body here... Branded header, CTA buttons, and standard footers will be automatically appended."
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
               />
             </div>
 

@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { SectionHeader } from '@/components/public/shared/SectionHeader'
 import { ProgramCard } from '@/components/public/shared/ProgramCard'
+import { apiFetch } from '@/lib/api/client'
 
-// Mock Data - Will be replaced by API in Phase 5
+// Fallback Mock Data
 const mockPrograms = [
   {
     id: '1',
@@ -30,7 +31,18 @@ const mockPrograms = [
   }
 ]
 
-export function FeaturedPrograms() {
+export async function FeaturedPrograms() {
+  let list = mockPrograms
+
+  try {
+    const res = await apiFetch<any>('/api/programs')
+    if (res.ok && res.data && Array.isArray(res.data) && res.data.length > 0) {
+      list = res.data.slice(0, 3)
+    }
+  } catch (err) {
+    console.error('Failed to load featured programs from API:', err)
+  }
+
   return (
     <section className="bg-background py-20">
       <div className="mx-auto max-w-6xl px-4 md:px-8">
@@ -41,12 +53,12 @@ export function FeaturedPrograms() {
         />
 
         <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {mockPrograms.map((program) => (
+          {list.map((program) => (
             <ProgramCard 
               key={program.id} 
               title={program.name}
               description={program.description}
-              href={`/programs/${program.category}`}
+              href={`/programs/${program.slug}`}
               category={program.category}
             />
           ))}
@@ -64,3 +76,4 @@ export function FeaturedPrograms() {
     </section>
   )
 }
+

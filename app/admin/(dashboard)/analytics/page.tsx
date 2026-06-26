@@ -73,11 +73,11 @@ export default function PlatformAnalyticsPage() {
           <h1 className="font-heading text-2xl font-bold text-foreground">Platform Analytics</h1>
           <p className="mt-1 text-sm text-brand-muted">Real-time charts auditing user traffic and donor campaigns conversion rates.</p>
         </div>
-        <div className="flex items-center gap-1 rounded-lg border border-black/5 bg-white p-1 shadow-sm shrink-0">
+        <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1 shadow-sm shrink-0">
           <button
             onClick={() => setActiveMetric('both')}
             className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
-              activeMetric === 'both' ? 'bg-brand-primary text-white' : 'text-brand-muted hover:bg-gray-50'
+              activeMetric === 'both' ? 'bg-brand-primary text-white' : 'text-brand-muted hover:bg-muted'
             }`}
           >
             All Insights
@@ -85,7 +85,7 @@ export default function PlatformAnalyticsPage() {
           <button
             onClick={() => setActiveMetric('views')}
             className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
-              activeMetric === 'views' ? 'bg-[#1A3A5C] text-white' : 'text-brand-muted hover:bg-gray-50'
+              activeMetric === 'views' ? 'bg-[#1A3A5C] text-white' : 'text-brand-muted hover:bg-muted'
             }`}
           >
             Page Views
@@ -93,7 +93,7 @@ export default function PlatformAnalyticsPage() {
           <button
             onClick={() => setActiveMetric('donations')}
             className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
-              activeMetric === 'donations' ? 'bg-[#2E7D32] text-white' : 'text-brand-muted hover:bg-gray-50'
+              activeMetric === 'donations' ? 'bg-[#2E7D32] text-white' : 'text-brand-muted hover:bg-muted'
             }`}
           >
             Donations
@@ -178,7 +178,7 @@ export default function PlatformAnalyticsPage() {
 
       {/* SVG Interactive Chart */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between border-b border-black/5 pb-4">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-border pb-4">
           <div>
             <h2 className="font-heading text-lg font-semibold">Visitor & Donation Engagement Trends</h2>
             <p className="text-xs text-brand-muted">Combined visualization of monthly unique visitors against transaction conversions.</p>
@@ -364,13 +364,13 @@ export default function PlatformAnalyticsPage() {
             {/* Float Tooltip */}
             {hoveredIndex !== null && (
               <div
-                className="absolute bg-white text-foreground p-3 rounded-lg border border-black/10 shadow-lg text-xs pointer-events-none space-y-1 z-10"
+                className="absolute bg-card text-foreground p-3 rounded-lg border border-border shadow-lg text-xs pointer-events-none space-y-1 z-10"
                 style={{
                   left: `${((points[hoveredIndex].x - paddingLeft) / chartWidth) * 80 + 10}%`,
                   top: '10%',
                 }}
               >
-                <div className="font-bold border-b border-black/5 pb-1 mb-1">
+                <div className="font-bold border-b border-border pb-1 mb-1">
                   {points[hoveredIndex].month} 2026
                 </div>
                 {(activeMetric === 'both' || activeMetric === 'views') && (
@@ -390,6 +390,74 @@ export default function PlatformAnalyticsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Funnel & Conversion Stats */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Volunteer Recruitment Funnel */}
+        <Card>
+          <CardHeader>
+            <h2 className="font-heading text-lg font-semibold">Volunteer Recruitment Funnel</h2>
+            <p className="text-xs text-brand-muted">Conversion rates across volunteer application stages for this term.</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {[
+              { stage: 'Applications Received', count: 150, pct: 100, color: 'bg-[#1A3A5C]' },
+              { stage: 'Screened & Reviewed', count: 92, pct: 61, color: 'bg-[#1A3A5C]/80' },
+              { stage: 'Approved Candidates', count: 48, pct: 32, color: 'bg-[#2E7D32]' },
+              { stage: 'Active Deployments', count: 28, pct: 18, color: 'bg-[#2E7D32]/85' },
+            ].map((item) => (
+              <div key={item.stage} className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <span className="text-foreground">{item.stage}</span>
+                  <span className="text-brand-muted">{item.count} ({item.pct}%)</span>
+                </div>
+                <div className="relative h-6 w-full rounded-md bg-secondary overflow-hidden">
+                  <div
+                    className={`h-full ${item.color} rounded-l-md transition-all duration-500`}
+                    style={{ width: `${item.pct}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Campaign Conversions */}
+        <Card>
+          <CardHeader>
+            <h2 className="font-heading text-lg font-semibold">Campaign Success Metrics</h2>
+            <p className="text-xs text-brand-muted">Top performing fundraisers by goal completion rate.</p>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {[
+              { name: 'Humanitarian Emergency Relief', raised: '₦1.2M', goal: '₦1.5M', pct: 80 },
+              { name: 'Education Sponsor-A-Child', raised: '₦950K', goal: '₦1.0M', pct: 95 },
+              { name: 'Community Clean Water Project', raised: '₦450K', goal: '₦800K', pct: 56 },
+            ].map((campaign) => (
+              <div key={campaign.name} className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <span className="text-foreground truncate max-w-[220px]" title={campaign.name}>
+                    {campaign.name}
+                  </span>
+                  <span className="text-brand-muted">
+                    {campaign.raised} / {campaign.goal}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-2 w-full bg-secondary rounded-full overflow-hidden flex-1">
+                    <div
+                      className="h-full bg-[#1A3A5C] rounded-full"
+                      style={{ width: `${campaign.pct}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-bold text-brand-primary shrink-0">{campaign.pct}%</span>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
+

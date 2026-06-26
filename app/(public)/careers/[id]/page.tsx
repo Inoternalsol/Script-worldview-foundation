@@ -52,13 +52,35 @@ const mockJobs = [
   }
 ]
 
-export default function CareerPage({ params }: { params: { id: string } }) {
-  // Mock fetching
-  const job = mockJobs.find(j => j.id === params.id)
+import { apiFetch } from '@/lib/api/client'
+
+export const revalidate = 3600
+
+export default async function CareerPage({ params }: { params: { id: string } }) {
+  let job = mockJobs.find(j => j.id === params.id)
+
+  try {
+    const res = await apiFetch<any>(`/api/careers/jobs/${params.id}`)
+    if (res.ok && res.data) {
+      const data = res.data
+      job = {
+        id: data.id,
+        title: data.title,
+        department: data.department || 'General',
+        location: data.location || 'Remote',
+        type: data.type || 'Full-time',
+        deadline: data.deadline ? new Date(data.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Open until filled',
+        description: data.description
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load job details from API:', error)
+  }
 
   if (!job) {
     notFound()
   }
+
 
   return (
     <article className="bg-background pb-20 pt-10">
@@ -68,7 +90,7 @@ export default function CareerPage({ params }: { params: { id: string } }) {
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Careers
         </Link>
 
-        <div className="rounded-2xl border border-black/10 bg-white p-8 shadow-card md:p-12">
+        <div className="rounded-2xl border border-border bg-card p-8 shadow-card md:p-12">
           <div className="mb-4 text-sm font-bold uppercase tracking-wider text-brand-secondary">
             {job.department}
           </div>
@@ -76,7 +98,7 @@ export default function CareerPage({ params }: { params: { id: string } }) {
             {job.title}
           </h1>
           
-          <div className="mb-8 flex flex-wrap gap-6 border-b border-black/10 pb-8 text-sm text-brand-muted">
+          <div className="mb-8 flex flex-wrap gap-6 border-b border-border pb-8 text-sm text-brand-muted">
             <span className="flex items-center gap-1.5"><MapPin className="h-5 w-5 text-brand-primary" /> {job.location}</span>
             <span className="flex items-center gap-1.5"><Briefcase className="h-5 w-5 text-brand-primary" /> {job.type}</span>
             <span className="flex items-center gap-1.5"><Clock className="h-5 w-5 text-brand-primary" /> Deadline: {job.deadline}</span>

@@ -31,11 +31,11 @@ export default async function NewsletterAdminPage() {
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-black/5 bg-gray-50/50">
+              <tr className="border-b border-border bg-muted/50">
                 <th className="px-4 py-3 text-left font-semibold text-brand-muted">Email</th>
                 <th className="px-4 py-3 text-left font-semibold text-brand-muted">Name</th>
                 <th className="px-4 py-3 text-left font-semibold text-brand-muted">Status</th>
@@ -51,7 +51,7 @@ export default async function NewsletterAdminPage() {
                 </tr>
               ) : (
                 subscribers.map((sub) => (
-                  <tr key={sub.id} className="border-b border-black/5 transition-colors hover:bg-gray-50/50">
+                  <tr key={sub.id} className="border-b border-border transition-colors hover:bg-muted/50">
                     <td className="px-4 py-3 font-medium text-foreground">{sub.email}</td>
                     <td className="px-4 py-3 text-brand-muted">
                       {[sub.firstName, sub.lastName].filter(Boolean).join(' ') || '—'}
@@ -61,7 +61,7 @@ export default async function NewsletterAdminPage() {
                         className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${
                           sub.status === 'active'
                             ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-700'
+                            : 'bg-secondary text-muted-foreground'
                         }`}
                       >
                         {sub.status}

@@ -15,7 +15,7 @@ export default function GetInvolvedPage() {
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <div className="grid gap-8 md:grid-cols-2">
             
-            <div className="rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm transition-all hover:shadow-card">
+            <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm transition-all hover:shadow-card">
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary/10">
                 <Heart className="h-8 w-8 text-brand-primary" />
               </div>
@@ -28,7 +28,7 @@ export default function GetInvolvedPage() {
               </Button>
             </div>
 
-            <div className="rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm transition-all hover:shadow-card">
+            <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm transition-all hover:shadow-card">
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary/10">
                 <Users className="h-8 w-8 text-brand-primary" />
               </div>
@@ -41,7 +41,7 @@ export default function GetInvolvedPage() {
               </Button>
             </div>
 
-            <div className="rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm transition-all hover:shadow-card">
+            <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm transition-all hover:shadow-card">
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary/10">
                 <Handshake className="h-8 w-8 text-brand-primary" />
               </div>
@@ -54,7 +54,7 @@ export default function GetInvolvedPage() {
               </Button>
             </div>
 
-            <div className="rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm transition-all hover:shadow-card">
+            <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm transition-all hover:shadow-card">
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary/10">
                 <Megaphone className="h-8 w-8 text-brand-primary" />
               </div>

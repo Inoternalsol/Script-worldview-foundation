@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import { eq, desc } from 'drizzle-orm'
 import { createDb } from '../db/client'
-import { events, eventRegistrations } from '../db/schema'
+import { events, eventRegistrations } from '../../../lib/db/schema'
 import { authMiddleware, requireRole } from '../middleware/auth'
 import { sendEmail } from '../utils/email'
 import { getEventConfirmationHtml } from '../utils/email-templates'
@@ -63,78 +63,6 @@ eventsRoutes.get('/:slug', async (c) => {
   }
 
   return c.json({ data: eventList[0] })
-})
-
-// Protected routes
-eventsRoutes.use('*', authMiddleware)
-
-// POST /api/events
-eventsRoutes.post('/', requireRole(['super_admin', 'dept_admin', 'content_editor']), async (c) => {
-  const parsed = eventSchema.safeParse(await c.req.json().catch(() => null))
-  if (!parsed.success) {
-    return c.json({ error: 'Invalid input', details: parsed.error.format() }, 400)
-  }
-
-  const db = createDb(c.env.DB)
-  const user = c.get('user')
-
-  const newEvent = {
-    id: nanoid(),
-    ...parsed.data,
-    createdBy: user.id,
-  }
-
-  try {
-    await db.insert(events).values(newEvent)
-    return c.json({ data: newEvent }, 201)
-  } catch (err: any) {
-    console.error('Database insertion error for new event:', err)
-    if (err.message?.includes('UNIQUE')) {
-      return c.json({ error: 'Slug already exists' }, 409)
-    }
-    return c.json({ error: 'Database error', message: err.message }, 500)
-  }
-})
-
-// PUT /api/events/:id
-eventsRoutes.put('/:id', requireRole(['super_admin', 'dept_admin', 'content_editor']), async (c) => {
-  const id = c.req.param('id')
-  const parsed = eventSchema.partial().safeParse(await c.req.json().catch(() => null))
-  
-  if (!parsed.success) {
-    return c.json({ error: 'Invalid input', details: parsed.error.format() }, 400)
-  }
-
-  const db = createDb(c.env.DB)
-  
-  const updateData = {
-    ...parsed.data,
-    updatedAt: new Date(),
-  }
-
-  const result = await db.update(events).set(updateData).where(eq(events.id, id!)).returning()
-
-  if (!result.length) {
-    return c.json({ error: 'Event not found' }, 404)
-  }
-
-  return c.json({ data: result[0] })
-})
-
-// DELETE /api/events/:id
-eventsRoutes.delete('/:id', requireRole(['super_admin', 'dept_admin']), async (c) => {
-  const id = c.req.param('id')
-  const db = createDb(c.env.DB)
-
-  // Hard delete for events, or could soft delete if we change schema
-  // We'll just hard delete for now
-  const result = await db.delete(events).where(eq(events.id, id!)).returning()
-
-  if (!result.length) {
-    return c.json({ error: 'Event not found' }, 404)
-  }
-
-  return c.json({ success: true })
 })
 
 // POST /api/events/:id/register - Public event registration
@@ -217,3 +145,77 @@ eventsRoutes.post('/:id/register', async (c) => {
     return c.json({ error: 'Database error during registration' }, 500)
   }
 })
+
+// Protected routes
+eventsRoutes.use('*', authMiddleware)
+
+// POST /api/events
+eventsRoutes.post('/', requireRole(['super_admin', 'dept_admin', 'content_editor']), async (c) => {
+  const parsed = eventSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid input', details: parsed.error.format() }, 400)
+  }
+
+  const db = createDb(c.env.DB)
+  const user = c.get('user')
+
+  const newEvent = {
+    id: nanoid(),
+    ...parsed.data,
+    createdBy: user.id,
+  }
+
+  try {
+    await db.insert(events).values(newEvent)
+    return c.json({ data: newEvent }, 201)
+  } catch (err: any) {
+    console.error('Database insertion error for new event:', err)
+    if (err.message?.includes('UNIQUE')) {
+      return c.json({ error: 'Slug already exists' }, 409)
+    }
+    return c.json({ error: 'Database error', message: err.message }, 500)
+  }
+})
+
+// PUT /api/events/:id
+eventsRoutes.put('/:id', requireRole(['super_admin', 'dept_admin', 'content_editor']), async (c) => {
+  const id = c.req.param('id')
+  const parsed = eventSchema.partial().safeParse(await c.req.json().catch(() => null))
+  
+  if (!parsed.success) {
+    return c.json({ error: 'Invalid input', details: parsed.error.format() }, 400)
+  }
+
+  const db = createDb(c.env.DB)
+  
+  const updateData = {
+    ...parsed.data,
+    updatedAt: new Date(),
+  }
+
+  const result = await db.update(events).set(updateData).where(eq(events.id, id!)).returning()
+
+  if (!result.length) {
+    return c.json({ error: 'Event not found' }, 404)
+  }
+
+  return c.json({ data: result[0] })
+})
+
+// DELETE /api/events/:id
+eventsRoutes.delete('/:id', requireRole(['super_admin', 'dept_admin']), async (c) => {
+  const id = c.req.param('id')
+  const db = createDb(c.env.DB)
+
+  // Hard delete for events, or could soft delete if we change schema
+  // We'll just hard delete for now
+  const result = await db.delete(events).where(eq(events.id, id!)).returning()
+
+  if (!result.length) {
+    return c.json({ error: 'Event not found' }, 404)
+  }
+
+  return c.json({ success: true })
+})
+
+// file end

@@ -18,21 +18,21 @@ export default function AboutPage() {
       <section className="bg-background py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <div className="grid gap-8 md:grid-cols-3">
-            <div className="rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm">
+            <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
               <Target className="mx-auto mb-4 h-12 w-12 text-brand-secondary" />
               <h2 className="mb-4 font-heading text-2xl font-bold text-brand-primary">Our Mission</h2>
               <p className="text-brand-muted">
                 To empower individuals and communities with the knowledge, resources, and support they need to build dignified and self-sustaining futures.
               </p>
             </div>
-            <div className="rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm">
+            <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
               <Eye className="mx-auto mb-4 h-12 w-12 text-brand-secondary" />
               <h2 className="mb-4 font-heading text-2xl font-bold text-brand-primary">Our Vision</h2>
               <p className="text-brand-muted">
                 A world where every community has the capacity to thrive, driven by educated minds and compassionate hearts.
               </p>
             </div>
-            <div className="rounded-2xl border border-black/5 bg-white p-8 text-center shadow-sm">
+            <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
               <Heart className="mx-auto mb-4 h-12 w-12 text-brand-secondary" />
               <h2 className="mb-4 font-heading text-2xl font-bold text-brand-primary">Our Values</h2>
               <p className="text-brand-muted">
@@ -56,7 +56,7 @@ export default function AboutPage() {
       </section>
 
       {/* Story & Timeline */}
-      <section className="bg-white py-20">
+      <section className="bg-card py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <SectionHeader
             eyebrow="Our History"
@@ -92,42 +92,42 @@ export default function AboutPage() {
             description="Our work is organized into six key areas of intervention."
           />
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <div className="flex items-start gap-4 rounded-xl bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4 rounded-xl bg-card p-6 shadow-sm">
               <BookOpen className="h-8 w-8 text-brand-primary shrink-0" />
               <div>
                 <h3 className="font-heading font-bold text-brand-primary">Education</h3>
                 <p className="mt-1 text-sm text-brand-muted">Literacy, scholarships, and school infrastructure.</p>
               </div>
             </div>
-            <div className="flex items-start gap-4 rounded-xl bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4 rounded-xl bg-card p-6 shadow-sm">
               <HeartHandshake className="h-8 w-8 text-brand-primary shrink-0" />
               <div>
                 <h3 className="font-heading font-bold text-brand-primary">Humanitarian</h3>
                 <p className="mt-1 text-sm text-brand-muted">Emergency relief, food security, and health interventions.</p>
               </div>
             </div>
-            <div className="flex items-start gap-4 rounded-xl bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4 rounded-xl bg-card p-6 shadow-sm">
               <Users className="h-8 w-8 text-brand-primary shrink-0" />
               <div>
                 <h3 className="font-heading font-bold text-brand-primary">Community</h3>
                 <p className="mt-1 text-sm text-brand-muted">Empowerment, peacebuilding, and local leadership.</p>
               </div>
             </div>
-            <div className="flex items-start gap-4 rounded-xl bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4 rounded-xl bg-card p-6 shadow-sm">
               <FlaskConical className="h-8 w-8 text-brand-primary shrink-0" />
               <div>
                 <h3 className="font-heading font-bold text-brand-primary">Research</h3>
                 <p className="mt-1 text-sm text-brand-muted">Data-driven insights and policy advocacy.</p>
               </div>
             </div>
-            <div className="flex items-start gap-4 rounded-xl bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4 rounded-xl bg-card p-6 shadow-sm">
               <GraduationCap className="h-8 w-8 text-brand-primary shrink-0" />
               <div>
                 <h3 className="font-heading font-bold text-brand-primary">Capacity Building</h3>
                 <p className="mt-1 text-sm text-brand-muted">Training and organizational development.</p>
               </div>
             </div>
-            <div className="flex items-start gap-4 rounded-xl bg-white p-6 shadow-sm">
+            <div className="flex items-start gap-4 rounded-xl bg-card p-6 shadow-sm">
               <Activity className="h-8 w-8 text-brand-primary shrink-0" />
               <div>
                 <h3 className="font-heading font-bold text-brand-primary">Sports & Athletics</h3>
@@ -139,7 +139,7 @@ export default function AboutPage() {
       </section>
 
       {/* Leadership Overview */}
-      <section className="bg-white py-20 text-center">
+      <section className="bg-card py-20 text-center">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <SectionHeader
             eyebrow="Leadership"

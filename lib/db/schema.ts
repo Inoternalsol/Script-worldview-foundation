@@ -218,6 +218,7 @@ export const donations = sqliteTable(
       .default(sql`(unixepoch() * 1000)`),
     createdAt,
     updatedAt,
+    deletedAt: integer('deleted_at', { mode: 'timestamp_ms' }),
   },
   (t) => [uniqueIndex('donations_payment_ref_unique').on(t.paymentRef), index('donations_status_idx').on(t.status)],
 )
@@ -245,6 +246,7 @@ export const contacts = sqliteTable(
     source: text('source'),
     createdAt,
     updatedAt,
+    deletedAt: integer('deleted_at', { mode: 'timestamp_ms' }),
   },
   (t) => [index('contacts_status_idx').on(t.status), index('contacts_type_idx').on(t.type)],
 )
@@ -272,6 +274,7 @@ export const volunteers = sqliteTable(
       .default(sql`(unixepoch() * 1000)`),
     createdAt,
     updatedAt,
+    deletedAt: integer('deleted_at', { mode: 'timestamp_ms' }),
   },
   (t) => [uniqueIndex('volunteers_email_unique').on(t.email), index('volunteers_status_idx').on(t.status)],
 )
@@ -382,5 +385,15 @@ export const auditLogs = sqliteTable(
     updatedAt,
   },
   (t) => [index('audit_logs_user_id_idx').on(t.userId), index('audit_logs_action_idx').on(t.action)],
+)
+
+export const siteSettings = sqliteTable(
+  'site_settings',
+  {
+    key: text('key').primaryKey(),
+    valueJson: text('value_json').notNull(),
+    updatedBy: text('updated_by'),
+    updatedAt,
+  }
 )
 

@@ -1,54 +1,90 @@
 import { PageHero } from '@/components/public/shared/PageHero'
-import { BlogCard } from '@/components/public/shared/BlogCard'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Search } from 'lucide-react'
+import { BlogList } from './BlogList'
+import { apiFetch } from '@/lib/api/client'
 
-// Mock Data
-const mockPosts = [
+// Fallback Data in case the backend database is completely empty or server is offline
+const fallbackPosts = [
   {
     id: '1',
     title: 'Transforming Education in Rural Communities',
     slug: 'transforming-education-rural',
+    content: '',
     excerpt: 'How our recent intervention in the northern communities has improved literacy rates among young girls.',
     featuredImage: '/images/programs/education.png',
     categoryId: 'news',
     publishedAt: new Date('2024-03-15').getTime(),
-    author: { name: 'Sarah Johnson' }
+    viewCount: 0,
+    readTimeMinutes: 4,
   },
   {
     id: '2',
     title: 'Annual Impact Report 2023 Released',
     slug: 'annual-impact-report-2023',
+    content: '',
     excerpt: 'A comprehensive look at our achievements, challenges, and the communities we served over the past year.',
     featuredImage: null,
     categoryId: 'reports',
     publishedAt: new Date('2024-02-28').getTime(),
-    author: { name: 'David Smith' }
+    viewCount: 0,
+    readTimeMinutes: 6,
   },
   {
     id: '3',
     title: 'Emergency Response: Flood Relief Efforts',
     slug: 'emergency-response-flood',
+    content: '',
     excerpt: 'Our rapid response team has been deployed to assist families affected by the recent flooding.',
     featuredImage: '/images/blog/flood-relief.png',
     categoryId: 'stories',
     publishedAt: new Date('2024-02-10').getTime(),
-    author: { name: 'Michael Okorie' }
+    viewCount: 0,
+    readTimeMinutes: 5,
   },
   {
     id: '4',
     title: 'The Importance of Community-Led Development',
     slug: 'importance-of-community-led-development',
+    content: '',
     excerpt: 'Why empowering local leaders is the key to sustainable social impact in developing nations.',
     featuredImage: null,
     categoryId: 'op-eds',
     publishedAt: new Date('2024-01-20').getTime(),
-    author: { name: 'Rev. David Chukwuma' }
+    viewCount: 0,
+    readTimeMinutes: 7,
   }
 ]
 
-export default function BlogPage() {
+export const revalidate = 3600 // Cache and statically regenerate page at most once per hour
+
+export default async function BlogPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+  let posts = fallbackPosts
+  let totalPages = 1
+  
+  const page = typeof searchParams.page === 'string' ? searchParams.page : '1'
+  const category = typeof searchParams.category === 'string' ? searchParams.category : 'all'
+  const search = typeof searchParams.search === 'string' ? searchParams.search : ''
+
+  try {
+    const query = new URLSearchParams()
+    query.set('status', 'published')
+    query.set('page', page)
+    if (category !== 'all') query.set('category', category)
+    if (search) query.set('search', search)
+
+    const res = await apiFetch<any>(`/api/blog?${query.toString()}`)
+    if (res.ok && res.data && Array.isArray(res.data)) {
+      if (res.data.length > 0) {
+        posts = res.data.map((post: any) => ({
+          ...post,
+          publishedAt: post.publishedAt ? new Date(post.publishedAt).getTime() : null
+        }))
+        totalPages = (res as any).meta?.totalPages || 1
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load blog posts from API:', error)
+  }
+
   return (
     <div>
       <PageHero
@@ -57,47 +93,15 @@ export default function BlogPage() {
       />
 
       <section className="bg-background py-12">
-        <div className="mx-auto max-w-6xl px-4 md:px-8">
-          
-          {/* Search and Filter */}
-          <div className="mb-12 flex flex-col justify-between gap-4 md:flex-row md:items-center">
-            <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
-              <Button variant="secondary" className="bg-brand-primary text-white hover:bg-brand-primary/90">All</Button>
-              <Button variant="secondary" className="bg-white">News</Button>
-              <Button variant="secondary" className="bg-white">Reports</Button>
-              <Button variant="secondary" className="bg-white">Stories</Button>
-              <Button variant="secondary" className="bg-white">Op-Eds</Button>
-            </div>
-            <div className="relative w-full md:w-72">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <Input placeholder="Search articles..." className="pl-9" />
-            </div>
-          </div>
-
-          {/* Grid */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {mockPosts.map((post) => (
-              <BlogCard 
-                key={post.id} 
-                title={post.title}
-                excerpt={post.excerpt}
-                href={`/blog/${post.slug}`}
-                category={post.categoryId}
-                publishedAt={post.publishedAt}
-              />
-            ))}
-          </div>
-
-          {/* Pagination Placeholder */}
-          <div className="mt-12 flex justify-center">
-            <div className="flex gap-2">
-              <Button variant="secondary" disabled>Previous</Button>
-              <Button variant="secondary">Next</Button>
-            </div>
-          </div>
-
-        </div>
+        <BlogList 
+          initialPosts={posts} 
+          totalPages={totalPages} 
+          currentPage={parseInt(page, 10)} 
+          currentCategory={category} 
+          currentSearch={search} 
+        />
       </section>
     </div>
   )
 }
+

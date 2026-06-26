@@ -35,7 +35,7 @@ export function EventRegistrationSection({
   const isFull = remaining !== null && remaining <= 0;
 
   return (
-    <div className="sticky top-24 rounded-2xl border border-black/10 bg-white p-6 shadow-card">
+    <div className="sticky top-24 rounded-2xl border border-border bg-card p-6 shadow-card">
       <h3 className="mb-6 font-heading text-xl font-bold text-brand-primary">Event Registration</h3>
       
       <div className="mb-6 space-y-4 text-sm text-brand-muted">

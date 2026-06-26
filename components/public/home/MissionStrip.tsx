@@ -1,9 +1,15 @@
 import { BookOpen, HeartHandshake, Users } from 'lucide-react'
 
-export function MissionStrip() {
+export function MissionStrip({ highlight, statement }: { highlight?: string; statement?: string }) {
   return (
-    <section className="bg-brand-secondary py-16 text-white">
+    <section className="bg-brand-secondary dark:bg-slate-900 py-16 text-white border-y border-border dark:border-white/5">
       <div className="mx-auto max-w-6xl px-4 md:px-8">
+        {(highlight || statement) && (
+          <div className="mb-12 text-center max-w-3xl mx-auto space-y-4">
+            {highlight && <h2 className="font-heading text-3xl md:text-4xl font-bold">{highlight}</h2>}
+            {statement && <p className="text-white/80 text-lg">{statement}</p>}
+          </div>
+        )}
         <div className="grid gap-8 md:grid-cols-3">
           <div className="flex flex-col items-center text-center space-y-4 p-6">
             <div className="rounded-full bg-white/20 p-4">

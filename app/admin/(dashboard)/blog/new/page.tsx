@@ -8,11 +8,13 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { TipTapEditor } from '@/components/admin/content/TipTapEditor'
 
 export default function NewBlogPostPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [content, setContent] = useState('')
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -23,7 +25,7 @@ export default function NewBlogPostPage() {
     const body = {
       title: form.get('title') as string,
       slug: (form.get('slug') as string) || (form.get('title') as string).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-      content: form.get('content') as string,
+      content: content,
       excerpt: (form.get('excerpt') as string) || undefined,
       categoryId: (form.get('categoryId') as string) || undefined,
       featuredImage: (form.get('featuredImage') as string) || undefined,
@@ -31,7 +33,6 @@ export default function NewBlogPostPage() {
     }
 
     try {
-      // Fetch securely through the Next.js API proxy (Phase 9)
       const res = await fetch('/api/admin/blog', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -66,7 +67,7 @@ export default function NewBlogPostPage() {
         <p className="mt-1 text-sm text-brand-muted">Create a new article for the public blog.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6 rounded-xl border border-black/10 bg-white p-6 shadow-sm">
+      <form onSubmit={handleSubmit} className="space-y-6 rounded-xl border border-border bg-card p-6 shadow-sm">
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="title">Title *</Label>
@@ -100,8 +101,8 @@ export default function NewBlogPostPage() {
           </div>
 
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="content">Content * (HTML)</Label>
-            <Textarea id="content" name="content" rows={12} required placeholder="Write your article content here (supports HTML)..." />
+            <Label>Content *</Label>
+            <TipTapEditor value={content} onChange={setContent} placeholder="Write your article content here..." />
           </div>
 
           <div className="space-y-2">

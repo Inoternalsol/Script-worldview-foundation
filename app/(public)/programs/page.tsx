@@ -3,12 +3,12 @@ import { ProgramCard } from '@/components/public/shared/ProgramCard'
 import { SectionHeader } from '@/components/public/shared/SectionHeader'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { apiFetch } from '@/lib/api/client'
 
-export const revalidate = 3600; // Cache and statically regenerate page at most once per hour
+export const revalidate = 86400; // Cache and statically regenerate page at most once per day
 
-
-// Mock Data
-const programs = [
+// Fallback Mock Data
+const fallbackPrograms = [
   {
     id: '1',
     name: 'Education & Training',
@@ -59,7 +59,18 @@ const programs = [
   }
 ]
 
-export default function ProgramsPage() {
+export default async function ProgramsPage() {
+  let list = fallbackPrograms
+
+  try {
+    const res = await apiFetch<any>('/api/programs')
+    if (res.ok && res.data && Array.isArray(res.data) && res.data.length > 0) {
+      list = res.data
+    }
+  } catch (error) {
+    console.error('Failed to load programs list from API:', error)
+  }
+
   return (
     <div>
       <PageHero
@@ -70,7 +81,7 @@ export default function ProgramsPage() {
       <section className="bg-background py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {programs.map((program) => (
+            {list.map((program) => (
               <ProgramCard 
                 key={program.id} 
                 title={program.name}
@@ -84,7 +95,7 @@ export default function ProgramsPage() {
       </section>
 
       {/* Impact Stats */}
-      <section className="bg-white py-20 text-center">
+      <section className="bg-card py-20 text-center">
         <div className="mx-auto max-w-4xl px-4">
           <SectionHeader
             title="Our Impact in Numbers"

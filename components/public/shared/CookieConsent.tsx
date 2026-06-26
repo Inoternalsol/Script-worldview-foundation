@@ -47,7 +47,7 @@ export function CookieConsent() {
   if (!open) return null
 
   return (
-    <div className="fixed bottom-5 left-5 z-[100] w-[min(480px,calc(100vw-40px))] overflow-hidden rounded-2xl border border-black/10 bg-white/95 p-5 shadow-2xl backdrop-blur-md transition-all duration-300 md:p-6">
+    <div className="fixed bottom-5 left-5 z-[100] w-[min(480px,calc(100vw-40px))] overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-2xl backdrop-blur-md transition-all duration-300 md:p-6">
       <div className="flex items-start gap-4">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary">
           <Shield className="h-5 w-5" />
@@ -65,7 +65,7 @@ export function CookieConsent() {
               <button
                 type="button"
                 onClick={() => setShowPreferences(true)}
-                className="inline-flex h-9 items-center justify-center rounded-xl px-3 text-xs font-semibold text-brand-muted hover:bg-black/5"
+                className="inline-flex h-9 items-center justify-center rounded-xl px-3 text-xs font-semibold text-brand-muted hover:bg-secondary"
               >
                 <Settings className="mr-1.5 h-3.5 w-3.5" />
                 Customize
@@ -80,7 +80,7 @@ export function CookieConsent() {
               </Button>
             </div>
           ) : (
-            <div className="mt-5 space-y-3.5 border-t border-black/5 pt-4">
+            <div className="mt-5 space-y-3.5 border-t border-border pt-4">
               {/* Essential */}
               <div className="flex items-center justify-between gap-4">
                 <div>
@@ -120,7 +120,7 @@ export function CookieConsent() {
                 <button
                   type="button"
                   onClick={() => setShowPreferences(false)}
-                  className="inline-flex h-9 items-center justify-center rounded-xl px-3 text-xs font-semibold text-brand-muted hover:bg-black/5"
+                  className="inline-flex h-9 items-center justify-center rounded-xl px-3 text-xs font-semibold text-brand-muted hover:bg-secondary"
                 >
                   Back
                 </button>

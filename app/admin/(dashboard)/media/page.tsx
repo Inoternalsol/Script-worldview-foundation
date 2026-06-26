@@ -1,26 +1,48 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Image, File, Video, Trash2, Link as LinkIcon, Search, UploadCloud } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 
-// Static mock media library items for development
-const mockMedia = [
-  { id: '1', filename: 'home-hero.png', type: 'image', size: '874 KB', url: '/images/home-hero.png', date: '2026-05-19' },
-  { id: '2', filename: 'about-hero.png', type: 'image', size: '874 KB', url: '/images/about-hero.png', date: '2026-05-19' },
-  { id: '3', filename: 'education-flyer.pdf', type: 'document', size: '1.2 MB', url: '#', date: '2026-05-18' },
-  { id: '4', filename: 'flood-relief.png', type: 'image', size: '937 KB', url: '/images/blog/flood-relief.png', date: '2026-05-17' },
-  { id: '5', filename: 'intro-video.mp4', type: 'video', size: '18.4 MB', url: '#', date: '2026-05-15' },
-]
+type MediaItem = {
+  id: string
+  filename: string
+  url: string
+  type: 'image' | 'video' | 'document'
+  sizeBytes: number | null
+  createdAt: string | number
+}
 
 export default function MediaLibraryPage() {
   const { toast } = useToast()
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
-  const [mediaList, setMediaList] = useState(mockMedia)
+  const [mediaList, setMediaList] = useState<MediaItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  async function fetchMedia() {
+    try {
+      const res = await fetch('/api/admin/media')
+      if (!res.ok) throw new Error('Failed to load media assets')
+      const data = await res.json()
+      setMediaList(data.data || [])
+    } catch (err: any) {
+      toast({
+        title: 'Error',
+        description: err.message,
+        variant: 'destructive',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchMedia()
+  }, [])
 
   const filteredMedia = mediaList.filter((item) => {
     const matchesFilter = filter === 'all' || item.type === filter
@@ -29,20 +51,85 @@ export default function MediaLibraryPage() {
   })
 
   function handleCopyUrl(url: string) {
-    navigator.clipboard.writeText(window.location.origin + url)
+    const absoluteUrl = url.startsWith('http') ? url : window.location.origin + url
+    navigator.clipboard.writeText(absoluteUrl)
     toast({
       title: 'Copied!',
       description: 'Media public URL copied to clipboard.',
     })
   }
 
-  function handleDelete(id: string) {
-    setMediaList((prev) => prev.filter((item) => item.id !== id))
-    toast({
-      title: 'Deleted',
-      description: 'Asset removed from media library.',
-      variant: 'destructive',
-    })
+  async function handleDelete(id: string) {
+    try {
+      const res = await fetch(`/api/admin/media/${id}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) throw new Error('Failed to delete media asset')
+      setMediaList((prev) => prev.filter((item) => item.id !== id))
+      toast({
+        title: 'Deleted',
+        description: 'Asset removed from media library.',
+        variant: 'destructive',
+      })
+    } catch (err: any) {
+      toast({
+        title: 'Error',
+        description: err.message,
+        variant: 'destructive',
+      })
+    }
+  }
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const type = file.type.startsWith('image/') 
+      ? 'image' 
+      : file.type.startsWith('video/') 
+        ? 'video' 
+        : 'document'
+
+    const reader = new FileReader()
+    reader.onload = async (event) => {
+      const base64Url = event.target?.result as string
+
+      try {
+        const res = await fetch('/api/admin/media', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            filename: file.name,
+            type,
+            sizeBytes: file.size,
+            url: base64Url
+          }),
+        })
+
+        if (!res.ok) throw new Error('Upload failed')
+        const data = await res.json()
+        setMediaList((prev) => [data.data, ...prev])
+        toast({
+          title: 'Uploaded',
+          description: `${file.name} uploaded successfully.`,
+        })
+      } catch (err: any) {
+        toast({
+          title: 'Upload Failed',
+          description: err.message,
+          variant: 'destructive',
+        })
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
+  function formatBytes(bytes: number | null) {
+    if (!bytes) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
   return (
@@ -59,14 +146,20 @@ export default function MediaLibraryPage() {
             <h2 className="font-heading text-lg font-semibold">Upload File</h2>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-black/10 px-4 py-8 text-center transition-colors hover:bg-black/5">
+            <label className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border px-4 py-8 text-center transition-colors hover:bg-black/5 cursor-pointer">
               <UploadCloud className="h-10 w-10 text-brand-muted" />
               <p className="mt-2 text-sm font-semibold">Drag & drop files</p>
               <p className="mt-1 text-xs text-brand-muted">Images, PDFs or Videos up to 20MB</p>
-              <Button size="sm" className="mt-4" variant="secondary">
+              <span className="mt-4 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 px-3 py-1.5 text-xs font-semibold">
                 Select Files
-              </Button>
-            </div>
+              </span>
+              <input
+                type="file"
+                className="hidden"
+                onChange={handleFileUpload}
+                accept="image/*,video/*,application/pdf,.doc,.docx"
+              />
+            </label>
           </CardContent>
         </Card>
 
@@ -100,36 +193,48 @@ export default function MediaLibraryPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredMedia.map((item) => (
-              <Card key={item.id} className="overflow-hidden">
-                <div className="relative flex aspect-video items-center justify-center bg-gray-100">
-                  {item.type === 'image' ? (
-                    <img src={item.url} alt={item.filename} className="h-full w-full object-cover" />
-                  ) : item.type === 'video' ? (
-                    <Video className="h-10 w-10 text-brand-primary" />
-                  ) : (
-                    <File className="h-10 w-10 text-brand-secondary" />
-                  )}
-                </div>
-                <CardContent className="p-4">
-                  <div className="truncate font-semibold text-sm">{item.filename}</div>
-                  <div className="mt-1 flex items-center justify-between text-xs text-brand-muted">
-                    <span>{item.size}</span>
-                    <span>{item.date}</span>
+          {loading ? (
+            <div className="p-12 text-center text-brand-muted">Loading media assets...</div>
+          ) : filteredMedia.length === 0 ? (
+            <div className="p-12 text-center text-brand-muted">No files found matching the criteria.</div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredMedia.map((item) => (
+                <Card key={item.id} className="overflow-hidden">
+                  <div className="relative flex aspect-video items-center justify-center bg-secondary">
+                    {item.type === 'image' ? (
+                      <img src={item.url} alt={item.filename} className="h-full w-full object-cover" />
+                    ) : item.type === 'video' ? (
+                      <Video className="h-10 w-10 text-brand-primary" />
+                    ) : (
+                      <File className="h-10 w-10 text-brand-secondary" />
+                    )}
                   </div>
-                  <div className="mt-4 flex justify-end gap-2 border-t border-black/5 pt-3">
-                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleCopyUrl(item.url)}>
-                      <LinkIcon className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:bg-red-50" onClick={() => handleDelete(item.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  <CardContent className="p-4">
+                    <div className="truncate font-semibold text-sm">{item.filename}</div>
+                    <div className="mt-1 flex items-center justify-between text-xs text-brand-muted">
+                      <span>{formatBytes(item.sizeBytes)}</span>
+                      <span>
+                        {new Date(item.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </span>
+                    </div>
+                    <div className="mt-4 flex justify-end gap-2 border-t border-border pt-3">
+                      <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleCopyUrl(item.url)}>
+                        <LinkIcon className="h-4 w-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:bg-red-50" onClick={() => handleDelete(item.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

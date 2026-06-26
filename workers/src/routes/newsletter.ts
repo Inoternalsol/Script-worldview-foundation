@@ -3,8 +3,9 @@ import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import { eq, desc } from 'drizzle-orm'
 import { createDb } from '../db/client'
-import { newsletterSubscribers } from '../db/schema'
+import { newsletterSubscribers } from '../../../lib/db/schema'
 import { authMiddleware, requireRole } from '../middleware/auth'
+import { rateLimit } from '../middleware/rateLimit'
 
 type Bindings = {
   DB: D1Database
@@ -20,7 +21,7 @@ const subscriberSchema = z.object({
 })
 
 // POST /api/newsletter/subscribe - Public subscription
-newsletterRoutes.post('/subscribe', async (c) => {
+newsletterRoutes.post('/subscribe', rateLimit({ windowMs: 600000, maxRequests: 5, endpointLabel: 'newsletter subscription' }), async (c) => {
   const body = await c.req.json().catch(() => ({}))
   const parsed = subscriberSchema.safeParse(body)
 

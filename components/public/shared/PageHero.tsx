@@ -10,7 +10,7 @@ export type PageHeroProps = {
 
 export function PageHero({ title, subtitle, ctas, backgroundImage }: PageHeroProps) {
   return (
-    <section className="relative overflow-hidden bg-brand-primary">
+    <section className="relative overflow-hidden bg-brand-primary dark:bg-slate-950 text-white">
       {backgroundImage ? (
         <div className="absolute inset-0 z-0">
           <Image

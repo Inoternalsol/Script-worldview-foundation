@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react'
+import { apiFetch } from '@/lib/api/client'
 import { PageHero } from '@/components/public/shared/PageHero'
 import { SectionHeader } from '@/components/public/shared/SectionHeader'
 import { Button } from '@/components/ui/button'
@@ -13,8 +15,8 @@ import {
 } from '@/components/ui/dialog'
 import { PartnershipForm } from '@/components/public/forms/PartnershipForm'
 
-// Mock Data
-const partners = [
+// Fallback Mock Data
+const fallbackPartners = [
   { name: 'UNICEF', type: 'International NGO', description: 'Collaborating on child education initiatives.' },
   { name: 'World Health Organization', type: 'International NGO', description: 'Supporting our medical outreach programs.' },
   { name: 'First Bank of Nigeria', type: 'Corporate', description: 'Financial inclusion and micro-grant support.' },
@@ -24,6 +26,25 @@ const partners = [
 ]
 
 export default function PartnersPage() {
+  const [partners, setPartners] = useState(fallbackPartners)
+
+  useEffect(() => {
+    async function fetchPartners() {
+      try {
+        const res = await apiFetch<any>('/api/pages/partners')
+        if (res.ok && res.data && res.data.contentJson) {
+          const parsed = JSON.parse(res.data.contentJson)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setPartners(parsed)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load partners page content:', error)
+      }
+    }
+    fetchPartners()
+  }, [])
+
   return (
     <div>
       <PageHero
@@ -31,11 +52,11 @@ export default function PartnersPage() {
         subtitle="We believe that systemic change requires collaboration. We are proud to work alongside these incredible organizations."
       />
 
-      <section className="bg-white py-20">
+      <section className="bg-card py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {partners.map((partner, idx) => (
-              <div key={idx} className="flex flex-col justify-between rounded-xl border border-black/10 p-6 shadow-sm transition-all hover:shadow-md">
+              <div key={idx} className="flex flex-col justify-between rounded-xl border border-border p-6 shadow-sm transition-all hover:shadow-md">
                 <div>
                   <div className="mb-2 text-xs font-bold uppercase tracking-wider text-brand-secondary">{partner.type}</div>
                   <h3 className="mb-2 font-heading text-xl font-bold text-brand-primary">{partner.name}</h3>
@@ -46,6 +67,7 @@ export default function PartnersPage() {
           </div>
         </div>
       </section>
+
 
       <section className="bg-brand-primary/5 py-24 text-center">
         <div className="mx-auto max-w-2xl px-4">

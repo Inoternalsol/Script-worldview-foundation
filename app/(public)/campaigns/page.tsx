@@ -1,8 +1,9 @@
 import { PageHero } from '@/components/public/shared/PageHero'
 import { CampaignCard } from '@/components/public/shared/CampaignCard'
+import { apiFetch } from '@/lib/api/client'
 
-// Mock Data
-const campaigns = [
+// Fallback Mock Data
+const fallbackCampaigns = [
   {
     id: '1',
     title: 'Back to School Drive 2024',
@@ -25,7 +26,22 @@ const campaigns = [
   }
 ]
 
-export default function CampaignsPage() {
+export const revalidate = 1800
+
+export default async function CampaignsPage() {
+  let campaigns = fallbackCampaigns
+
+  try {
+    const res = await apiFetch<any>('/api/campaigns')
+    if (res.ok && res.data && Array.isArray(res.data)) {
+      if (res.data.length > 0) {
+        campaigns = res.data
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load campaigns from API:', error)
+  }
+
   return (
     <div>
       <PageHero
@@ -51,3 +67,4 @@ export default function CampaignsPage() {
     </div>
   )
 }
+

@@ -4,19 +4,30 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Mail } from 'lucide-react'
+import { apiFetch } from '@/lib/api/client'
 
 export function NewsletterSignup() {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setStatus('loading')
-    // Mock API call
-    setTimeout(() => {
-      setStatus('success')
-      setEmail('')
-    }, 1000)
+    try {
+      const result = await apiFetch<any>('/api/newsletter/subscribe', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      })
+      if (result.ok) {
+        setStatus('success')
+        setEmail('')
+      } else {
+        setStatus('idle')
+      }
+    } catch (error) {
+      console.error('Newsletter signup error:', error)
+      setStatus('idle')
+    }
   }
 
   return (

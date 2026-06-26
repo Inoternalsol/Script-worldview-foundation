@@ -2,9 +2,10 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { drizzle } from 'drizzle-orm/d1';
-import * as schema from '../db/schema';
-import { eq } from 'drizzle-orm';
+import * as schema from '../../../lib/db/schema';
+import { eq, and, isNull } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
+import { authMiddleware, requireRole } from '../middleware/auth';
 
 import { Env } from '../types';
 
@@ -123,11 +124,34 @@ donations.post('/', rateLimit({ windowMs: 600000, maxRequests: 10, endpointLabel
   }
 });
 
-// Admin: Get all donations
-donations.get('/', async (c) => {
+// Admin: Get all donations (excluding soft-deleted)
+donations.get('/', authMiddleware, requireRole(['super_admin', 'dept_admin']), async (c) => {
   const db = drizzle(c.env.DB);
-  const result = await db.select().from(schema.donations).orderBy(schema.donations.createdAt);
+  const result = await db.select()
+    .from(schema.donations)
+    .where(isNull(schema.donations.deletedAt))
+    .orderBy(schema.donations.createdAt);
   return c.json({ ok: true, data: result });
+});
+
+// Admin: DELETE a donation (soft-delete)
+donations.delete('/:id', authMiddleware, requireRole(['super_admin', 'dept_admin']), async (c) => {
+  const id = c.req.param('id');
+  const db = drizzle(c.env.DB);
+  
+  const result = await db.update(schema.donations)
+    .set({
+      deletedAt: new Date(),
+      updatedAt: new Date()
+    })
+    .where(and(eq(schema.donations.id, id), isNull(schema.donations.deletedAt)))
+    .returning();
+
+  if (!result.length) {
+    return c.json({ error: 'Donation not found or already deleted' }, 404);
+  }
+
+  return c.json({ ok: true, data: result[0] });
 });
 
 export default donations;

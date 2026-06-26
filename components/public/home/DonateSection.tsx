@@ -15,7 +15,7 @@ export function DonateSection() {
   const [isMonthly, setIsMonthly] = useState(false)
 
   return (
-    <section className="bg-brand-primary py-20 text-white">
+    <section className="bg-brand-primary dark:bg-slate-950 py-20 text-white border-y border-border dark:border-white/5">
       <div className="mx-auto max-w-6xl px-4 md:px-8">
         <div className="grid gap-12 md:grid-cols-2 md:items-center">
           <div className="space-y-6">
@@ -41,8 +41,8 @@ export function DonateSection() {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white p-2 text-foreground shadow-xl md:p-4">
-            <DonationForm />
+          <div className="rounded-2xl bg-card dark:bg-slate-900 border dark:border-white/10 p-6 text-foreground shadow-xl md:p-8">
+            <DonationForm noCardStyle={true} />
           </div>
         </div>
       </div>

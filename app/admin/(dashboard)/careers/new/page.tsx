@@ -67,7 +67,7 @@ export default function NewJobPostingPage() {
         <p className="mt-1 text-sm text-brand-muted">Create a new career opportunity.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6 rounded-xl border border-black/10 bg-white p-6 shadow-sm">
+      <form onSubmit={handleSubmit} className="space-y-6 rounded-xl border border-border bg-card p-6 shadow-sm">
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="title">Job Title *</Label>

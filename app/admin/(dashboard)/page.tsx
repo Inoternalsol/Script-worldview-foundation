@@ -49,7 +49,7 @@ function StatCard({
   color?: string
 }) {
   return (
-    <div className="rounded-xl border border-black/10 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+    <div className="rounded-xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between">
         <div>
           <div className="text-sm font-medium text-brand-muted">{label}</div>

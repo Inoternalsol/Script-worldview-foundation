@@ -1,9 +1,9 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { nanoid } from 'nanoid'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and, isNull } from 'drizzle-orm'
 import { createDb } from '../db/client'
-import { contacts } from '../db/schema'
+import { contacts } from '../../../lib/db/schema'
 import { authMiddleware, requireRole } from '../middleware/auth'
 import { sendEmail } from '../utils/email'
 import { getContactConfirmationHtml, getContactAdminNotificationHtml } from '../utils/email-templates'
@@ -102,27 +102,27 @@ contactRoutes.post('/', rateLimit({ windowMs: 600000, maxRequests: 10, endpointL
 // Protected routes for Admin
 contactRoutes.use('*', authMiddleware)
 
-// GET /api/contacts - List submissions
+// GET /api/contacts - List submissions (excluding soft-deleted)
 contactRoutes.get('/', requireRole(['super_admin', 'dept_admin']), async (c) => {
   const db = createDb(c.env.DB)
-  const type = c.req.query('type')
-  const status = c.req.query('status')
-
-  let query = db.select().from(contacts)
-  
-  // Basic filtering could be added here if needed
-  
-  const results = await db.select().from(contacts).orderBy(desc(contacts.createdAt)).limit(100)
+  const results = await db.select()
+    .from(contacts)
+    .where(isNull(contacts.deletedAt))
+    .orderBy(desc(contacts.createdAt))
+    .limit(100)
 
   return c.json({ data: results })
 })
 
-// GET /api/contacts/:id - Single submission
+// GET /api/contacts/:id - Single submission (excluding soft-deleted)
 contactRoutes.get('/:id', requireRole(['super_admin', 'dept_admin']), async (c) => {
   const id = c.req.param('id')
   const db = createDb(c.env.DB)
 
-  const result = await db.select().from(contacts).where(eq(contacts.id, id!)).limit(1)
+  const result = await db.select()
+    .from(contacts)
+    .where(and(eq(contacts.id, id!), isNull(contacts.deletedAt)))
+    .limit(1)
 
   if (!result.length) {
     return c.json({ error: 'Contact not found' }, 404)
@@ -131,7 +131,7 @@ contactRoutes.get('/:id', requireRole(['super_admin', 'dept_admin']), async (c) 
   return c.json({ data: result[0] })
 })
 
-// PUT /api/contacts/:id - Update status/assignment
+// PUT /api/contacts/:id - Update status/assignment (excluding soft-deleted)
 contactRoutes.put('/:id', requireRole(['super_admin', 'dept_admin']), async (c) => {
   const id = c.req.param('id')
   const body = await c.req.json().catch(() => ({}))
@@ -152,7 +152,7 @@ contactRoutes.put('/:id', requireRole(['super_admin', 'dept_admin']), async (c) 
       ...parsed.data, 
       updatedAt: new Date() 
     })
-    .where(eq(contacts.id, id!))
+    .where(and(eq(contacts.id, id!), isNull(contacts.deletedAt)))
     .returning()
 
   if (!result.length) {
@@ -161,3 +161,24 @@ contactRoutes.put('/:id', requireRole(['super_admin', 'dept_admin']), async (c) 
 
   return c.json({ data: result[0] })
 })
+
+// DELETE /api/contacts/:id - Soft delete
+contactRoutes.delete('/:id', requireRole(['super_admin', 'dept_admin']), async (c) => {
+  const id = c.req.param('id')
+  const db = createDb(c.env.DB)
+  
+  const result = await db.update(contacts)
+    .set({
+      deletedAt: new Date(),
+      updatedAt: new Date()
+    })
+    .where(and(eq(contacts.id, id!), isNull(contacts.deletedAt)))
+    .returning()
+
+  if (!result.length) {
+    return c.json({ error: 'Contact not found or already deleted' }, 404)
+  }
+
+  return c.json({ ok: true, data: result[0] })
+})
+

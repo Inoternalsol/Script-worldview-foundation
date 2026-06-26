@@ -45,13 +45,26 @@ const mockCampaigns = [
   }
 ]
 
-export default function CampaignPage({ params }: { params: { slug: string } }) {
-  // Mock fetching
-  const campaign = mockCampaigns.find(c => c.slug === params.slug)
+import { apiFetch } from '@/lib/api/client'
+
+export const revalidate = 1800
+
+export default async function CampaignPage({ params }: { params: { slug: string } }) {
+  let campaign = mockCampaigns.find(c => c.slug === params.slug)
+
+  try {
+    const res = await apiFetch<any>(`/api/campaigns/${params.slug}`)
+    if (res.ok && res.data) {
+      campaign = res.data
+    }
+  } catch (error) {
+    console.error('Failed to load campaign details from API:', error)
+  }
 
   if (!campaign) {
     notFound()
   }
+
 
   return (
     <article className="bg-background pb-20 pt-10">
@@ -62,7 +75,7 @@ export default function CampaignPage({ params }: { params: { slug: string } }) {
         </Link>
 
         {/* Featured Image */}
-        <div className="mb-12 aspect-[21/9] w-full rounded-2xl bg-gray-200"></div>
+        <div className="mb-12 aspect-[21/9] w-full rounded-2xl bg-secondary/80"></div>
 
         <div className="grid gap-12 lg:grid-cols-3">
           
@@ -80,7 +93,7 @@ export default function CampaignPage({ params }: { params: { slug: string } }) {
 
           {/* Sidebar / Donation */}
           <div>
-            <div className="sticky top-24 rounded-2xl border border-black/10 bg-white p-6 shadow-card">
+            <div className="sticky top-24 rounded-2xl border border-border bg-card p-6 shadow-card">
               <h3 className="mb-6 font-heading text-xl font-bold text-brand-primary">Campaign Progress</h3>
               
               <div className="mb-6">

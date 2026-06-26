@@ -5,7 +5,7 @@ import { Search } from 'lucide-react'
 export default function SearchPage() {
   return (
     <div className="min-h-[70vh] bg-background">
-      <div className="bg-white py-12 border-b border-black/10">
+      <div className="bg-card py-12 border-b border-border">
         <div className="mx-auto max-w-4xl px-4 md:px-8">
           <h1 className="mb-6 font-heading text-3xl font-bold text-brand-primary">Search</h1>
           <form className="flex gap-2">

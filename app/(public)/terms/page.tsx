@@ -7,7 +7,7 @@ export default function TermsPage() {
         title="Terms of Use"
         subtitle="Last updated: October 2023"
       />
-      <section className="bg-white py-20">
+      <section className="bg-card py-20">
         <div className="mx-auto max-w-4xl px-4 md:px-8">
           <div className="prose prose-lg max-w-none text-brand-muted">
             <p>

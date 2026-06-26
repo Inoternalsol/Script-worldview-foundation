@@ -1,9 +1,10 @@
 import { PageHero } from '@/components/public/shared/PageHero'
 import { EventCard } from '@/components/public/shared/EventCard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { apiFetch } from '@/lib/api/client'
 
-// Mock Data
-const upcomingEvents = [
+// Fallback Mock Data
+const fallbackUpcomingEvents = [
   {
     id: '1',
     title: 'Annual Community Outreach 2024',
@@ -26,7 +27,7 @@ const upcomingEvents = [
   }
 ]
 
-const pastEvents = [
+const fallbackPastEvents = [
   {
     id: '3',
     title: 'Education Fundraiser Gala 2023',
@@ -39,7 +40,42 @@ const pastEvents = [
   }
 ]
 
-export default function EventsPage() {
+export const revalidate = 1800 // Cache events at most 30 minutes
+
+export default async function EventsPage() {
+  let upcoming = fallbackUpcomingEvents
+  let past = fallbackPastEvents
+
+  try {
+    const upcomingRes = await apiFetch<any>('/api/events?status=upcoming')
+    if (upcomingRes.ok && upcomingRes.data && Array.isArray(upcomingRes.data)) {
+      if (upcomingRes.data.length > 0) {
+        upcoming = upcomingRes.data.map((e: any) => ({
+          ...e,
+          date: new Date(e.date).getTime(),
+          endDate: e.endDate ? new Date(e.endDate).getTime() : null,
+        }))
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load upcoming events from API:', error)
+  }
+
+  try {
+    const pastRes = await apiFetch<any>('/api/events?status=past')
+    if (pastRes.ok && pastRes.data && Array.isArray(pastRes.data)) {
+      if (pastRes.data.length > 0) {
+        past = pastRes.data.map((e: any) => ({
+          ...e,
+          date: new Date(e.date).getTime(),
+          endDate: e.endDate ? new Date(e.endDate).getTime() : null,
+        }))
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load past events from API:', error)
+  }
+
   return (
     <div>
       <PageHero
@@ -59,15 +95,15 @@ export default function EventsPage() {
             </div>
 
             <TabsContent value="upcoming" className="mt-0">
-              {upcomingEvents.length > 0 ? (
+              {upcoming.length > 0 ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {upcomingEvents.map((event) => (
+                  {upcoming.map((event) => (
                     <EventCard 
                       key={event.id} 
                       title={event.title}
                       href={`/events/${event.slug}`}
                       date={event.date}
-                      location={event.location}
+                      location={event.location || 'TBD'}
                     />
                   ))}
                 </div>
@@ -79,17 +115,23 @@ export default function EventsPage() {
             </TabsContent>
             
             <TabsContent value="past" className="mt-0">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {pastEvents.map((event) => (
-                  <EventCard 
-                    key={event.id} 
-                    title={event.title}
-                    href={`/events/${event.slug}`}
-                    date={event.date}
-                    location={event.location}
-                  />
-                ))}
-              </div>
+              {past.length > 0 ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {past.map((event) => (
+                    <EventCard 
+                      key={event.id} 
+                      title={event.title}
+                      href={`/events/${event.slug}`}
+                      date={event.date}
+                      location={event.location || 'TBD'}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="py-20 text-center text-brand-muted">
+                  No past events recorded.
+                </div>
+              )}
             </TabsContent>
           </Tabs>
 
@@ -98,3 +140,4 @@ export default function EventsPage() {
     </div>
   )
 }
+

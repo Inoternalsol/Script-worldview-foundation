@@ -13,7 +13,7 @@ export default function VolunteersPage() {
         subtitle="Give your time, skills, and energy to support communities in need. Join our network of changemakers."
       />
 
-      <section className="bg-white py-20">
+      <section className="bg-card py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <div className="grid gap-12 lg:grid-cols-3">
             <div className="rounded-2xl bg-gray-50 p-8 text-center">
@@ -43,7 +43,7 @@ export default function VolunteersPage() {
             light
             centered
           />
-          <div className="mt-8 rounded-2xl bg-white p-8 text-left text-foreground">
+          <div className="mt-8 rounded-2xl bg-card p-8 text-left text-foreground">
             <h3 className="mb-4 font-heading text-xl font-bold text-brand-primary text-center">Volunteer Application</h3>
             <VolunteerForm />
           </div>

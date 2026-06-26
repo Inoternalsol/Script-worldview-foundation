@@ -13,7 +13,7 @@ export default function NewsletterPage() {
         <NewsletterComponent />
       </div>
 
-      <section className="bg-white py-20 text-center">
+      <section className="bg-card py-20 text-center">
         <div className="mx-auto max-w-4xl px-4 md:px-8">
           <h2 className="mb-6 font-heading text-3xl font-bold text-brand-primary">What to Expect</h2>
           <div className="grid gap-8 md:grid-cols-3 mt-12">

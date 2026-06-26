@@ -10,8 +10,10 @@ import { volunteerRoutes } from './routes/volunteers'
 import { newsletterRoutes } from './routes/newsletter'
 import { careerRoutes } from './routes/careers'
 import donationRoutes from './routes/donations'
+import { campaignsRoutes } from './routes/campaigns'
 import paystackWebhook from './routes/webhooks/paystack'
 import { adminRoutes } from './routes/admin'
+import { settingsRoutes } from './routes/settings'
 import stripeWebhook from './routes/webhooks/stripe'
 import { Env } from './types'
 
@@ -38,9 +40,12 @@ app.route('/api/volunteers', volunteerRoutes)
 app.route('/api/newsletter', newsletterRoutes)
 app.route('/api/careers', careerRoutes)
 app.route('/api/donations', donationRoutes)
+app.route('/api/campaigns', campaignsRoutes)
 app.route('/api/admin', adminRoutes)
+app.route('/api/settings', settingsRoutes)
 app.route('/api/webhooks/paystack', paystackWebhook)
 app.route('/api/webhooks/stripe', stripeWebhook)
 
 export default app
+
 

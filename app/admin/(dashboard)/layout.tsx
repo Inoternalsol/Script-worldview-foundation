@@ -1,65 +1,10 @@
 import Link from 'next/link'
 import { auth } from '@/auth'
-import {
-  LayoutDashboard,
-  Users,
-  Heart,
-  Mail,
-  FileText,
-  Calendar,
-  Briefcase,
-  Settings,
-  LogOut,
-  ChevronRight,
-  MessageSquare,
-  Image,
-  Shield,
-  Terminal,
-  TrendingUp,
-  Target,
-} from 'lucide-react'
+import { SignOutButton } from '@/components/admin/SignOutButton'
+import { SidebarNavigation } from '@/components/admin/SidebarNavigation'
+import { ThemeToggle } from '@/components/public/shared/ThemeToggle'
 
-const navSections = [
-  {
-    label: 'Overview',
-    items: [
-      { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-      { href: '/admin/analytics', label: 'Analytics', icon: TrendingUp },
-    ],
-  },
-  {
-    label: 'Engagement',
-    items: [
-      { href: '/admin/volunteers', label: 'Volunteers', icon: Users },
-      { href: '/admin/donations', label: 'Donations', icon: Heart },
-      { href: '/admin/campaigns', label: 'Fundraisers', icon: Target },
-      { href: '/admin/contacts', label: 'Messages', icon: MessageSquare },
-      { href: '/admin/newsletter', label: 'Newsletter', icon: Mail },
-    ],
-  },
-  {
-    label: 'Content',
-    items: [
-      { href: '/admin/content/pages', label: 'Static Pages', icon: FileText },
-      { href: '/admin/blog', label: 'Blog Posts', icon: FileText },
-      { href: '/admin/events', label: 'Events', icon: Calendar },
-      { href: '/admin/careers', label: 'Careers', icon: Briefcase },
-      { href: '/admin/media', label: 'Media Library', icon: Image },
-    ],
-  },
-  {
-    label: 'System',
-    items: [
-      { href: '/admin/users', label: 'Staff Accounts', icon: Shield },
-      { href: '/admin/chatbot', label: 'AI Chatbot', icon: MessageSquare },
-      { href: '/admin/email', label: 'Email Dispatcher', icon: Mail },
-      { href: '/admin/audit-log', label: 'Audit Logs', icon: Terminal },
-      { href: '/admin/settings', label: 'Settings', icon: Settings },
-    ],
-  },
-]
-
-
+import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb'
 
 export default async function AdminLayout({
   children,
@@ -67,74 +12,78 @@ export default async function AdminLayout({
   children: React.ReactNode
 }) {
   const session = await auth()
+  const user = session?.user as any
 
   return (
-    <div className="flex min-h-[calc(100vh-1px)] bg-gray-50">
-      <aside className="hidden w-64 shrink-0 border-r border-black/10 bg-white md:flex md:flex-col">
-        <div className="border-b border-black/5 px-6 py-5">
-          <Link href="/" className="font-heading text-lg font-bold text-brand-primary">
-            SWF Admin
+    <div className="flex min-h-[calc(100vh-1px)] bg-[#F7F8FA]">
+      {/* Sidebar */}
+      <aside className="hidden w-64 shrink-0 border-r border-border bg-card shadow-[1px_0_0_0_rgba(0,0,0,0.04)] md:flex md:flex-col">
+        {/* Brand */}
+        <div className="border-b border-border px-5 py-5">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-white text-xs font-black">
+              SWF
+            </div>
+            <div>
+              <div className="font-heading text-sm font-bold text-foreground leading-none">Admin Panel</div>
+              <div className="text-[11px] text-brand-muted mt-0.5 leading-none">Script Worldview</div>
+            </div>
           </Link>
-          <div className="mt-1 truncate text-xs text-brand-muted">
-            {session?.user?.email ?? 'Signed in'}
+        </div>
+
+        {/* User pill */}
+        <div className="border-b border-border px-4 py-3">
+          <div className="flex items-center gap-2.5 rounded-lg bg-muted px-3 py-2">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-primary/15 text-xs font-bold text-brand-primary uppercase">
+              {user?.name?.charAt(0) ?? 'A'}
+            </div>
+            <div className="min-w-0">
+              <div className="truncate text-xs font-semibold text-foreground">{user?.name ?? 'Admin'}</div>
+              <div className="truncate text-[10px] text-brand-muted capitalize">{user?.role?.replace('_', ' ') ?? 'Admin'}</div>
+            </div>
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
-          {navSections.map((section) => (
-            <div key={section.label} className="mb-6">
-              <div className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-brand-muted/60">
-                {section.label}
-              </div>
-              <div className="space-y-0.5">
-                {section.items.map((item) => (
-                  <Link
-                    key={item.href}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/80 transition-colors hover:bg-brand-primary/5 hover:text-brand-primary"
-                    href={item.href}
-                  >
-                    <item.icon className="h-4 w-4 shrink-0" />
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ))}
-        </nav>
+        {/* Navigation */}
+        <SidebarNavigation />
 
-        <div className="border-t border-black/5 p-3">
-          <Link
-            href="/api/auth/signout"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/60 transition-colors hover:bg-red-50 hover:text-red-600"
-          >
-            <LogOut className="h-4 w-4" />
-            Sign out
-          </Link>
+        {/* Sign out */}
+        <div className="border-t border-border p-3">
+          <SignOutButton />
         </div>
       </aside>
 
+      {/* Main content */}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-10 border-b border-black/10 bg-white/80 px-4 py-4 backdrop-blur md:px-8">
+        <header className="sticky top-0 z-10 border-b border-border bg-background/90 px-4 py-3.5 backdrop-blur-sm md:px-8">
           <div className="flex items-center justify-between">
             <div className="min-w-0">
-              <div className="truncate font-heading text-lg font-semibold text-foreground">
-                Admin Panel
+              <div className="truncate font-heading text-base font-semibold text-foreground">
+                Script Worldview Foundation
               </div>
-              <div className="truncate text-sm text-brand-muted">
-                {session?.user?.role ? `Role: ${session.user.role}` : 'Authenticated'}
+              <div className="truncate text-xs text-brand-muted">
+                Content Management System
               </div>
             </div>
-            <Link
-              href="/"
-              className="rounded-lg border border-black/10 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-black/5"
-            >
-              View Site
-            </Link>
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <Link
+                href="/"
+                target="_blank"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-black/4"
+              >
+                View Live Site ↗
+              </Link>
+            </div>
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-8 md:px-8">{children}</main>
+        <main className="flex-1 px-4 py-8 md:px-8">
+          <AdminBreadcrumb />
+          {children}
+        </main>
       </div>
     </div>
   )
 }
+

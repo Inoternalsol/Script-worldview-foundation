@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import { eq, asc } from 'drizzle-orm'
 import { createDb } from '../db/client'
-import { programs } from '../db/schema'
+import { programs } from '../../../lib/db/schema'
 import { authMiddleware, requireRole } from '../middleware/auth'
 
 type Bindings = {

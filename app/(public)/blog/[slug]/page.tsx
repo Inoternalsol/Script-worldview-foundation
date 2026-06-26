@@ -1,3 +1,4 @@
+import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Calendar, Clock, User, ArrowLeft, Facebook, Twitter, Linkedin } from 'lucide-react'
@@ -82,9 +83,68 @@ const mockPosts = [
   }
 ]
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  // Mock fetching
-  const post = mockPosts.find(p => p.slug === params.slug)
+import { apiFetch } from '@/lib/api/client'
+
+export const revalidate = 3600
+
+async function getPostData(slug: string) {
+  let post = mockPosts.find(p => p.slug === slug)
+
+  try {
+    const res = await apiFetch<any>(`/api/blog/${slug}`)
+    if (res.ok && res.data) {
+      const data = res.data
+      post = {
+        id: data.id,
+        title: data.title,
+        slug: data.slug,
+        featuredImage: data.featuredImage || null,
+        content: data.content,
+        categoryId: data.categoryId || 'news',
+        publishedAt: data.publishedAt ? new Date(data.publishedAt).getTime() : new Date().getTime(),
+        author: { name: 'Staff Writer', role: 'Contributor' },
+        readTime: data.readTimeMinutes || 5
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load blog post by slug:', error)
+  }
+  return post
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const post = await getPostData(params.slug)
+  if (!post) return {}
+
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://scriptworldviewfoundation.org'
+  const ogImage = post.featuredImage || `${APP_URL}/images/og-image.png`
+  const description = post.content.replace(/<[^>]*>/g, '').substring(0, 155) + '...'
+
+  return {
+    title: `${post.title} | Script Worldview Foundation`,
+    description,
+    openGraph: {
+      title: post.title,
+      description,
+      url: `${APP_URL}/blog/${post.slug}`,
+      type: 'article',
+      publishedTime: post.publishedAt ? new Date(post.publishedAt).toISOString() : undefined,
+      images: [{ url: ogImage }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description,
+      images: [ogImage],
+    },
+    alternates: {
+      canonical: `${APP_URL}/blog/${post.slug}`,
+    }
+  }
+}
+
+export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+  const post = await getPostData(params.slug)
 
   if (!post) {
     notFound()
@@ -94,8 +154,29 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     month: 'long', day: 'numeric', year: 'numeric'
   })
 
+  // Format schema.org markup
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    image: post.featuredImage ? [post.featuredImage] : [],
+    datePublished: post.publishedAt ? new Date(post.publishedAt).toISOString() : undefined,
+    dateModified: post.publishedAt ? new Date(post.publishedAt).toISOString() : undefined,
+    author: [{
+      '@type': 'Person',
+      name: post.author.name,
+    }],
+    description: post.content.replace(/<[^>]*>/g, '').substring(0, 155) + '...',
+  }
+
   return (
     <article className="bg-background pb-20 pt-10">
+      {/* Schema.org Organization structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      
       <div className="mx-auto max-w-3xl px-4 md:px-8">
         
         <Link href="/blog" className="mb-8 inline-flex items-center text-sm font-medium text-brand-muted hover:text-brand-primary">
@@ -119,18 +200,20 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
         {/* Featured Image */}
         {post.featuredImage && (
-          <div className="relative mb-12 aspect-[21/9] w-full overflow-hidden rounded-2xl bg-gray-100 shadow-lg">
+          <div className="relative mb-12 aspect-[21/9] w-full overflow-hidden rounded-2xl bg-secondary shadow-lg">
             <Image 
               src={post.featuredImage} 
               alt={post.title} 
               fill 
               className="object-cover"
               priority
+              placeholder="blur"
+              blurDataURL="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjMWEzYTVjIi8+PC9zdmc+"
             />
           </div>
         )}
         {!post.featuredImage && (
-          <div className="mb-12 aspect-[21/9] w-full rounded-2xl bg-gray-200"></div>
+          <div className="mb-12 aspect-[21/9] w-full rounded-2xl bg-secondary/80"></div>
         )}
 
         {/* Content */}
@@ -140,9 +223,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         />
 
         {/* Footer & Share */}
-        <footer className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-black/10 pt-8 sm:flex-row">
+        <footer className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-border pt-8 sm:flex-row">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-gray-200"></div>
+            <div className="h-12 w-12 rounded-full bg-secondary/80"></div>
             <div>
               <div className="font-bold text-foreground">{post.author.name}</div>
               <div className="text-sm text-brand-muted">{post.author.role}</div>
@@ -151,15 +234,15 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
           
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-brand-muted">Share:</span>
-            <button aria-label="Share on Facebook" title="Share on Facebook" className="rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-brand-primary hover:text-white transition-colors">
+            <button aria-label="Share on Facebook" title="Share on Facebook" className="rounded-full bg-secondary p-2 text-muted-foreground hover:bg-brand-primary hover:text-white transition-colors">
               <Facebook className="h-4 w-4" />
               <span className="sr-only">Facebook</span>
             </button>
-            <button aria-label="Share on Twitter" title="Share on Twitter" className="rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-brand-primary hover:text-white transition-colors">
+            <button aria-label="Share on Twitter" title="Share on Twitter" className="rounded-full bg-secondary p-2 text-muted-foreground hover:bg-brand-primary hover:text-white transition-colors">
               <Twitter className="h-4 w-4" />
               <span className="sr-only">Twitter</span>
             </button>
-            <button aria-label="Share on LinkedIn" title="Share on LinkedIn" className="rounded-full bg-gray-100 p-2 text-gray-500 hover:bg-brand-primary hover:text-white transition-colors">
+            <button aria-label="Share on LinkedIn" title="Share on LinkedIn" className="rounded-full bg-secondary p-2 text-muted-foreground hover:bg-brand-primary hover:text-white transition-colors">
               <Linkedin className="h-4 w-4" />
               <span className="sr-only">LinkedIn</span>
             </button>
@@ -170,3 +253,4 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     </article>
   )
 }
+

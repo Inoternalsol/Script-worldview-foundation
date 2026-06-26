@@ -50,7 +50,7 @@ export default function ResearchProgramPage() {
         subtitle="Generating data-driven insights and policy advocacy to drive systemic, long-term change."
       />
 
-      <section className="bg-white py-20">
+      <section className="bg-card py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="mb-6 font-heading text-3xl font-bold text-brand-primary">Evidence-Based Action</h2>
@@ -71,7 +71,7 @@ export default function ResearchProgramPage() {
           
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {publications.map((pub) => (
-              <div key={pub.id} className="flex flex-col rounded-2xl border border-black/10 bg-white p-6 shadow-sm transition-all hover:shadow-card">
+              <div key={pub.id} className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-card">
                 <div className="mb-4 flex items-center justify-between">
                   <span className="rounded-full bg-brand-secondary/10 px-3 py-1 text-xs font-semibold text-brand-secondary">
                     {pub.type}

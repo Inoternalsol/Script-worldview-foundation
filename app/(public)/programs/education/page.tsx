@@ -14,7 +14,7 @@ export default function EducationProgramPage() {
         subtitle="Empowering the next generation through literacy, scholarships, and infrastructure development."
       />
 
-      <section className="bg-white py-20">
+      <section className="bg-card py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
@@ -46,7 +46,7 @@ export default function EducationProgramPage() {
                 </li>
               </ul>
             </div>
-            <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-100 shadow-xl">
+            <div className="relative aspect-square overflow-hidden rounded-2xl bg-secondary shadow-xl">
               <Image 
                 src="/images/programs/education.png" 
                 alt="Students in classroom" 

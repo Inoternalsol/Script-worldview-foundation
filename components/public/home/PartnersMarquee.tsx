@@ -6,7 +6,7 @@ export function PartnersMarquee() {
   ]
 
   return (
-    <section className="overflow-hidden border-y border-black/5 bg-white py-10">
+    <section className="overflow-hidden border-y border-border dark:border-white/5 bg-card dark:bg-slate-950 py-10">
       <div className="mx-auto max-w-6xl px-4 md:px-8 mb-6 text-center text-sm font-semibold uppercase tracking-wider text-brand-muted">
         Trusted by our global and local partners
       </div>

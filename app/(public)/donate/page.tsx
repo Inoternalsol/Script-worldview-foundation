@@ -1,25 +1,26 @@
-import { PageHero } from '@/components/public/shared/PageHero'
-import { DonateSection } from '@/components/public/home/DonateSection'
+import { DonationHeroSection } from '@/components/public/donate/DonationHeroSection'
+import { DonationFormCard } from '@/components/public/donate/DonationFormCard'
+import { DonationImpact } from '@/components/public/donate/DonationImpact'
+import { DonationTransparency } from '@/components/public/donate/DonationTransparency'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Donate — Support Our Mission',
+  description:
+    'Every contribution to Script Worldview Foundation transforms lives through education, humanitarian relief, and community empowerment. Donate securely today.',
+}
 
 export default function DonatePage() {
   return (
     <div>
-      <PageHero
-        title="Donate"
-        subtitle="Your generosity allows us to continue shaping minds and transforming communities. Thank you for your support."
-      />
-
-      <DonateSection />
-      
-      {/* Donor Wall / Transparency */}
-      <section className="bg-background py-20 text-center">
-        <div className="mx-auto max-w-4xl px-4 md:px-8">
-          <h2 className="mb-6 font-heading text-3xl font-bold text-brand-primary">Our Commitment to Transparency</h2>
-          <p className="text-lg text-brand-muted">
-            We ensure that every Naira, Dollar, and Pound is maximized for impact. 90% of all donations go directly to programmatic activities, with only 10% used for administrative and operational costs.
-          </p>
+      <DonationHeroSection />
+      <section className="bg-[#F7F8FA] py-16">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 md:px-8 lg:grid-cols-[1fr_420px] lg:items-start">
+          <DonationImpact />
+          <DonationFormCard />
         </div>
       </section>
+      <DonationTransparency />
     </div>
   )
 }

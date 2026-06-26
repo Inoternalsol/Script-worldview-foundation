@@ -1,9 +1,9 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { nanoid } from 'nanoid'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, and, isNull } from 'drizzle-orm'
 import { createDb } from '../db/client'
-import { volunteers } from '../db/schema'
+import { volunteers } from '../../../lib/db/schema'
 import { authMiddleware, requireRole } from '../middleware/auth'
 import { sendEmail } from '../utils/email'
 import { getVolunteerAcknowledgmentHtml } from '../utils/email-templates'
@@ -83,18 +83,25 @@ volunteerRoutes.post('/', rateLimit({ windowMs: 600000, maxRequests: 10, endpoin
 // Protected routes for Admin
 volunteerRoutes.use('*', authMiddleware)
 
-// GET /api/volunteers - List applications
+// GET /api/volunteers - List applications (excluding soft-deleted)
 volunteerRoutes.get('/', requireRole(['super_admin', 'dept_admin']), async (c) => {
   const db = createDb(c.env.DB)
-  const results = await db.select().from(volunteers).orderBy(desc(volunteers.appliedAt)).limit(100)
+  const results = await db.select()
+    .from(volunteers)
+    .where(isNull(volunteers.deletedAt))
+    .orderBy(desc(volunteers.appliedAt))
+    .limit(100)
   return c.json({ data: results })
 })
 
-// GET /api/volunteers/:id - Single application
+// GET /api/volunteers/:id - Single application (excluding soft-deleted)
 volunteerRoutes.get('/:id', requireRole(['super_admin', 'dept_admin']), async (c) => {
   const id = c.req.param('id')
   const db = createDb(c.env.DB)
-  const result = await db.select().from(volunteers).where(eq(volunteers.id, id!)).limit(1)
+  const result = await db.select()
+    .from(volunteers)
+    .where(and(eq(volunteers.id, id!), isNull(volunteers.deletedAt)))
+    .limit(1)
 
   if (!result.length) {
     return c.json({ error: 'Volunteer not found' }, 404)
@@ -103,7 +110,7 @@ volunteerRoutes.get('/:id', requireRole(['super_admin', 'dept_admin']), async (c
   return c.json({ data: result[0] })
 })
 
-// PUT /api/volunteers/:id - Update status
+// PUT /api/volunteers/:id - Update status (excluding soft-deleted)
 volunteerRoutes.put('/:id', requireRole(['super_admin', 'dept_admin']), async (c) => {
   const id = c.req.param('id')
   const body = await c.req.json().catch(() => ({}))
@@ -123,7 +130,7 @@ volunteerRoutes.put('/:id', requireRole(['super_admin', 'dept_admin']), async (c
       ...parsed.data, 
       updatedAt: new Date() 
     })
-    .where(eq(volunteers.id, id!))
+    .where(and(eq(volunteers.id, id!), isNull(volunteers.deletedAt)))
     .returning()
 
   if (!result.length) {
@@ -132,3 +139,24 @@ volunteerRoutes.put('/:id', requireRole(['super_admin', 'dept_admin']), async (c
 
   return c.json({ data: result[0] })
 })
+
+// DELETE /api/volunteers/:id - Soft delete
+volunteerRoutes.delete('/:id', requireRole(['super_admin', 'dept_admin']), async (c) => {
+  const id = c.req.param('id')
+  const db = createDb(c.env.DB)
+  
+  const result = await db.update(volunteers)
+    .set({
+      deletedAt: new Date(),
+      updatedAt: new Date()
+    })
+    .where(and(eq(volunteers.id, id!), isNull(volunteers.deletedAt)))
+    .returning()
+
+  if (!result.length) {
+    return c.json({ error: 'Volunteer not found or already deleted' }, 404)
+  }
+
+  return c.json({ ok: true, data: result[0] })
+})
+

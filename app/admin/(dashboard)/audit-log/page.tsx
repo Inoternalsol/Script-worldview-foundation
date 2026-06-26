@@ -1,17 +1,30 @@
-'use client'
-
+import { adminFetch } from '@/lib/admin-api'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Terminal, Shield, Globe } from 'lucide-react'
+import { Globe } from 'lucide-react'
 
-const mockLogs = [
-  { id: '1', user: 'admin@scriptworldviewfoundation.org', action: 'UPDATE', resource: 'settings', resourceId: 'global_config', ip: '192.168.1.100', date: '2026-05-19 16:45:10' },
-  { id: '2', user: 'admin@scriptworldviewfoundation.org', action: 'CREATE', resource: 'users', resourceId: 'System Administrator', ip: '192.168.1.100', date: '2026-05-19 16:09:16' },
-  { id: '3', user: 'john.doe@scriptworldviewfoundation.org', action: 'UPDATE', resource: 'blog_posts', resourceId: 'rebuilding-after-floods', ip: '102.89.44.12', date: '2026-05-18 10:20:44' },
-  { id: '4', user: 'jane.smith@scriptworldviewfoundation.org', action: 'CREATE', resource: 'blog_posts', resourceId: 'women-cooperative-village', ip: '102.89.2.144', date: '2026-05-17 09:30:12' },
-]
+type AuditLog = {
+  id: string
+  userId: string | null
+  action: string
+  resource: string
+  resourceId: string | null
+  ipAddress: string | null
+  timestamp: string | number
+}
 
-export default function SystemAuditLogsPage() {
+async function getLogs(): Promise<AuditLog[]> {
+  try {
+    const res = await adminFetch('/audit-log')
+    return res.data
+  } catch {
+    return []
+  }
+}
+
+export default async function SystemAuditLogsPage() {
+  const logsList = await getLogs()
+
   return (
     <div className="space-y-8">
       <div>
@@ -23,7 +36,7 @@ export default function SystemAuditLogsPage() {
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 text-xs font-bold uppercase tracking-wider text-brand-muted border-b border-black/5">
+              <thead className="bg-muted text-xs font-bold uppercase tracking-wider text-brand-muted border-b border-border">
                 <tr>
                   <th className="px-6 py-4">User</th>
                   <th className="px-6 py-4">Action</th>
@@ -34,26 +47,40 @@ export default function SystemAuditLogsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/5 font-mono text-xs">
-                {mockLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50/50">
-                    <td className="px-6 py-4 font-semibold text-foreground font-sans text-sm">{log.user}</td>
-                    <td className="px-6 py-4">
-                      <Badge
-                        variant={log.action === 'CREATE' ? 'default' : 'secondary'}
-                        className="font-sans text-[10px] font-bold"
-                      >
-                        {log.action}
-                      </Badge>
+                {logsList.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center text-brand-muted">
+                      No system logs recorded yet.
                     </td>
-                    <td className="px-6 py-4 text-brand-secondary">{log.resource}</td>
-                    <td className="px-6 py-4 text-brand-primary truncate max-w-[200px]">{log.resourceId}</td>
-                    <td className="px-6 py-4 text-brand-muted flex items-center gap-1">
-                      <Globe className="h-3 w-3" />
-                      {log.ip}
-                    </td>
-                    <td className="px-6 py-4 text-brand-muted">{log.date}</td>
                   </tr>
-                ))}
+                ) : (
+                  logsList.map((log) => (
+                    <tr key={log.id} className="hover:bg-muted/50">
+                      <td className="px-6 py-4 font-semibold text-foreground font-sans text-sm">
+                        {log.userId || 'system'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge
+                          variant={log.action === 'CREATE' ? 'default' : 'secondary'}
+                          className="font-sans text-[10px] font-bold"
+                        >
+                          {log.action}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4 text-brand-secondary">{log.resource}</td>
+                      <td className="px-6 py-4 text-brand-primary truncate max-w-[200px]">
+                        {log.resourceId || '—'}
+                      </td>
+                      <td className="px-6 py-4 text-brand-muted flex items-center gap-1">
+                        <Globe className="h-3 w-3" />
+                        {log.ipAddress || '127.0.0.1'}
+                      </td>
+                      <td className="px-6 py-4 text-brand-muted">
+                        {new Date(log.timestamp).toLocaleString('en-US')}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

@@ -7,4 +7,5 @@ export type Env = {
   FRONTEND_URL: string;
   RESEND_API_KEY: string;
   EMAIL_FROM: string;
+  JWT_SECRET: string;
 };

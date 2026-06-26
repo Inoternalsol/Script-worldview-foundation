@@ -50,7 +50,7 @@ export default function CapacityBuildingPage() {
         subtitle="Equipping community leaders, educators, and partner NGOs with the skills needed to maximize their impact."
       />
 
-      <section className="bg-white py-20">
+      <section className="bg-card py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
@@ -90,7 +90,7 @@ export default function CapacityBuildingPage() {
           
           <div className="mt-12 space-y-6">
             {workshops.map((workshop) => (
-              <div key={workshop.id} className="flex flex-col justify-between rounded-2xl bg-white p-6 shadow-sm transition-all hover:shadow-md sm:flex-row sm:items-center">
+              <div key={workshop.id} className="flex flex-col justify-between rounded-2xl bg-card p-6 shadow-sm transition-all hover:shadow-md sm:flex-row sm:items-center">
                 <div className="mb-6 sm:mb-0">
                   <h3 className="font-heading text-xl font-bold text-brand-primary">{workshop.title}</h3>
                   <div className="mt-4 flex flex-wrap gap-4 text-sm text-brand-muted">

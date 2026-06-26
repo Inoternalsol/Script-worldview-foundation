@@ -1,8 +1,9 @@
 import { SectionHeader } from '@/components/public/shared/SectionHeader'
 import { BlogCard } from '@/components/public/shared/BlogCard'
 import Link from 'next/link'
+import { apiFetch } from '@/lib/api/client'
 
-// Mock Data
+// Fallback Mock Data
 const mockPosts = [
   {
     id: '1',
@@ -36,9 +37,22 @@ const mockPosts = [
   }
 ]
 
-export function LatestNews() {
+export async function LatestNews() {
+  let posts = mockPosts
+  try {
+    const res = await apiFetch<any>('/api/blog?status=published')
+    if (res.ok && res.data && Array.isArray(res.data) && res.data.length > 0) {
+      posts = res.data.slice(0, 3).map((post: any) => ({
+        ...post,
+        publishedAt: post.publishedAt ? new Date(post.publishedAt).getTime() : new Date().getTime()
+      }))
+    }
+  } catch (err) {
+    console.error('Failed to load latest news from API:', err)
+  }
+
   return (
-    <section className="bg-white py-20">
+    <section className="bg-card dark:bg-slate-950 py-20 border-t border-border dark:border-white/5">
       <div className="mx-auto max-w-6xl px-4 md:px-8">
         <SectionHeader
           eyebrow="Latest News"
@@ -47,13 +61,13 @@ export function LatestNews() {
         />
 
         <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {mockPosts.map((post) => (
+          {posts.map((post) => (
             <BlogCard 
               key={post.id} 
               title={post.title}
-              excerpt={post.excerpt}
+              excerpt={post.excerpt || ''}
               href={`/blog/${post.slug}`}
-              category={post.categoryId}
+              category={post.categoryId || 'news'}
               publishedAt={post.publishedAt}
             />
           ))}
@@ -71,3 +85,4 @@ export function LatestNews() {
     </section>
   )
 }
+

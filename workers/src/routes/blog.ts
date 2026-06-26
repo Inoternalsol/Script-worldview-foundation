@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import { eq, and, desc, sql } from 'drizzle-orm'
 import { createDb } from '../db/client'
-import { blogPosts } from '../db/schema'
+import { blogPosts } from '../../../lib/db/schema'
 import { authMiddleware, requireRole } from '../middleware/auth'
 
 import { Env } from '../types'
@@ -25,24 +25,40 @@ const blogSchema = z.object({
 blogRoutes.get('/', async (c) => {
   const db = createDb(c.env.DB)
   const status = c.req.query('status')
+  const category = c.req.query('category')
+  const search = c.req.query('search')
+  const page = parseInt(c.req.query('page') || '1', 10)
+  const limit = parseInt(c.req.query('limit') || '7', 10)
   
-  let conditions = undefined
-  // For public visitors, only show published posts
-  if (!status || status === 'published') {
-    conditions = eq(blogPosts.status, 'published')
-  } else {
-    // If requesting drafts, we should ideally verify auth here, but keeping it simple for now
-    conditions = eq(blogPosts.status, status as 'draft' | 'published' | 'archived')
+  const targetStatus = status || 'published'
+  
+  const conditions = [eq(blogPosts.status, targetStatus as any)]
+  
+  if (category && category !== 'all') {
+    conditions.push(eq(blogPosts.categoryId, category))
+  }
+  
+  if (search) {
+    conditions.push(sql`${blogPosts.title} LIKE ${'%' + search + '%'}`)
   }
 
-  const posts = await db
-    .select()
-    .from(blogPosts)
-    .where(conditions)
-    .orderBy(desc(blogPosts.publishedAt), desc(blogPosts.createdAt))
-    .limit(50)
+  const offset = (page - 1) * limit
 
-  return c.json({ data: posts })
+  const [posts, [{ total }]] = await Promise.all([
+    db
+      .select()
+      .from(blogPosts)
+      .where(and(...conditions))
+      .orderBy(desc(blogPosts.publishedAt), desc(blogPosts.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db
+      .select({ total: sql<number>`count(*)` })
+      .from(blogPosts)
+      .where(and(...conditions))
+  ])
+
+  return c.json({ data: posts, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } })
 })
 
 // GET /api/blog/:slug - Single post
@@ -70,6 +86,14 @@ blogRoutes.get('/:slug', async (c) => {
 // Protected routes
 blogRoutes.use('*', authMiddleware)
 
+function sanitizeHtml(html: string): string {
+  if (!html) return ''
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/\s+on\w+\s*=\s*(["'][^"']*["']|[^\s>]+)/gi, '')
+    .replace(/href\s*=\s*(["']javascript:[^"']*["']|javascript:[^\s>]+)/gi, '')
+}
+
 // POST /api/blog - Create post
 blogRoutes.post('/', requireRole(['super_admin', 'dept_admin', 'content_editor']), async (c) => {
   const parsed = blogSchema.safeParse(await c.req.json().catch(() => null))
@@ -80,9 +104,14 @@ blogRoutes.post('/', requireRole(['super_admin', 'dept_admin', 'content_editor']
   const db = createDb(c.env.DB)
   const user = c.get('user')
 
+  const sanitizedContent = sanitizeHtml(parsed.data.content)
+  const sanitizedExcerpt = parsed.data.excerpt ? sanitizeHtml(parsed.data.excerpt) : undefined
+
   const newPost = {
     id: nanoid(),
     ...parsed.data,
+    content: sanitizedContent,
+    excerpt: sanitizedExcerpt || null,
     authorId: user.id,
     publishedAt: parsed.data.status === 'published' ? new Date() : null,
   }
@@ -109,8 +138,13 @@ blogRoutes.put('/:id', requireRole(['super_admin', 'dept_admin', 'content_editor
 
   const db = createDb(c.env.DB)
   
+  const sanitizedContent = parsed.data.content ? sanitizeHtml(parsed.data.content) : undefined
+  const sanitizedExcerpt = parsed.data.excerpt ? sanitizeHtml(parsed.data.excerpt) : undefined
+
   const updateData = {
     ...parsed.data,
+    ...(sanitizedContent ? { content: sanitizedContent } : {}),
+    ...(sanitizedExcerpt !== undefined ? { excerpt: sanitizedExcerpt } : {}),
     updatedAt: new Date(),
     ...(parsed.data.status === 'published' ? { publishedAt: new Date() } : {})
   }
@@ -123,6 +157,7 @@ blogRoutes.put('/:id', requireRole(['super_admin', 'dept_admin', 'content_editor
 
   return c.json({ data: result[0] })
 })
+
 
 // DELETE /api/blog/:id - Soft delete
 blogRoutes.delete('/:id', requireRole(['super_admin', 'dept_admin']), async (c) => {

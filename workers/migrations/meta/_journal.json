@@ -8,6 +8,20 @@
       "when": 1778517035100,
       "tag": "0000_talented_naoko",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1782386034760,
+      "tag": "0001_awesome_reavers",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1782405867244,
+      "tag": "0002_nebulous_pixie",
+      "breakpoints": true
     }
   ]
 }

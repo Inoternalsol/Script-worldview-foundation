@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,53 +9,115 @@ import { Label } from '@/components/ui/label'
 import { useToast } from '@/components/ui/use-toast'
 import { MessageSquare, Save, Settings, Database, Plus, Trash2 } from 'lucide-react'
 
-// Mock FAQ chunks
-const initialFaqs = [
-  { id: '1', question: 'How can I donate NGN or international currencies?', answer: 'You can securely donate on our /donate page. We support direct NGN donations via Paystack (cards, transfers, USSD) and international currencies via Stripe.' },
-  { id: '2', question: 'What is the core mission of Script Worldview Foundation?', answer: 'Our mission is to empower individuals and communities with the knowledge, resources, and support they need to build dignified and self-sustaining futures.' },
-  { id: '3', question: 'Are volunteer applications open, and what are the tracks?', answer: 'Yes, applications are always open on our /volunteers page! We offer Field Volunteer, Skill-Based, and Remote Ambassador tracks.' },
-  { id: '4', question: 'Who founded the NGO and who leads it?', answer: 'Script Worldview Foundation was founded by Rev. Joshua Sati (Chairman). Operations are led by Sarah Nnamdi (Executive Director) and David Adeyemi (Director of Programs).' },
-  { id: '5', question: 'Where is your headquarters located and how can I contact you?', answer: 'Our headquarters is located at 123 Foundation Way, Jos, Plateau State, Nigeria. Reach us at hello@scriptworldviewfoundation.org or call +234 (0) 000 000 0000.' },
-  { id: '6', question: 'What are the main intervention areas or departments?', answer: 'Our work is structured across six key pillars: Education (scholarships & literacy), Humanitarian response (emergency relief), Community development, Research, Capacity Building, and Sports (youth basketball programs).' },
-  { id: '7', question: 'What is the history and background of the organization?', answer: 'Founded in 2010 as a small rural literacy initiative, officially registered as an NGO in 2015, and expanded to nationwide reach in 2023, impacting over 2,000,000 lives across 12 communities.' }
-]
+type FaqItem = {
+  id: string
+  question: string
+  answer: string
+}
+
+type ChatbotConfig = {
+  greeting: string
+  systemPrompt: string
+  faqs: FaqItem[]
+}
+
+const defaultGreeting = "Hello! I am the Script Worldview Foundation Assistant. How can I help you shape minds and transform communities today?"
+const defaultPrompt = "You are the official SWF Assistant representing the NGO Script Worldview Foundation. You are warm, professional, helpful and values-driven. Provide brief, elegant responses. Refer users to /donate, /volunteers, and /careers pages."
 
 export default function ChatbotConfigurationPage() {
   const { toast } = useToast()
-  const [faqs, setFaqs] = useState(initialFaqs)
+  const [loading, setLoading] = useState(true)
+  const [faqs, setFaqs] = useState<FaqItem[]>([])
   const [newQuestion, setNewQuestion] = useState('')
   const [newAnswer, setNewAnswer] = useState('')
-  const [greeting, setGreeting] = useState("Hello! I am the Script Worldview Foundation Assistant. How can I help you shape minds and transform communities today?")
+  const [greeting, setGreeting] = useState(defaultGreeting)
+  const [systemPrompt, setSystemPrompt] = useState(defaultPrompt)
+
+  async function loadConfig() {
+    try {
+      const res = await fetch('/api/admin/settings')
+      if (!res.ok) throw new Error('Failed to load settings')
+      const data = await res.json()
+      
+      const config = data.data?.chatbot as ChatbotConfig | undefined
+      if (config) {
+        setGreeting(config.greeting || defaultGreeting)
+        setSystemPrompt(config.systemPrompt || defaultPrompt)
+        setFaqs(config.faqs || [])
+      }
+    } catch (err: any) {
+      toast({
+        title: 'Load Error',
+        description: err.message,
+        variant: 'destructive',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadConfig()
+  }, [])
+
+  async function saveConfig(updatedFaqs = faqs, updatedGreeting = greeting, updatedPrompt = systemPrompt) {
+    try {
+      // First get existing settings
+      const getRes = await fetch('/api/admin/settings')
+      const currentSettings = getRes.ok ? (await getRes.json()).data : {}
+
+      const nextSettings = {
+        ...currentSettings,
+        chatbot: {
+          greeting: updatedGreeting,
+          systemPrompt: updatedPrompt,
+          faqs: updatedFaqs,
+        }
+      }
+
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nextSettings),
+      })
+
+      if (!res.ok) throw new Error('Failed to save chatbot settings')
+      toast({
+        title: 'Configuration Updated',
+        description: 'Chatbot behavior settings saved to database.',
+      })
+    } catch (err: any) {
+      toast({
+        title: 'Save Failed',
+        description: err.message,
+        variant: 'destructive',
+      })
+    }
+  }
 
   function handleSaveSystemPrompt() {
-    toast({
-      title: 'Chatbot Saved',
-      description: 'System instructions and welcome greeting updated successfully.',
-    })
+    saveConfig(faqs, greeting, systemPrompt)
   }
 
   function handleAddFaq() {
     if (!newQuestion || !newAnswer) return
-    setFaqs((prev) => [
-      ...prev,
+    const updated = [
+      ...faqs,
       { id: Date.now().toString(), question: newQuestion, answer: newAnswer }
-    ])
+    ]
+    setFaqs(updated)
     setNewQuestion('')
     setNewAnswer('')
-    toast({
-      title: 'Knowledge FAQ Added',
-      description: 'The query chunk is now indexable by the RAG fallback engine.',
-    })
+    saveConfig(updated)
   }
 
   function handleDeleteFaq(id: string) {
-    setFaqs((prev) => prev.filter((item) => item.id !== id))
-    toast({
-      title: 'Item Removed',
-      description: 'FAQ context deleted.',
-      variant: 'destructive',
-    })
+    const updated = faqs.filter((item) => item.id !== id)
+    setFaqs(updated)
+    saveConfig(updated)
   }
+
+  if (loading) return <div className="p-12 text-center text-brand-muted">Loading configuration...</div>
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -67,7 +129,7 @@ export default function ChatbotConfigurationPage() {
       <div className="grid gap-6">
         {/* Core Behavior */}
         <Card>
-          <CardHeader className="flex flex-row items-center gap-3 border-b border-black/5 pb-4">
+          <CardHeader className="flex flex-row items-center gap-3 border-b border-border pb-4">
             <Settings className="h-5 w-5 text-brand-primary" />
             <div>
               <h2 className="font-heading text-lg font-semibold">Assistant Identity</h2>
@@ -89,7 +151,8 @@ export default function ChatbotConfigurationPage() {
               <Textarea
                 id="systemPrompt"
                 rows={4}
-                defaultValue="You are the official SWF Assistant representing the NGO Script Worldview Foundation. You are warm, professional, helpful and values-driven. Provide brief, elegant responses. Refer users to /donate, /volunteers, and /careers pages."
+                value={systemPrompt}
+                onChange={(e) => setSystemPrompt(e.target.value)}
               />
             </div>
             <div className="flex justify-end pt-2">
@@ -102,7 +165,7 @@ export default function ChatbotConfigurationPage() {
 
         {/* FAQs Knowledge Base RAG */}
         <Card>
-          <CardHeader className="flex flex-row items-center gap-3 border-b border-black/5 pb-4">
+          <CardHeader className="flex flex-row items-center gap-3 border-b border-border pb-4">
             <Database className="h-5 w-5 text-brand-secondary" />
             <div>
               <h2 className="font-heading text-lg font-semibold">RAG FAQ Knowledge Base</h2>
@@ -112,21 +175,25 @@ export default function ChatbotConfigurationPage() {
           <CardContent className="space-y-6 pt-6">
             {/* FAQ List */}
             <div className="space-y-3">
-              {faqs.map((faq) => (
-                <div key={faq.id} className="flex items-start justify-between gap-4 rounded-lg bg-gray-50 p-4 border border-black/5">
-                  <div className="space-y-1">
-                    <div className="font-semibold text-sm">{faq.question}</div>
-                    <div className="text-xs text-brand-muted">{faq.answer}</div>
+              {faqs.length === 0 ? (
+                <div className="p-6 text-center text-xs text-brand-muted">No FAQ context chunks in the knowledge base. Add some triggers below!</div>
+              ) : (
+                faqs.map((faq) => (
+                  <div key={faq.id} className="flex items-start justify-between gap-4 rounded-lg bg-muted p-4 border border-border">
+                    <div className="space-y-1">
+                      <div className="font-semibold text-sm">{faq.question}</div>
+                      <div className="text-xs text-brand-muted">{faq.answer}</div>
+                    </div>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:bg-red-50 shrink-0" onClick={() => handleDeleteFaq(faq.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:bg-red-50 shrink-0" onClick={() => handleDeleteFaq(faq.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              ))}
+                ))
+              )}
             </div>
 
             {/* Add FAQ form */}
-            <div className="border-t border-black/5 pt-4 space-y-4">
+            <div className="border-t border-border pt-4 space-y-4">
               <h3 className="font-semibold text-sm">Add Context Chunk</h3>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
@@ -135,7 +202,7 @@ export default function ChatbotConfigurationPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="newA">Answer/Context</Label>
-                  <Input id="newA" placeholder="e.g. Lagos, Nigeria." value={newAnswer} onChange={(e) => setNewAnswer(e.target.value)} />
+                  <Input id="newA" placeholder="e.g. Jos, Nigeria." value={newAnswer} onChange={(e) => setNewAnswer(e.target.value)} />
                 </div>
               </div>
               <Button size="sm" onClick={handleAddFaq} className="flex items-center gap-2">

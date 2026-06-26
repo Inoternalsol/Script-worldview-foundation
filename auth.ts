@@ -2,6 +2,7 @@ import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import { z } from 'zod'
 import { getServerEnv } from '@/lib/env'
+import { SignJWT } from 'jose'
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -67,11 +68,23 @@ export const {
       if (request.nextUrl.pathname.startsWith('/admin')) return !!auth?.user
       return true
     },
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.role = (user as { role?: string }).role
         token.department = (user as { department?: string | null }).department
         token.status = (user as { status?: string }).status
+        
+        const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-for-dev'
+        const secretKey = new TextEncoder().encode(jwtSecret)
+        token.backendToken = await new SignJWT({
+          sub: user.id || '',
+          role: (user as { role?: string }).role || 'viewer',
+          department: (user as { department?: string | null }).department || null,
+        })
+          .setProtectedHeader({ alg: 'HS256' })
+          .setIssuedAt()
+          .setExpirationTime('30d')
+          .sign(secretKey)
       }
       return token
     },
@@ -84,6 +97,7 @@ export const {
           role: (token as any).role,
           department: (token as any).department,
           status: (token as any).status,
+          backendToken: (token as any).backendToken,
         },
       }
     },

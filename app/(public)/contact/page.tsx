@@ -62,7 +62,7 @@ export default function ContactPage() {
             </div>
 
             {/* Contact Form */}
-            <div className="rounded-2xl border border-black/10 bg-white p-8 shadow-card">
+            <div className="rounded-2xl border border-border dark:border-white/10 bg-card dark:bg-slate-900 p-8 shadow-card">
               <h3 className="mb-6 font-heading text-2xl font-bold text-brand-primary">Send a Message</h3>
               <ContactForm />
             </div>
@@ -74,10 +74,9 @@ export default function ContactPage() {
       {/* Map (Real Google Maps iframe embed) */}
       <section className="relative h-96 w-full">
         <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d125792.83648057403!2d8.824248425126867!3d9.895556272445839!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x10f3db537db1bf79%3A0x8673a5a73e658e45!2sJos%2C%20Plateau!5e0!3m2!1sen!2sng!4v1716900000000!5m2!1sen!2sng"
+          src="https://maps.google.com/maps?q=Jos,+Plateau+State,+Nigeria&t=&z=13&ie=UTF8&iwloc=&output=embed"
           width="100%"
           height="100%"
-          style={{ border: 0 }}
           allowFullScreen
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"

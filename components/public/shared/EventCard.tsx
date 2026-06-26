@@ -13,7 +13,7 @@ export function EventCard({ title, href, date, location }: EventCardProps) {
   return (
     <Link
       href={href}
-      className="group flex h-full flex-col rounded-xl border border-black/10 bg-white p-6 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-cardHover"
+      className="group flex h-full flex-col rounded-xl border border-border dark:border-white/10 bg-card dark:bg-slate-900 p-6 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-cardHover"
     >
       <div className="font-heading text-lg font-semibold text-foreground group-hover:text-brand-primary">
         {title}

@@ -127,7 +127,7 @@ export default function GalleryPage() {
                 className={
                   activeTab === tab
                     ? 'bg-brand-primary text-white hover:bg-brand-primary/90'
-                    : 'bg-white text-brand-primary border border-black/5 hover:bg-gray-50'
+                    : 'bg-card text-brand-primary border border-border hover:bg-accent hover:text-accent-foreground'
                 }
               >
                 {tab}
@@ -150,7 +150,7 @@ export default function GalleryPage() {
                   transition={{ duration: 0.2 }}
                   key={item.url}
                   onClick={() => handleOpenLightbox(index)}
-                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-black/5 bg-white shadow-card transition-all hover:-translate-y-0.5 hover:shadow-cardHover"
+                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all hover:-translate-y-0.5 hover:shadow-cardHover"
                 >
                   <div className="relative aspect-[4/3] w-full overflow-hidden">
                     <Image

@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { drizzle } from 'drizzle-orm/d1';
-import * as schema from '../../db/schema';
+import * as schema from '../../../../lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { sendEmail } from '../../utils/email';
 import { getDonationReceiptHtml } from '../../utils/email-templates';

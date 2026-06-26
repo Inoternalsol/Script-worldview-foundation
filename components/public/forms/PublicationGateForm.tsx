@@ -86,7 +86,7 @@ export function PublicationGateForm({ publicationTitle, downloadUrl, onSuccess }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-sm mx-auto p-4 bg-white rounded-lg">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-sm mx-auto p-4 bg-card rounded-lg">
         <div className="text-center space-y-1">
           <DownloadCloud className="h-8 w-8 text-brand-primary mx-auto" />
           <h3 className="font-heading font-semibold text-lg">Unlock Research Publication</h3>

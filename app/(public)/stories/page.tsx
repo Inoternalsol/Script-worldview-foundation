@@ -1,8 +1,9 @@
 import { PageHero } from '@/components/public/shared/PageHero'
 import { StoryCard } from '@/components/public/shared/StoryCard'
+import { apiFetch } from '@/lib/api/client'
 
-// Mock Data
-const stories = [
+// Fallback Mock Data
+const fallbackStories = [
   {
     id: '1',
     title: 'From School Dropout to Software Engineer',
@@ -29,7 +30,29 @@ const stories = [
   }
 ]
 
-export default function StoriesPage() {
+export const revalidate = 3600
+
+export default async function StoriesPage() {
+  let list = fallbackStories
+
+  try {
+    const res = await apiFetch<any>('/api/blog?category=stories&status=published')
+    if (res.ok && res.data && Array.isArray(res.data)) {
+      if (res.data.length > 0) {
+        list = res.data.map((post: any) => ({
+          id: post.id,
+          title: post.title,
+          excerpt: post.excerpt || '',
+          location: 'Nigeria',
+          program: 'Initiative',
+          imageUrl: post.featuredImage || null
+        }))
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load stories from API:', error)
+  }
+
   return (
     <div>
       <PageHero
@@ -39,14 +62,13 @@ export default function StoriesPage() {
 
       <section className="bg-background py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
-          {/* Masonry Grid Placeholder */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {stories.map((story) => (
+            {list.map((story) => (
               <StoryCard 
                 key={story.id} 
                 title={story.title}
                 excerpt={story.excerpt}
-                href={`/stories/${story.id}`}
+                href={`/blog/${story.id}`} // Or link to the blog post details directly
                 location={story.location}
                 tag={story.program}
               />
@@ -57,3 +79,4 @@ export default function StoriesPage() {
     </div>
   )
 }
+

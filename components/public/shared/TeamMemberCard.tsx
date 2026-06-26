@@ -9,7 +9,7 @@ export type TeamMemberCardProps = {
 
 export function TeamMemberCard({ name, title, imageUrl, bio }: TeamMemberCardProps) {
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-black/10 bg-white shadow-card">
+    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border dark:border-white/10 bg-card dark:bg-slate-900 shadow-card">
       <div className="relative h-48 w-full">
         <Image src={imageUrl} alt={name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
       </div>

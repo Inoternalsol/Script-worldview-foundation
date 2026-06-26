@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { SignJWT } from 'jose'
 import { getServerEnv } from '@/lib/env'
+import { revalidatePath } from 'next/cache'
+
 
 export async function GET(req: NextRequest, { params }: { params: { path: string[] } }) {
   return handleProxy(req, params.path)
@@ -80,12 +82,39 @@ async function handleProxy(req: NextRequest, pathSegments: string[]) {
       cache: 'no-store',
     })
 
+    const contentType = res.headers.get('content-type') || ''
     const responseBody = await res.text().catch(() => '')
+
+    if (contentType.includes('text/csv')) {
+      return new NextResponse(responseBody, {
+        status: res.status,
+        headers: {
+          'Content-Type': 'text/csv',
+          'Content-Disposition': res.headers.get('Content-Disposition') || 'attachment; filename="export.csv"',
+          'Access-Control-Expose-Headers': 'Content-Disposition',
+        },
+      })
+    }
+
     let responseData
     try {
       responseData = JSON.parse(responseBody)
     } catch {
       responseData = responseBody
+    }
+
+    // Run on-demand revalidation if the mutation succeeded
+    const isMutation = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
+    if (isMutation && res.status >= 200 && res.status < 300) {
+      const segment = pathSegments[0]
+      if (['blog', 'events', 'campaigns', 'programs', 'careers'].includes(segment)) {
+        try {
+          revalidatePath(`/${segment}`, 'layout')
+          console.log(`[ISR Revalidation] Purged cache for layout path: /${segment}`)
+        } catch (revalErr) {
+          console.error(`[ISR Revalidation] Failed to revalidate /${segment}:`, revalErr)
+        }
+      }
     }
 
     return NextResponse.json(

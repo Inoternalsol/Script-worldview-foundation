@@ -30,7 +30,7 @@ const contactFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   phone: z.string().optional(),
-  department: z.enum(['general', 'education', 'humanitarian', 'community', 'sports', 'hr', 'press', 'partnership']),
+  department: z.enum(['general', 'education', 'humanitarian', 'community', 'hr', 'press', 'partnership']),
   subject: z.string().min(5, { message: 'Subject must be at least 5 characters.' }),
   message: z.string().min(10, { message: 'Message must be at least 10 characters.' }),
 });
@@ -95,7 +95,7 @@ export function ContactForm() {
               <FormItem>
                 <FormLabel>Full Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input placeholder="John Doe" autoComplete="name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -108,7 +108,7 @@ export function ContactForm() {
               <FormItem>
                 <FormLabel>Email Address</FormLabel>
                 <FormControl>
-                  <Input placeholder="john@example.com" {...field} />
+                  <Input placeholder="john@example.com" type="email" autoComplete="email" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -124,7 +124,7 @@ export function ContactForm() {
               <FormItem>
                 <FormLabel>Phone Number (Optional)</FormLabel>
                 <FormControl>
-                  <Input placeholder="+234 ..." {...field} />
+                  <Input placeholder="+234 ..." type="tel" autoComplete="tel" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -147,7 +147,6 @@ export function ContactForm() {
                     <SelectItem value="education">Education & Training</SelectItem>
                     <SelectItem value="humanitarian">Humanitarian Services</SelectItem>
                     <SelectItem value="community">Community Development</SelectItem>
-                    <SelectItem value="sports">Sports & Athletics</SelectItem>
                     <SelectItem value="hr">Careers & HR</SelectItem>
                     <SelectItem value="press">Media & Press</SelectItem>
                     <SelectItem value="partnership">Partnerships</SelectItem>
@@ -191,7 +190,7 @@ export function ContactForm() {
           )}
         />
 
-        <Button type="submit" className="w-full md:w-auto bg-[#1A3A5C] hover:bg-[#1A3A5C]/90" disabled={isLoading}>
+        <Button type="submit" className="w-full md:w-auto bg-brand-primary text-primary-foreground hover:bg-brand-primary/90" disabled={isLoading}>
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

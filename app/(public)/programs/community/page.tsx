@@ -23,10 +23,10 @@ export default function CommunityProgramPage() {
         subtitle="Fostering sustainable socio-economic growth, peacebuilding, and local leadership."
       />
 
-      <section className="bg-white py-20">
+      <section className="bg-card py-20">
         <div className="mx-auto max-w-6xl px-4 md:px-8">
           <div className="grid gap-12 lg:grid-cols-3">
-            <div className="rounded-2xl border border-black/5 bg-gray-50 p-8 text-center transition-all hover:-translate-y-1 hover:shadow-card">
+            <div className="rounded-2xl border border-border bg-gray-50 p-8 text-center transition-all hover:-translate-y-1 hover:shadow-card">
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary/10">
                 <Users className="h-8 w-8 text-brand-primary" />
               </div>
@@ -36,7 +36,7 @@ export default function CommunityProgramPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-black/5 bg-gray-50 p-8 text-center transition-all hover:-translate-y-1 hover:shadow-card">
+            <div className="rounded-2xl border border-border bg-gray-50 p-8 text-center transition-all hover:-translate-y-1 hover:shadow-card">
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary/10">
                 <Handshake className="h-8 w-8 text-brand-primary" />
               </div>
@@ -46,7 +46,7 @@ export default function CommunityProgramPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-black/5 bg-gray-50 p-8 text-center transition-all hover:-translate-y-1 hover:shadow-card">
+            <div className="rounded-2xl border border-border bg-gray-50 p-8 text-center transition-all hover:-translate-y-1 hover:shadow-card">
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary/10">
                 <ShieldCheck className="h-8 w-8 text-brand-primary" />
               </div>
@@ -67,8 +67,8 @@ export default function CommunityProgramPage() {
             title="The Women's Cooperative Initiative"
             description="How 50 women transformed their local economy through collective savings and skill development."
           />
-          <div className="mt-12 overflow-hidden rounded-2xl bg-white shadow-card md:flex">
-            <div className="relative h-64 bg-gray-100 md:h-auto md:w-1/2">
+          <div className="mt-12 overflow-hidden rounded-2xl bg-card shadow-card md:flex">
+            <div className="relative h-64 bg-secondary md:h-auto md:w-1/2">
               <Image 
                 src="/images/programs/community.png" 
                 alt="Community meeting" 

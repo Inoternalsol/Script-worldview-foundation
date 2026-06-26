@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+@custom-variant dark (&:is(.dark *));
 :root {
   --background: 249 250 251;
   --foreground: 28 40 51;
@@ -7,6 +7,7 @@
   --brand-primary: 26 58 92;
   --brand-secondary: 46 125 50;
   --brand-cta: 230 81 0;
+  --brand-accent: 230 81 0;
   --brand-muted: 93 109 126;
 
   --success: 39 174 96;
@@ -37,6 +38,39 @@
   --font-mono: var(--font-jetbrains-mono);
 }
 
+.dark {
+  --background: 17 24 39;
+  --foreground: 243 244 246;
+
+  --brand-primary: 2 41 191; /* Deep blue #0229bf */
+  --brand-secondary: 52 211 153; /* Brighter green */
+  --brand-cta: 249 115 22; /* Brighter orange */
+  --brand-accent: 249 115 22;
+  --brand-muted: 156 163 175;
+
+  --success: 52 211 153;
+  --error: 248 113 113;
+
+  /* shadcn/ui component tokens */
+  --card: 31 41 55;
+  --card-foreground: 243 244 246;
+  --popover: 31 41 55;
+  --popover-foreground: 243 244 246;
+  --primary: 2 41 191;
+  --primary-foreground: 255 255 255;
+  --secondary: 55 65 81;
+  --secondary-foreground: 243 244 246;
+  --muted: 55 65 81;
+  --muted-foreground: 156 163 175;
+  --accent: 55 65 81;
+  --accent-foreground: 243 244 246;
+  --destructive: 248 113 113;
+  --destructive-foreground: 255 255 255;
+  --border: 55 65 81;
+  --input: 55 65 81;
+  --ring: 2 41 191;
+}
+
 @theme inline {
   --color-background: rgb(var(--background));
   --color-foreground: rgb(var(--foreground));
@@ -44,6 +78,7 @@
   --color-brand-primary: rgb(var(--brand-primary));
   --color-brand-secondary: rgb(var(--brand-secondary));
   --color-brand-cta: rgb(var(--brand-cta));
+  --color-brand-accent: rgb(var(--brand-accent));
   --color-brand-muted: rgb(var(--brand-muted));
 
   --color-success: rgb(var(--success));
