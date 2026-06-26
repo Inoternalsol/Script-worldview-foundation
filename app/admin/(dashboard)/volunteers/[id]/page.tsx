@@ -47,12 +47,7 @@ export default function VolunteerDetailPage() {
 
   return (
     <div className="space-y-6">
-      <AdminBreadcrumb
-        items={[
-          { label: 'Volunteers', href: '/admin/volunteers' },
-          { label: volunteer.name },
-        ]}
-      />
+      <AdminBreadcrumb />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
