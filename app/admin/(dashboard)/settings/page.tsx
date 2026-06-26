@@ -9,6 +9,8 @@ import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/components/ui/use-toast'
 import { Settings, Save, ShieldAlert, Key, Globe } from 'lucide-react'
 
+import { adminClientFetch } from '@/lib/admin-client'
+
 export default function AdminSettingsPage() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
@@ -21,10 +23,7 @@ export default function AdminSettingsPage() {
 
   async function loadSettings() {
     try {
-      const res = await fetch('/api/admin/settings')
-      if (!res.ok) throw new Error('Failed to load settings')
-      const data = await res.json()
-      const s = data.data
+      const s = await adminClientFetch('/settings')
       if (s) {
         setOrgName(s.orgName || 'Script Worldview Foundation')
         setContactEmail(s.contactEmail || 'info@scriptworldviewfoundation.org')
@@ -50,9 +49,8 @@ export default function AdminSettingsPage() {
   async function handleSave() {
     setSaving(true)
     try {
-      const res = await fetch('/api/admin/settings', {
+      await adminClientFetch('/settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orgName,
           contactEmail,
@@ -62,7 +60,6 @@ export default function AdminSettingsPage() {
         }),
       })
 
-      if (!res.ok) throw new Error('Failed to save settings')
       toast({
         title: 'Settings Saved',
         description: 'Global system configuration updated successfully.',

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { adminClientFetch } from '@/lib/admin-client'
 
 export default function NewProgramPage() {
   const router = useRouter()
@@ -33,16 +34,10 @@ export default function NewProgramPage() {
     }
 
     try {
-      const res = await fetch('/api/admin/programs', {
+      await adminClientFetch('/programs', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.message || data.error || 'Failed to create program')
-      }
 
       router.push('/admin/programs')
       router.refresh()

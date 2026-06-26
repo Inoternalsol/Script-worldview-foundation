@@ -20,6 +20,7 @@ import { toast } from '@/components/ui/use-toast';
 import { apiFetch } from '@/lib/api/client';
 import { Loader2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { CustomFormField } from '@/components/ui/custom-form-field';
 
 const volunteerFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -104,60 +105,32 @@ export function VolunteerForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
+          <CustomFormField
             control={form.control}
             name="name"
-            render={({ field }: { field: any }) => (
-              <FormItem>
-                <FormLabel>Full Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Jane Doe" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Full Name"
+            placeholder="Jane Doe"
           />
-          <FormField
+          <CustomFormField
             control={form.control}
             name="email"
-            render={({ field }: { field: any }) => (
-              <FormItem>
-                <FormLabel>Email Address</FormLabel>
-                <FormControl>
-                  <Input placeholder="jane@example.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Email Address"
+            placeholder="jane@example.com"
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
+          <CustomFormField
             control={form.control}
             name="phone"
-            render={({ field }: { field: any }) => (
-              <FormItem>
-                <FormLabel>Phone Number</FormLabel>
-                <FormControl>
-                  <Input placeholder="+234 ..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Phone Number"
+            placeholder="+234 ..."
           />
-          <FormField
+          <CustomFormField
             control={form.control}
             name="location"
-            render={({ field }: { field: any }) => (
-              <FormItem>
-                <FormLabel>Current Location (City, State)</FormLabel>
-                <FormControl>
-                  <Input placeholder="Lagos, Nigeria" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Current Location (City, State)"
+            placeholder="Lagos, Nigeria"
           />
         </div>
 
@@ -212,50 +185,26 @@ export function VolunteerForm() {
           )}
         />
 
-        <FormField
+        <CustomFormField
           control={form.control}
           name="languages"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Languages Spoken</FormLabel>
-              <FormControl>
-                <Input placeholder="English, Yoruba, Hausa, etc." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Languages Spoken"
+          placeholder="English, Yoruba, Hausa, etc."
         />
 
-        <FormField
+        <CustomFormField
           control={form.control}
           name="motivation"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Why do you want to volunteer with us?</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Tell us about your passion and how you want to make an impact..."
-                  className="min-height-[120px]"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Why do you want to volunteer with us?"
+          placeholder="Tell us about your passion and how you want to make an impact..."
+          type="textarea"
         />
 
-        <FormField
+        <CustomFormField
           control={form.control}
           name="howDidYouHear"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>How did you hear about us?</FormLabel>
-              <FormControl>
-                <Input placeholder="Social media, Word of mouth, etc." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="How did you hear about us?"
+          placeholder="Social media, Word of mouth, etc."
         />
 
         <Button type="submit" className="w-full md:w-auto bg-[#2E7D32] hover:bg-[#2E7D32]/90" disabled={isLoading}>

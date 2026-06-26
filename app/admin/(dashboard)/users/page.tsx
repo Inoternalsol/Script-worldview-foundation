@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label'
 import { Shield, Plus, RefreshCw, UserCheck, UserX } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 
+import { adminClientFetch } from '@/lib/admin-client'
+
 type User = {
   id: string
   name: string
@@ -28,10 +30,8 @@ export default function UsersManagementPage() {
 
   async function fetchUsers() {
     try {
-      const res = await fetch('/api/admin/users')
-      if (!res.ok) throw new Error('Failed to load user accounts')
-      const data = await res.json()
-      setUsersList(data.data || [])
+      const data = await adminClientFetch<User[]>('/users')
+      setUsersList(data || [])
     } catch (err: any) {
       toast({
         title: 'Error',
@@ -50,12 +50,10 @@ export default function UsersManagementPage() {
   async function toggleStatus(id: string, currentStatus: string, name: string) {
     const nextStatus = currentStatus === 'active' ? 'suspended' : 'active'
     try {
-      const res = await fetch(`/api/admin/users/${id}`, {
+      await adminClientFetch(`/users/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: nextStatus }),
       })
-      if (!res.ok) throw new Error('Failed to update status')
       
       setUsersList((prev) =>
         prev.map((u) => (u.id === id ? { ...u, status: nextStatus } : u))
@@ -77,12 +75,10 @@ export default function UsersManagementPage() {
   async function handleResetPassword(id: string, email: string) {
     try {
       const tempPassword = Math.random().toString(36).slice(-10) + 'A1!'
-      const res = await fetch(`/api/admin/users/${id}`, {
+      await adminClientFetch(`/users/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: tempPassword }),
       })
-      if (!res.ok) throw new Error('Failed to reset password')
       
       toast({
         title: 'Password Reset Successful',
@@ -111,17 +107,11 @@ export default function UsersManagementPage() {
     }
 
     try {
-      const res = await fetch('/api/admin/users', {
+      const data = await adminClientFetch<User>('/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || 'Failed to create user')
-      }
-      const data = await res.json()
-      setUsersList((prev) => [data.data, ...prev])
+      setUsersList((prev) => [data, ...prev])
       setOpen(false)
       toast({
         title: 'User Created',

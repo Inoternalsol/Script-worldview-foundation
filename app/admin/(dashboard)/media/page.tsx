@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Image, File, Video, Trash2, Link as LinkIcon, Search, UploadCloud } from 'lucide-react'
+import { ImageIcon, File, Video, Trash2, Link as LinkIcon, Search, UploadCloud } from 'lucide-react'
+import Image from 'next/image'
 import { useToast } from '@/components/ui/use-toast'
+
+import { adminClientFetch } from '@/lib/admin-client'
 
 type MediaItem = {
   id: string
@@ -25,10 +28,8 @@ export default function MediaLibraryPage() {
 
   async function fetchMedia() {
     try {
-      const res = await fetch('/api/admin/media')
-      if (!res.ok) throw new Error('Failed to load media assets')
-      const data = await res.json()
-      setMediaList(data.data || [])
+      const data = await adminClientFetch<MediaItem[]>('/media')
+      setMediaList(data || [])
     } catch (err: any) {
       toast({
         title: 'Error',
@@ -61,10 +62,9 @@ export default function MediaLibraryPage() {
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(`/api/admin/media/${id}`, {
+      await adminClientFetch(`/media/${id}`, {
         method: 'DELETE',
       })
-      if (!res.ok) throw new Error('Failed to delete media asset')
       setMediaList((prev) => prev.filter((item) => item.id !== id))
       toast({
         title: 'Deleted',
@@ -95,9 +95,8 @@ export default function MediaLibraryPage() {
       const base64Url = event.target?.result as string
 
       try {
-        const res = await fetch('/api/admin/media', {
+        const data = await adminClientFetch<MediaItem>('/media', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             filename: file.name,
             type,
@@ -106,9 +105,7 @@ export default function MediaLibraryPage() {
           }),
         })
 
-        if (!res.ok) throw new Error('Upload failed')
-        const data = await res.json()
-        setMediaList((prev) => [data.data, ...prev])
+        setMediaList((prev) => [data, ...prev])
         toast({
           title: 'Uploaded',
           description: `${file.name} uploaded successfully.`,
@@ -203,7 +200,7 @@ export default function MediaLibraryPage() {
                 <Card key={item.id} className="overflow-hidden">
                   <div className="relative flex aspect-video items-center justify-center bg-secondary">
                     {item.type === 'image' ? (
-                      <img src={item.url} alt={item.filename} className="h-full w-full object-cover" />
+                      <Image src={item.url} alt={item.filename} width={300} height={200} className="h-full w-full object-cover" />
                     ) : item.type === 'video' ? (
                       <Video className="h-10 w-10 text-brand-primary" />
                     ) : (

@@ -80,9 +80,11 @@ export function Header() {
         <Link href="/" className="flex items-center gap-3 group">
           <div className="flex items-center group-hover:opacity-80 transition-opacity">
             <div className="h-[36px] rounded-lg bg-card overflow-hidden flex items-start">
-              <img
+              <Image
                 src="/logo.png"
                 alt="Script Worldview Foundation"
+                width={120}
+                height={40}
                 className="h-[40px] w-auto max-w-none"
               />
             </div>

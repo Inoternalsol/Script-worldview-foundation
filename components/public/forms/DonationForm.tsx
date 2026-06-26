@@ -13,6 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { CustomFormField } from '@/components/ui/custom-form-field';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/components/ui/use-toast';
@@ -334,60 +335,38 @@ export function DonationForm({
         <div className="space-y-4">
           <label className="text-xs font-bold uppercase tracking-wider text-gray-400">Your Details</label>
           <div className="grid grid-cols-2 gap-4">
-            <FormField
+            <CustomFormField
               control={form.control}
               name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs">First Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="John" className="rounded-xl border-gray-200 dark:border-slate-800" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="First Name"
+              placeholder="John"
+              className="rounded-xl border-gray-200 dark:border-slate-800"
             />
-            <FormField
+            <CustomFormField
               control={form.control}
               name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-xs">Last Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Doe" className="rounded-xl border-gray-200 dark:border-slate-800" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Last Name"
+              placeholder="Doe"
+              className="rounded-xl border-gray-200 dark:border-slate-800"
             />
           </div>
 
-          <FormField
+          <CustomFormField
             control={form.control}
             name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs">Email Address</FormLabel>
-                <FormControl>
-                  <Input placeholder="john@example.com" className="rounded-xl border-gray-200 dark:border-slate-800" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Email Address"
+            placeholder="john@example.com"
+            type="email"
+            className="rounded-xl border-gray-200 dark:border-slate-800"
           />
 
-          <FormField
+          <CustomFormField
             control={form.control}
             name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs">Phone Number (Optional)</FormLabel>
-                <FormControl>
-                  <Input placeholder="+234..." className="rounded-xl border-gray-200 dark:border-slate-800" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Phone Number (Optional)"
+            placeholder="+234..."
+            type="tel"
+            className="rounded-xl border-gray-200 dark:border-slate-800"
           />
 
           <FormField

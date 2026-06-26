@@ -26,6 +26,8 @@ import { toast } from '@/components/ui/use-toast';
 import { apiFetch } from '@/lib/api/client';
 import { Loader2 } from 'lucide-react';
 
+import { CustomFormField } from '@/components/ui/custom-form-field';
+
 const contactFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -88,52 +90,36 @@ export function ContactForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
+          <CustomFormField
             control={form.control}
             name="name"
-            render={({ field }: { field: any }) => (
-              <FormItem>
-                <FormLabel>Full Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="John Doe" autoComplete="name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Full Name"
+            placeholder="John Doe"
+            autoComplete="name"
           />
-          <FormField
+          <CustomFormField
             control={form.control}
             name="email"
-            render={({ field }: { field: any }) => (
-              <FormItem>
-                <FormLabel>Email Address</FormLabel>
-                <FormControl>
-                  <Input placeholder="john@example.com" type="email" autoComplete="email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Email Address"
+            placeholder="john@example.com"
+            type="email"
+            autoComplete="email"
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
+          <CustomFormField
             control={form.control}
             name="phone"
-            render={({ field }: { field: any }) => (
-              <FormItem>
-                <FormLabel>Phone Number (Optional)</FormLabel>
-                <FormControl>
-                  <Input placeholder="+234 ..." type="tel" autoComplete="tel" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            label="Phone Number (Optional)"
+            placeholder="+234 ..."
+            type="tel"
+            autoComplete="tel"
           />
           <FormField
             control={form.control}
             name="department"
-            render={({ field }: { field: any }) => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>Department</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -158,36 +144,19 @@ export function ContactForm() {
           />
         </div>
 
-        <FormField
+        <CustomFormField
           control={form.control}
           name="subject"
-          render={({ field }: { field: any }) => (
-            <FormItem>
-              <FormLabel>Subject</FormLabel>
-              <FormControl>
-                <Input placeholder="How can we help?" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Subject"
+          placeholder="How can we help?"
         />
 
-        <FormField
+        <CustomFormField
           control={form.control}
           name="message"
-          render={({ field }: { field: any }) => (
-            <FormItem>
-              <FormLabel>Message</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Tell us more about your inquiry..."
-                  className="min-height-[150px]"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          label="Message"
+          placeholder="Tell us more about your inquiry..."
+          type="textarea"
         />
 
         <Button type="submit" className="w-full md:w-auto bg-brand-primary text-primary-foreground hover:bg-brand-primary/90" disabled={isLoading}>
