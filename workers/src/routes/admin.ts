@@ -24,6 +24,8 @@ import { Env } from '../types'
 import { authMiddleware } from '../middleware/auth'
 import bcrypt from 'bcryptjs'
 import { settingsRoutes } from './settings'
+import { sendEmail } from '../utils/email'
+import { getDonationReceiptHtml } from '../utils/email-templates'
 
 export const adminRoutes = new Hono<{ Bindings: Env }>()
 
@@ -79,6 +81,48 @@ adminRoutes.get('/stats', async (c) => {
   })
 })
 
+adminRoutes.get('/analytics', async (c) => {
+  const currentYear = new Date().getFullYear().toString()
+
+  const { results: rawDonations } = await c.env.DB.prepare(`
+    SELECT 
+      strftime('%m', donated_at / 1000, 'unixepoch') as month,
+      SUM(amount) as total
+    FROM donations
+    WHERE status = 'completed' AND deleted_at IS NULL
+      AND strftime('%Y', donated_at / 1000, 'unixepoch') = ?
+    GROUP BY month
+    ORDER BY month
+  `).bind(currentYear).all()
+
+  const { results: rawVolunteers } = await c.env.DB.prepare(`
+    SELECT 
+      strftime('%m', applied_at / 1000, 'unixepoch') as month,
+      COUNT(id) as count
+    FROM volunteers
+    WHERE deleted_at IS NULL
+      AND strftime('%Y', applied_at / 1000, 'unixepoch') = ?
+    GROUP BY month
+    ORDER BY month
+  `).bind(currentYear).all()
+  
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const data = monthNames.map((name, index) => {
+    const monthStr = (index + 1).toString().padStart(2, '0')
+    const donationRow = rawDonations.find((d: any) => d.month === monthStr)
+    const volunteerRow = rawVolunteers.find((v: any) => v.month === monthStr)
+    
+    return {
+      name,
+      donations: donationRow ? Math.round(Number(donationRow.total) / 100) : 0,
+      volunteers: volunteerRow ? Number(volunteerRow.count) : 0,
+      pageViews: 0 // Mocked since we do not track it in DB natively
+    }
+  })
+
+  return c.json({ data })
+})
+
 // ─── Volunteers ───────────────────────────────────────────────────
 adminRoutes.get('/volunteers', async (c) => {
   const db = createDb(c.env.DB)
@@ -102,9 +146,12 @@ adminRoutes.get('/volunteers', async (c) => {
 adminRoutes.get('/volunteers/:id', async (c) => {
   const db = createDb(c.env.DB)
   const id = c.req.param('id')
-  const [vol] = await db.select().from(volunteers).where(eq(volunteers.id, id)).limit(1)
-  if (!vol) return c.json({ error: 'Not found' }, 404)
-  return c.json({ data: vol })
+  const record = await db.select().from(volunteers).where(eq(volunteers.id, id)).get()
+  
+  if (!record) {
+    return c.json({ error: 'Volunteer not found' }, 404)
+  }
+  return c.json({ data: record })
 })
 
 adminRoutes.patch('/volunteers/:id', async (c) => {
@@ -197,6 +244,34 @@ adminRoutes.get('/donations', async (c) => {
     .limit(200)
 
   return c.json({ data })
+})
+
+adminRoutes.post('/donations/:id/receipt', async (c) => {
+  const db = createDb(c.env.DB)
+  const id = c.req.param('id')
+  
+  const [donation] = await db
+    .select()
+    .from(donations)
+    .where(eq(donations.id, id))
+    .limit(1)
+
+  if (!donation) return c.json({ error: 'Donation not found' }, 404)
+  if (donation.status !== 'completed') return c.json({ error: 'Cannot send receipt for incomplete donation' }, 400)
+
+  const receiptHtml = getDonationReceiptHtml(donation.donorName, donation.amount, donation.currency, donation.id)
+  
+  const emailResult = await sendEmail(c.env, {
+    to: donation.donorEmail,
+    subject: 'Receipt: Your Donation to Script Worldview Foundation',
+    html: receiptHtml,
+  })
+
+  if (!emailResult.success) {
+    return c.json({ error: 'Failed to send email', details: emailResult.error }, 500)
+  }
+
+  return c.json({ success: true })
 })
 
 // ─── Contacts ─────────────────────────────────────────────────────

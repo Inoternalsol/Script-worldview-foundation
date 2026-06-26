@@ -200,7 +200,7 @@ export default function MediaLibraryPage() {
                 <Card key={item.id} className="overflow-hidden">
                   <div className="relative flex aspect-video items-center justify-center bg-secondary">
                     {item.type === 'image' ? (
-                      <Image src={item.url} alt={item.filename} width={300} height={200} className="h-full w-full object-cover" />
+                      <Image src={item.url} alt={item.filename} width={300} height={200} className="h-full w-full object-cover" unoptimized={item.url.startsWith('data:')} />
                     ) : item.type === 'video' ? (
                       <Video className="h-10 w-10 text-brand-primary" />
                     ) : (

@@ -74,8 +74,7 @@ export function DonationImpact() {
         </div>
         <div className="h-3 overflow-hidden rounded-full bg-secondary">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-brand-primary to-brand-secondary transition-all duration-1000"
-            style={{ width: '62%' }}
+            className="h-full rounded-full bg-gradient-to-r from-brand-primary to-brand-secondary transition-all duration-1000 w-[62%]"
           />
         </div>
         <div className="mt-2 text-xs text-brand-muted">

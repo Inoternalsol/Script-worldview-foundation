@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { AdminTableShell, TableSearch, TableFilter, EmptyRow, Th, StatusBadge, TablePagination } from '@/components/admin/AdminTable'
 import { VolunteerStatusActions } from '@/components/admin/VolunteerStatusActions'
+import Link from 'next/link'
 
 type Volunteer = {
   id: string
@@ -92,7 +93,11 @@ export function VolunteersTable({ volunteers }: { volunteers: Volunteer[] }) {
           ) : (
             paginated.map((vol) => (
               <tr key={vol.id} className="border-b border-border transition-colors hover:bg-muted/40">
-                <td className="px-4 py-3 font-medium text-foreground">{vol.name}</td>
+                <td className="px-4 py-3 font-medium text-brand-primary">
+                  <Link href={`/admin/volunteers/${vol.id}`} className="hover:underline">
+                    {vol.name}
+                  </Link>
+                </td>
                 <td className="px-4 py-3 text-brand-muted">{vol.email}</td>
                 <td className="px-4 py-3 text-brand-muted">{vol.phone || '—'}</td>
                 <td className="px-4 py-3 text-brand-muted">{vol.location || '—'}</td>

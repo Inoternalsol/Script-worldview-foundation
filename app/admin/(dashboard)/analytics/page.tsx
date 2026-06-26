@@ -1,29 +1,45 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { TrendingUp, Users, Heart, Eye, ArrowUpRight } from 'lucide-react'
+import { TrendingUp, Users, Heart, Eye, ArrowUpRight, Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
-
-// 12 Months of actual trend data
-const monthlyData = [
-  { month: 'Jan', views: 4200, donations: 350000 },
-  { month: 'Feb', views: 5100, donations: 420000 },
-  { month: 'Mar', views: 6800, donations: 580000 },
-  { month: 'Apr', views: 6100, donations: 510000 },
-  { month: 'May', views: 7900, donations: 720000 },
-  { month: 'Jun', views: 9200, donations: 850000 },
-  { month: 'Jul', views: 10500, donations: 1100000 },
-  { month: 'Aug', views: 12000, donations: 1250000 },
-  { month: 'Sep', views: 11000, donations: 1050000 },
-  { month: 'Oct', views: 13500, donations: 1600000 },
-  { month: 'Nov', views: 15200, donations: 1950000 },
-  { month: 'Dec', views: 18400, donations: 2400000 },
-]
+import { adminClientFetch } from '@/lib/admin-client'
 
 export default function PlatformAnalyticsPage() {
-  const [activeMetric, setActiveMetric] = useState<'both' | 'views' | 'donations'>('both')
+  const [activeMetric, setActiveMetric] = useState<'both' | 'volunteers' | 'donations'>('both')
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const [monthlyData, setMonthlyData] = useState<any[]>([])
+  const [stats, setStats] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [analyticsRes, statsRes] = await Promise.all([
+          adminClientFetch('/analytics'),
+          adminClientFetch('/stats')
+        ])
+        if (analyticsRes.data) setMonthlyData(analyticsRes.data)
+        if (statsRes.data) setStats(statsRes.data)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-brand-primary" />
+      </div>
+    )
+  }
+
+  if (!monthlyData.length) return null
 
   // Chart settings
   const width = 800
@@ -37,28 +53,28 @@ export default function PlatformAnalyticsPage() {
   const chartHeight = height - paddingTop - paddingBottom
 
   // Max values for scale
-  const maxViews = 20000
-  const maxDonations = 2500000
+  const maxVolunteers = Math.max(...monthlyData.map(d => d.volunteers), 10)
+  const maxDonations = Math.max(...monthlyData.map(d => d.donations), 1000)
 
   // Calculate coordinates for points
   const points = monthlyData.map((d, index) => {
     const x = paddingLeft + (index / (monthlyData.length - 1)) * chartWidth
-    // Views Y coordinate
-    const yViews = paddingTop + chartHeight - (d.views / maxViews) * chartHeight
+    // Volunteers Y coordinate
+    const yVolunteers = paddingTop + chartHeight - (d.volunteers / maxVolunteers) * chartHeight
     // Donations Y coordinate
     const yDonations = paddingTop + chartHeight - (d.donations / maxDonations) * chartHeight
-    return { x, yViews, yDonations, ...d }
+    return { x, yVolunteers, yDonations, ...d }
   })
 
   // SVG Path generator helper
-  const generatePath = (key: 'yViews' | 'yDonations') => {
+  const generatePath = (key: 'yVolunteers' | 'yDonations') => {
     return points.reduce((path, p, index) => {
       return index === 0 ? `M ${p.x} ${p[key]}` : `${path} L ${p.x} ${p[key]}`
     }, '')
   }
 
   // SVG Area path generator
-  const generateAreaPath = (key: 'yViews' | 'yDonations') => {
+  const generateAreaPath = (key: 'yVolunteers' | 'yDonations') => {
     const linePath = generatePath(key)
     const firstPoint = points[0]
     const lastPoint = points[points.length - 1]
@@ -73,7 +89,7 @@ export default function PlatformAnalyticsPage() {
           <h1 className="font-heading text-2xl font-bold text-foreground">Platform Analytics</h1>
           <p className="mt-1 text-sm text-brand-muted">Real-time charts auditing user traffic and donor campaigns conversion rates.</p>
         </div>
-        <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1 shadow-sm shrink-0">
+        <div className="flex shrink-0 items-center gap-1 rounded-lg border border-border bg-card p-1 shadow-sm">
           <button
             onClick={() => setActiveMetric('both')}
             className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
@@ -83,12 +99,12 @@ export default function PlatformAnalyticsPage() {
             All Insights
           </button>
           <button
-            onClick={() => setActiveMetric('views')}
+            onClick={() => setActiveMetric('volunteers')}
             className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
-              activeMetric === 'views' ? 'bg-[#1A3A5C] text-white' : 'text-brand-muted hover:bg-muted'
+              activeMetric === 'volunteers' ? 'bg-[#1A3A5C] text-white' : 'text-brand-muted hover:bg-muted'
             }`}
           >
-            Page Views
+            Volunteers
           </button>
           <button
             onClick={() => setActiveMetric('donations')}
@@ -107,16 +123,16 @@ export default function PlatformAnalyticsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-brand-muted uppercase tracking-wider">Page Views (Month)</p>
-                <h3 className="mt-1 font-heading text-2xl font-bold">18,400</h3>
+                <p className="text-xs font-semibold uppercase tracking-wider text-brand-muted">Total Volunteers</p>
+                <h3 className="mt-1 font-heading text-2xl font-bold">{stats?.volunteers || 0}</h3>
               </div>
               <div className="rounded-lg bg-brand-primary/5 p-3 text-brand-primary">
-                <Eye className="h-5 w-5" />
+                <Users className="h-5 w-5" />
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-1.5 text-xs text-green-600 font-semibold">
+            <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-green-600">
               <ArrowUpRight className="h-4 w-4" />
-              <span>+21.2% vs last month</span>
+              <span>{stats?.pendingVolunteers || 0} pending applications</span>
             </div>
           </CardContent>
         </Card>
@@ -125,16 +141,18 @@ export default function PlatformAnalyticsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-brand-muted uppercase tracking-wider">Conversion Rate</p>
-                <h3 className="mt-1 font-heading text-2xl font-bold">3.8%</h3>
+                <p className="text-xs font-semibold uppercase tracking-wider text-brand-muted">Donations Total</p>
+                <h3 className="mt-1 font-heading text-2xl font-bold">
+                  ₦{((stats?.donationTotal || 0) / 100).toLocaleString()}
+                </h3>
               </div>
               <div className="rounded-lg bg-green-50 p-3 text-green-600">
-                <TrendingUp className="h-5 w-5" />
+                <Heart className="h-5 w-5" />
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-1.5 text-xs text-green-600 font-semibold">
+            <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-green-600">
               <ArrowUpRight className="h-4 w-4" />
-              <span>+0.6% vs last month</span>
+              <span>{stats?.donations || 0} total transactions</span>
             </div>
           </CardContent>
         </Card>
@@ -143,16 +161,16 @@ export default function PlatformAnalyticsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-brand-muted uppercase tracking-wider">Active Volunteers</p>
-                <h3 className="mt-1 font-heading text-2xl font-bold">84</h3>
+                <p className="text-xs font-semibold uppercase tracking-wider text-brand-muted">Event Registrations</p>
+                <h3 className="mt-1 font-heading text-2xl font-bold">{stats?.events || 0} Events</h3>
               </div>
               <div className="rounded-lg bg-blue-50 p-3 text-blue-600">
                 <Users className="h-5 w-5" />
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-1.5 text-xs text-green-600 font-semibold">
+            <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-green-600">
               <ArrowUpRight className="h-4 w-4" />
-              <span>+4 new recruits this week</span>
+              <span>Active campaigns</span>
             </div>
           </CardContent>
         </Card>
@@ -161,16 +179,16 @@ export default function PlatformAnalyticsPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-brand-muted uppercase tracking-wider">Donations Total</p>
-                <h3 className="mt-1 font-heading text-2xl font-bold">₦2.4M</h3>
+                <p className="text-xs font-semibold uppercase tracking-wider text-brand-muted">Job Applications</p>
+                <h3 className="mt-1 font-heading text-2xl font-bold">{stats?.applications || 0}</h3>
               </div>
               <div className="rounded-lg bg-orange-50 p-3 text-brand-cta">
-                <Heart className="h-5 w-5" />
+                <Eye className="h-5 w-5" />
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-1.5 text-xs text-green-600 font-semibold">
+            <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-green-600">
               <ArrowUpRight className="h-4 w-4" />
-              <span>+18.2% vs last month</span>
+              <span>Across {stats?.jobs || 0} open positions</span>
             </div>
           </CardContent>
         </Card>
@@ -180,14 +198,14 @@ export default function PlatformAnalyticsPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between border-b border-border pb-4">
           <div>
-            <h2 className="font-heading text-lg font-semibold">Visitor & Donation Engagement Trends</h2>
-            <p className="text-xs text-brand-muted">Combined visualization of monthly unique visitors against transaction conversions.</p>
+            <h2 className="font-heading text-lg font-semibold">Volunteer & Donation Engagement Trends</h2>
+            <p className="text-xs text-brand-muted">Combined visualization of monthly volunteer signups against donations.</p>
           </div>
           <div className="flex items-center gap-4 text-xs font-semibold">
-            {(activeMetric === 'both' || activeMetric === 'views') && (
+            {(activeMetric === 'both' || activeMetric === 'volunteers') && (
               <div className="flex items-center gap-1.5">
                 <span className="h-3 w-3 rounded-full bg-[#1A3A5C]" />
-                <span>Page Views</span>
+                <span>Volunteers</span>
               </div>
             )}
             {(activeMetric === 'both' || activeMetric === 'donations') && (
@@ -200,7 +218,7 @@ export default function PlatformAnalyticsPage() {
         </CardHeader>
         <CardContent className="pt-6">
           <div className="relative w-full">
-            <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible">
+            <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full overflow-visible">
               {/* Grids */}
               {[0, 1, 2, 3, 4].map((grid, i) => {
                 const y = paddingTop + (i / 4) * chartHeight
@@ -223,27 +241,27 @@ export default function PlatformAnalyticsPage() {
                   key={p.month}
                   x={p.x}
                   y={height - 10}
-                  className="fill-brand-muted text-[10px] font-semibold text-center"
+                  className="fill-brand-muted text-center text-[10px] font-semibold"
                   textAnchor="middle"
                 >
-                  {p.month}
+                  {p.name}
                 </text>
               ))}
 
-              {/* Y Axis Left (Views) */}
-              {(activeMetric === 'both' || activeMetric === 'views') && (
+              {/* Y Axis Left (Volunteers) */}
+              {(activeMetric === 'both' || activeMetric === 'volunteers') && (
                 <>
-                  <text x={10} y={paddingTop - 5} className="fill-[#1A3A5C] text-[9px] font-bold">Views</text>
+                  <text x={10} y={paddingTop - 5} className="fill-[#1A3A5C] text-[9px] font-bold">Volunteers</text>
                   {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
                     <text
-                      key={`views-${ratio}`}
+                      key={`vol-${ratio}`}
                       x={paddingLeft - 10}
                       y={paddingTop + chartHeight - ratio * chartHeight}
                       textAnchor="end"
                       alignmentBaseline="middle"
                       className="fill-[#1A3A5C] text-[9px] font-semibold"
                     >
-                      {Math.round(ratio * maxViews)}
+                      {Math.round(ratio * maxVolunteers)}
                     </text>
                   ))}
                 </>
@@ -262,26 +280,26 @@ export default function PlatformAnalyticsPage() {
                       alignmentBaseline="middle"
                       className="fill-[#2E7D32] text-[9px] font-semibold"
                     >
-                      {ratio === 0 ? '₦0' : `₦${(ratio * maxDonations) / 1000000}M`}
+                      {ratio === 0 ? '₦0' : `₦${((ratio * maxDonations) / 1000).toFixed(1)}k`}
                     </text>
                   ))}
                 </>
               )}
 
               {/* Areas & Lines */}
-              {/* Page Views Area & Line */}
-              {(activeMetric === 'both' || activeMetric === 'views') && (
+              {/* Volunteers Area & Line */}
+              {(activeMetric === 'both' || activeMetric === 'volunteers') && (
                 <>
                   <path
-                    d={generateAreaPath('yViews')}
+                    d={generateAreaPath('yVolunteers')}
                     className="fill-[#1A3A5C]/5"
                   />
                   <motion.path
                     initial={{ pathLength: 0 }}
                     animate={{ pathLength: 1 }}
                     transition={{ duration: 0.8 }}
-                    d={generatePath('yViews')}
-                    className="stroke-[#1A3A5C] fill-none"
+                    d={generatePath('yVolunteers')}
+                    className="fill-none stroke-[#1A3A5C]"
                     strokeWidth="3"
                     strokeLinecap="round"
                   />
@@ -300,7 +318,7 @@ export default function PlatformAnalyticsPage() {
                     animate={{ pathLength: 1 }}
                     transition={{ duration: 0.8 }}
                     d={generatePath('yDonations')}
-                    className="stroke-[#2E7D32] fill-none"
+                    className="fill-none stroke-[#2E7D32]"
                     strokeWidth="3"
                     strokeLinecap="round"
                   />
@@ -323,25 +341,25 @@ export default function PlatformAnalyticsPage() {
               {points.map((p, index) => {
                 const isHovered = hoveredIndex === index
                 return (
-                  <g key={p.month}>
+                  <g key={p.name}>
                     {/* Interactive Invisible Overlay Bar for easy hovering */}
                     <rect
                       x={p.x - chartWidth / (2 * (points.length - 1))}
                       y={paddingTop}
                       width={chartWidth / (points.length - 1)}
                       height={chartHeight}
-                      className="fill-transparent cursor-pointer"
+                      className="cursor-pointer fill-transparent"
                       onMouseEnter={() => setHoveredIndex(index)}
                       onMouseLeave={() => setHoveredIndex(null)}
                     />
 
-                    {/* Views Dot */}
-                    {(activeMetric === 'both' || activeMetric === 'views') && (
+                    {/* Volunteers Dot */}
+                    {(activeMetric === 'both' || activeMetric === 'volunteers') && (
                       <circle
                         cx={p.x}
-                        cy={p.yViews}
+                        cy={p.yVolunteers}
                         r={isHovered ? 6 : 4}
-                        className="fill-[#1A3A5C] stroke-white transition-all pointer-events-none"
+                        className="pointer-events-none fill-[#1A3A5C] stroke-white transition-all"
                         strokeWidth="2"
                       />
                     )}
@@ -352,7 +370,7 @@ export default function PlatformAnalyticsPage() {
                         cx={p.x}
                         cy={p.yDonations}
                         r={isHovered ? 6 : 4}
-                        className="fill-[#2E7D32] stroke-white transition-all pointer-events-none"
+                        className="pointer-events-none fill-[#2E7D32] stroke-white transition-all"
                         strokeWidth="2"
                       />
                     )}
@@ -364,25 +382,29 @@ export default function PlatformAnalyticsPage() {
             {/* Float Tooltip */}
             {hoveredIndex !== null && (
               <div
-                className="absolute bg-card text-foreground p-3 rounded-lg border border-border shadow-lg text-xs pointer-events-none space-y-1 z-10"
+                className="pointer-events-none absolute z-10 space-y-1 rounded-lg border border-border bg-card p-3 text-xs text-foreground shadow-lg"
                 style={{
                   left: `${((points[hoveredIndex].x - paddingLeft) / chartWidth) * 80 + 10}%`,
                   top: '10%',
                 }}
               >
-                <div className="font-bold border-b border-border pb-1 mb-1">
-                  {points[hoveredIndex].month} 2026
+                <div className="mb-1 border-b border-border pb-1 font-bold">
+                  {points[hoveredIndex].name} {new Date().getFullYear()}
                 </div>
-                {(activeMetric === 'both' || activeMetric === 'views') && (
+                {(activeMetric === 'both' || activeMetric === 'volunteers') && (
                   <div className="flex items-center gap-1.5 text-brand-primary">
                     <span className="h-2 w-2 rounded-full bg-[#1A3A5C]" />
-                    <span>Views: <strong>{points[hoveredIndex].views.toLocaleString()}</strong></span>
+                    <span>
+                      Volunteers: <strong>{points[hoveredIndex].volunteers.toLocaleString()}</strong>
+                    </span>
                   </div>
                 )}
                 {(activeMetric === 'both' || activeMetric === 'donations') && (
                   <div className="flex items-center gap-1.5 text-brand-secondary">
                     <span className="h-2 w-2 rounded-full bg-[#2E7D32]" />
-                    <span>Donations: <strong>₦{points[hoveredIndex].donations.toLocaleString()}</strong></span>
+                    <span>
+                      Donations: <strong>₦{points[hoveredIndex].donations.toLocaleString()}</strong>
+                    </span>
                   </div>
                 )}
               </div>
@@ -390,73 +412,6 @@ export default function PlatformAnalyticsPage() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Funnel & Conversion Stats */}
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Volunteer Recruitment Funnel */}
-        <Card>
-          <CardHeader>
-            <h2 className="font-heading text-lg font-semibold">Volunteer Recruitment Funnel</h2>
-            <p className="text-xs text-brand-muted">Conversion rates across volunteer application stages for this term.</p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {[
-              { stage: 'Applications Received', count: 150, pct: 100, color: 'bg-[#1A3A5C]' },
-              { stage: 'Screened & Reviewed', count: 92, pct: 61, color: 'bg-[#1A3A5C]/80' },
-              { stage: 'Approved Candidates', count: 48, pct: 32, color: 'bg-[#2E7D32]' },
-              { stage: 'Active Deployments', count: 28, pct: 18, color: 'bg-[#2E7D32]/85' },
-            ].map((item) => (
-              <div key={item.stage} className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs font-semibold">
-                  <span className="text-foreground">{item.stage}</span>
-                  <span className="text-brand-muted">{item.count} ({item.pct}%)</span>
-                </div>
-                <div className="relative h-6 w-full rounded-md bg-secondary overflow-hidden">
-                  <div
-                    className={`h-full ${item.color} rounded-l-md transition-all duration-500`}
-                    style={{ width: `${item.pct}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Campaign Conversions */}
-        <Card>
-          <CardHeader>
-            <h2 className="font-heading text-lg font-semibold">Campaign Success Metrics</h2>
-            <p className="text-xs text-brand-muted">Top performing fundraisers by goal completion rate.</p>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            {[
-              { name: 'Humanitarian Emergency Relief', raised: '₦1.2M', goal: '₦1.5M', pct: 80 },
-              { name: 'Education Sponsor-A-Child', raised: '₦950K', goal: '₦1.0M', pct: 95 },
-              { name: 'Community Clean Water Project', raised: '₦450K', goal: '₦800K', pct: 56 },
-            ].map((campaign) => (
-              <div key={campaign.name} className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-semibold">
-                  <span className="text-foreground truncate max-w-[220px]" title={campaign.name}>
-                    {campaign.name}
-                  </span>
-                  <span className="text-brand-muted">
-                    {campaign.raised} / {campaign.goal}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-2 w-full bg-secondary rounded-full overflow-hidden flex-1">
-                    <div
-                      className="h-full bg-[#1A3A5C] rounded-full"
-                      style={{ width: `${campaign.pct}%` }}
-                    />
-                  </div>
-                  <span className="text-xs font-bold text-brand-primary shrink-0">{campaign.pct}%</span>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
     </div>
   )
 }

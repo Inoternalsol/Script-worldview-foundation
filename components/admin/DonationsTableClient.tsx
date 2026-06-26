@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import { DeleteConfirmButton } from '@/components/admin/DeleteConfirmButton'
-import { Download, Loader2 } from 'lucide-react'
+import { Download, Loader2, Mail } from 'lucide-react'
+import { adminClientFetch } from '@/lib/admin-client'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
 import {
@@ -35,6 +36,28 @@ const STATUS_COLORS: Record<string, string> = {
   pending:   'bg-amber-100 text-amber-700',
   failed:    'bg-red-100 text-red-700',
   refunded:  'bg-blue-100 text-blue-700',
+}
+
+function ResendReceiptButton({ id }: { id: string }) {
+  const [loading, setLoading] = useState(false)
+  const handleResend = async () => {
+    setLoading(true)
+    try {
+      const res = await adminClientFetch(`/donations/${id}/receipt`, { method: 'POST' })
+      if (!res.ok) throw new Error(res.error || 'Failed to send receipt')
+      toast({ title: 'Receipt Sent', description: 'The donation receipt has been sent to the donor.' })
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
+  }
+  
+  return (
+    <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleResend} disabled={loading} title="Resend Receipt">
+      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+    </Button>
+  )
 }
 
 export function DonationsTableClient({ donations }: { donations: Donation[] }) {
@@ -191,11 +214,14 @@ export function DonationsTableClient({ donations }: { donations: Donation[] }) {
                   })}
                 </td>
                 <td className="px-4 py-3">
-                  <DeleteConfirmButton
-                    id={don.id}
-                    endpoint="/api/admin/donations"
-                    label="Donation"
-                  />
+                  <div className="flex items-center gap-2">
+                    {don.status === 'completed' && <ResendReceiptButton id={don.id} />}
+                    <DeleteConfirmButton
+                      id={don.id}
+                      endpoint="/api/admin/donations"
+                      label="Donation"
+                    />
+                  </div>
                 </td>
               </tr>
             ))
