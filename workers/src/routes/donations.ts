@@ -136,7 +136,7 @@ donations.get('/', authMiddleware, requireRole(['super_admin', 'dept_admin']), a
 
 // Admin: DELETE a donation (soft-delete)
 donations.delete('/:id', authMiddleware, requireRole(['super_admin', 'dept_admin']), async (c) => {
-  const id = c.req.param('id');
+  const id = c.req.param('id') || '';
   const db = drizzle(c.env.DB);
   
   const result = await db.update(schema.donations)

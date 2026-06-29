@@ -1,8 +1,7 @@
 import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import { z } from 'zod'
-import { getServerEnv } from '@/lib/env'
-import { SignJWT } from 'jose'
+import { getServerEnv, signBackendToken } from '@/lib/env'
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -74,17 +73,11 @@ export const {
         token.department = (user as { department?: string | null }).department
         token.status = (user as { status?: string }).status
         
-        const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-for-dev'
-        const secretKey = new TextEncoder().encode(jwtSecret)
-        token.backendToken = await new SignJWT({
+        token.backendToken = await signBackendToken({
           sub: user.id || '',
           role: (user as { role?: string }).role || 'viewer',
           department: (user as { department?: string | null }).department || null,
-        })
-          .setProtectedHeader({ alg: 'HS256' })
-          .setIssuedAt()
-          .setExpirationTime('30d')
-          .sign(secretKey)
+        }, '30d')
       }
       return token
     },

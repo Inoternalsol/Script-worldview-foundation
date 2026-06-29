@@ -82,7 +82,9 @@ adminRoutes.get('/stats', async (c) => {
 })
 
 adminRoutes.get('/analytics', async (c) => {
-  const currentYear = new Date().getFullYear().toString()
+  const currentYearNum = new Date().getFullYear()
+  const startOfYearMs = new Date(`${currentYearNum}-01-01T00:00:00.000Z`).getTime()
+  const endOfYearMs = new Date(`${currentYearNum + 1}-01-01T00:00:00.000Z`).getTime()
 
   const { results: rawDonations } = await c.env.DB.prepare(`
     SELECT 
@@ -90,10 +92,10 @@ adminRoutes.get('/analytics', async (c) => {
       SUM(amount) as total
     FROM donations
     WHERE status = 'completed' AND deleted_at IS NULL
-      AND strftime('%Y', donated_at / 1000, 'unixepoch') = ?
+      AND donated_at >= ? AND donated_at < ?
     GROUP BY month
     ORDER BY month
-  `).bind(currentYear).all()
+  `).bind(startOfYearMs, endOfYearMs).all()
 
   const { results: rawVolunteers } = await c.env.DB.prepare(`
     SELECT 
@@ -101,10 +103,10 @@ adminRoutes.get('/analytics', async (c) => {
       COUNT(id) as count
     FROM volunteers
     WHERE deleted_at IS NULL
-      AND strftime('%Y', applied_at / 1000, 'unixepoch') = ?
+      AND applied_at >= ? AND applied_at < ?
     GROUP BY month
     ORDER BY month
-  `).bind(currentYear).all()
+  `).bind(startOfYearMs, endOfYearMs).all()
   
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
   const data = monthNames.map((name, index) => {

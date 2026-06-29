@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { SignJWT } from 'jose'
-import { getServerEnv } from '@/lib/env'
+import { getServerEnv, signBackendToken } from '@/lib/env'
 import { revalidatePath } from 'next/cache'
 
 
@@ -39,24 +38,12 @@ async function handleProxy(req: NextRequest, pathSegments: string[]) {
     return NextResponse.json({ error: 'Unauthorized: Access Denied' }, { status: 401 })
   }
 
-  const jwtSecret = process.env.JWT_SECRET || 'development_jwt_secret_key_12345'
-  if (!process.env.JWT_SECRET) {
-    console.warn('JWT_SECRET is not configured on Next.js server, falling back to default development key')
-  }
-
   const user = session.user as any
-
-  // Sign standard JWT matching Hono's authMiddleware verification (Phase 9)
-  const secretKey = new TextEncoder().encode(jwtSecret)
-  const bearerToken = await new SignJWT({
+  const bearerToken = user.backendToken || await signBackendToken({
     sub: user.id || '',
     role: user.role || 'viewer',
     department: user.department || null,
-  })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('10m') // 10 minutes short expiry
-    .sign(secretKey)
+  }, '10m')
 
   const path = pathSegments.join('/')
   const searchParams = req.nextUrl.searchParams.toString()
