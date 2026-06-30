@@ -84,30 +84,46 @@ export const {
       return true
     },
     async jwt({ token, user }) {
-      if (user) {
-        token.role = (user as { role?: string }).role
-        token.department = (user as { department?: string | null }).department
-        token.status = (user as { status?: string }).status
-        
-        token.backendToken = await signBackendToken({
-          sub: user.id || '',
-          role: (user as { role?: string }).role || 'viewer',
-          department: (user as { department?: string | null }).department || null,
-        }, '30d')
+      try {
+        if (user) {
+          token.role = (user as { role?: string }).role || 'viewer'
+          token.department = (user as { department?: string | null }).department || null
+          token.status = (user as { status?: string }).status || 'active'
+          
+          token.backendToken = await signBackendToken({
+            sub: user.id || '',
+            role: token.role as string,
+            department: token.department as string | null,
+          }, '30d')
+        } else if (token && !token.backendToken && token.sub) {
+          token.backendToken = await signBackendToken({
+            sub: token.sub,
+            role: (token.role as string) || 'viewer',
+            department: (token.department as string | null) || null,
+          }, '30d')
+        }
+      } catch (err) {
+        console.error('JWT callback error:', err)
       }
       return token
     },
     session({ session, token }) {
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: token.sub as string,
-          role: (token as any).role,
-          department: (token as any).department,
-          status: (token as any).status,
-          backendToken: (token as any).backendToken,
-        },
+      if (!session || !token) return session
+      try {
+        return {
+          ...session,
+          user: {
+            ...session.user,
+            id: (token.sub as string) || '',
+            role: (token as any).role || 'viewer',
+            department: (token as any).department || null,
+            status: (token as any).status || 'active',
+            backendToken: (token as any).backendToken,
+          },
+        }
+      } catch (err) {
+        console.error('Session callback error:', err)
+        return session
       }
     },
   },
