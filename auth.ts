@@ -14,6 +14,7 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
+  secret: getServerEnv().NEXTAUTH_SECRET,
   session: { strategy: 'jwt' },
   pages: { signIn: '/admin/login' },
   providers: [
@@ -27,13 +28,17 @@ export const {
         const parsed = credentialsSchema.safeParse(credentials)
         if (!parsed.success) return null
 
-        const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(parsed.data),
-        })
+        try {
+          const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(parsed.data),
+          })
 
-        if (!res.ok) return null
+          if (!res.ok) {
+            console.error('Login request failed with status:', res.status)
+            return null
+          }
 
         const data = (await res.json()) as {
           user: {
@@ -58,7 +63,11 @@ export const {
           status: data.user.status,
           image: data.user.avatarUrl ?? undefined,
         }
-      },
+      } catch (err: any) {
+        console.error('Backend authentication fetch error:', err)
+        return null
+      }
+    },
     }),
   ],
   callbacks: {
