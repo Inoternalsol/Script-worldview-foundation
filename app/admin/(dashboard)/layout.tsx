@@ -11,7 +11,12 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await auth()
+  let session = null
+  try {
+    session = await auth()
+  } catch (err) {
+    console.error('AdminLayout auth verification error:', err)
+  }
   const user = session?.user as any
 
   return (

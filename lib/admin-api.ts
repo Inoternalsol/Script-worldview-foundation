@@ -5,7 +5,12 @@ export async function adminFetch(path: string, options?: RequestInit) {
   const env = getServerEnv()
   const url = `${env.NEXT_PUBLIC_API_URL}/api/admin${path}`
   
-  const session = await auth()
+  let session = null
+  try {
+    session = await auth()
+  } catch (err) {
+    console.error('adminFetch auth error:', err)
+  }
   const headers = new Headers(options?.headers || {})
   headers.set('Content-Type', 'application/json')
   
