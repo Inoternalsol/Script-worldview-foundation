@@ -15,13 +15,25 @@ let cachedEnv: ServerEnv | null = null
 
 export function getServerEnv(): ServerEnv {
   if (!cachedEnv) {
-    cachedEnv = serverEnvSchema.parse({
-      NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-      NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-      NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-      JWT_SECRET: process.env.JWT_SECRET,
-    })
+    const raw = {
+      NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || undefined,
+      NEXTAUTH_URL: process.env.NEXTAUTH_URL || undefined,
+      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || undefined,
+      NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || undefined,
+      JWT_SECRET: process.env.JWT_SECRET || undefined,
+    }
+    const parsed = serverEnvSchema.safeParse(raw)
+    if (parsed.success) {
+      cachedEnv = parsed.data
+    } else {
+      cachedEnv = {
+        NEXTAUTH_SECRET: raw.NEXTAUTH_SECRET || 'fallback-nextauth-secret',
+        NEXTAUTH_URL: raw.NEXTAUTH_URL,
+        NEXT_PUBLIC_API_URL: raw.NEXT_PUBLIC_API_URL || 'http://localhost:8787',
+        NEXT_PUBLIC_APP_URL: raw.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+        JWT_SECRET: raw.JWT_SECRET || 'development_jwt_secret_key_12345',
+      }
+    }
   }
   return cachedEnv
 }
