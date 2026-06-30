@@ -33,7 +33,14 @@ async function handleProxy(req: NextRequest, pathSegments: string[]) {
     return NextResponse.json({ error: 'Server Env Configuration Error', message: err.message || String(err) }, { status: 500 })
   }
 
-  const session = await auth()
+  let session = null
+  try {
+    session = await auth()
+  } catch (err: any) {
+    console.error('API proxy auth verification error:', err)
+    return NextResponse.json({ error: 'Authentication verification failed', details: err.message }, { status: 401 })
+  }
+
   if (!session || !session.user) {
     return NextResponse.json({ error: 'Unauthorized: Access Denied' }, { status: 401 })
   }

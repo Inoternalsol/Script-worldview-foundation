@@ -14,6 +14,7 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
+  trustHost: true,
   secret: getServerEnv().NEXTAUTH_SECRET,
   session: { strategy: 'jwt' },
   pages: { signIn: '/admin/login' },
