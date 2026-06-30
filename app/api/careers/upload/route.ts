@@ -43,22 +43,23 @@ export async function POST(req: NextRequest) {
     // Read file data
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-
-    // Save path: public/uploads/cvs/
-    const uploadDir = join(process.cwd(), 'public', 'uploads', 'cvs')
-    
-    // Ensure directory exists
-    await mkdir(uploadDir, { recursive: true })
-
-    // Generate safe filename
     const safeFilename = `${nanoid()}.${ext}`
+
+    // In serverless production environments (Vercel/AWS Lambda), process.cwd() is read-only.
+    // Use /tmp fallback if VERCEL or AWS_LAMBDA_FUNCTION_NAME environment variables are detected.
+    const isServerless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)
+    const uploadDir = isServerless
+      ? join('/tmp', 'uploads', 'cvs')
+      : join(process.cwd(), 'public', 'uploads', 'cvs')
+    
+    await mkdir(uploadDir, { recursive: true })
     const filePath = join(uploadDir, safeFilename)
 
-    // Write file to disk
     await writeFile(filePath, buffer)
 
-    // Return absolute URL
-    const fileUrl = `${req.nextUrl.origin}/uploads/cvs/${safeFilename}`
+    const fileUrl = isServerless
+      ? `/api/careers/upload/file?name=${safeFilename}`
+      : `${req.nextUrl.origin}/uploads/cvs/${safeFilename}`
 
     return NextResponse.json({ ok: true, url: fileUrl })
   } catch (error: any) {

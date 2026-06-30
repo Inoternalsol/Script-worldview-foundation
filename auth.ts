@@ -63,8 +63,15 @@ export const {
   ],
   callbacks: {
     authorized({ auth, request }) {
-      if (request.nextUrl.pathname.startsWith('/admin/login')) return true
-      if (request.nextUrl.pathname.startsWith('/admin')) return !!auth?.user
+      const { pathname } = request.nextUrl
+      if (
+        pathname.startsWith('/admin/login') ||
+        pathname.startsWith('/admin/forgot-password') ||
+        pathname.startsWith('/admin/reset-password')
+      ) {
+        return true
+      }
+      if (pathname.startsWith('/admin')) return !!auth?.user
       return true
     },
     async jwt({ token, user }) {
