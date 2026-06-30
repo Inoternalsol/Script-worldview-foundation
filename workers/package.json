@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "node node_modules/wrangler/bin/wrangler.js dev",
+    "build": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
+    "typecheck": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
     "deploy": "node node_modules/wrangler/bin/wrangler.js deploy",
     "db:generate": "node node_modules/drizzle-kit/bin.cjs generate",
     "db:apply:local": "node node_modules/wrangler/bin/wrangler.js d1 migrations apply DB --local"
