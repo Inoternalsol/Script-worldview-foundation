@@ -397,3 +397,25 @@ export const siteSettings = sqliteTable(
   }
 )
 
+export const teamMembers = sqliteTable(
+  'team_members',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    role: text('role').notNull(),
+    bio: text('bio'),
+    photoUrl: text('photo_url'),
+    category: text('category', {
+      enum: ['executive', 'board', 'volunteer_lead'],
+    })
+      .notNull()
+      .default('executive'),
+    orderIndex: integer('order_index').notNull().default(0),
+    createdAt,
+    updatedAt,
+    deletedAt: integer('deleted_at', { mode: 'timestamp_ms' }),
+  },
+  (t) => [index('team_members_category_idx').on(t.category)],
+)
+
+

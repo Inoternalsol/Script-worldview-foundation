@@ -18,6 +18,7 @@ import {
   Target,
   BarChart3,
   Home,
+  UserCheck,
 } from 'lucide-react'
 
 const navSections = [
@@ -47,6 +48,7 @@ const navSections = [
       { href: '/admin/blog', label: 'Blog Posts', icon: FileText },
       { href: '/admin/events', label: 'Events', icon: Calendar },
       { href: '/admin/careers', label: 'Careers', icon: Briefcase },
+      { href: '/admin/team', label: 'Team Directory', icon: UserCheck },
       { href: '/admin/media', label: 'Media Library', icon: Image },
     ],
   },

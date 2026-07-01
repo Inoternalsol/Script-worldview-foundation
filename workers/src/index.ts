@@ -14,6 +14,7 @@ import { campaignsRoutes } from './routes/campaigns'
 import paystackWebhook from './routes/webhooks/paystack'
 import { adminRoutes } from './routes/admin'
 import { settingsRoutes } from './routes/settings'
+import { teamRoutes } from './routes/team'
 import stripeWebhook from './routes/webhooks/stripe'
 import { Env } from './types'
 

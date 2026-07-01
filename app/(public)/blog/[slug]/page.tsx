@@ -1,7 +1,8 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, Clock, User, ArrowLeft, Facebook, Twitter, Linkedin } from 'lucide-react'
+import { Calendar, Clock, User, ArrowLeft } from 'lucide-react'
+import { SocialShareButtons } from '@/components/public/shared/SocialShareButtons'
 
 import Image from 'next/image'
 
@@ -223,29 +224,19 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
         />
 
         {/* Footer & Share */}
-        <footer className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-border pt-8 sm:flex-row">
+        <footer className="mt-16 flex flex-col items-start justify-between gap-6 border-t border-border pt-8 w-full">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-secondary/80"></div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-primary/10 text-brand-primary font-bold text-lg">
+              {post.author.name.charAt(0)}
+            </div>
             <div>
               <div className="font-bold text-foreground">{post.author.name}</div>
               <div className="text-sm text-brand-muted">{post.author.role}</div>
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-brand-muted">Share:</span>
-            <button aria-label="Share on Facebook" title="Share on Facebook" className="rounded-full bg-secondary p-2 text-muted-foreground hover:bg-brand-primary hover:text-white transition-colors">
-              <Facebook className="h-4 w-4" />
-              <span className="sr-only">Facebook</span>
-            </button>
-            <button aria-label="Share on Twitter" title="Share on Twitter" className="rounded-full bg-secondary p-2 text-muted-foreground hover:bg-brand-primary hover:text-white transition-colors">
-              <Twitter className="h-4 w-4" />
-              <span className="sr-only">Twitter</span>
-            </button>
-            <button aria-label="Share on LinkedIn" title="Share on LinkedIn" className="rounded-full bg-secondary p-2 text-muted-foreground hover:bg-brand-primary hover:text-white transition-colors">
-              <Linkedin className="h-4 w-4" />
-              <span className="sr-only">LinkedIn</span>
-            </button>
+          <div className="w-full">
+            <SocialShareButtons title={post.title} />
           </div>
         </footer>
 

@@ -60,7 +60,7 @@ const fallbackTeam = [
   }
 ]
 
-export const revalidate = 86400
+export const revalidate = 60
 
 export default async function LeadershipPage() {
   let board = fallbackBoard
@@ -68,15 +68,42 @@ export default async function LeadershipPage() {
   let team = fallbackTeam
 
   try {
-    const res = await apiFetch<any>('/api/pages/leadership')
-    if (res.ok && res.data && res.data.contentJson) {
-      const parsed = JSON.parse(res.data.contentJson)
-      if (parsed.executive) executive = parsed.executive
-      if (parsed.board && Array.isArray(parsed.board)) board = parsed.board
-      if (parsed.team && Array.isArray(parsed.team)) team = parsed.team
+    const res = await apiFetch<any>('/api/team')
+    if (res.ok && Array.isArray(res.data) && res.data.length > 0) {
+      const allMembers = res.data
+      const execs = allMembers.filter((m: any) => m.category === 'executive')
+      const boards = allMembers.filter((m: any) => m.category === 'board')
+      const leads = allMembers.filter((m: any) => m.category === 'volunteer_lead')
+
+      if (execs.length > 0) {
+        executive = {
+          name: execs[0].name,
+          role: execs[0].role,
+          bio: execs[0].bio || '',
+          imageUrl: execs[0].photoUrl || '/images/team-staff1.png',
+        }
+      }
+      if (boards.length > 0) {
+        board = boards.map((m: any) => ({
+          id: m.id,
+          name: m.name,
+          role: m.role,
+          bio: m.bio || '',
+          imageUrl: m.photoUrl || `https://avatar.vercel.sh/${encodeURIComponent(m.name)}`,
+        }))
+      }
+      if (leads.length > 0) {
+        team = leads.map((m: any) => ({
+          id: m.id,
+          name: m.name,
+          role: m.role,
+          bio: m.bio || '',
+          imageUrl: m.photoUrl || `https://avatar.vercel.sh/${encodeURIComponent(m.name)}`,
+        }))
+      }
     }
   } catch (error) {
-    console.error('Failed to load leadership data from API:', error)
+    console.error('Failed to load live team data from API:', error)
   }
 
   return (
