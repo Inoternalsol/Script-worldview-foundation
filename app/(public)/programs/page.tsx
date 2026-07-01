@@ -59,8 +59,12 @@ const fallbackPrograms = [
   }
 ]
 
+import { getServerEnv } from '@/lib/env'
+
 export default async function ProgramsPage() {
+  const env = getServerEnv()
   let list = fallbackPrograms
+  let settings = null
 
   try {
     const res = await apiFetch<any>('/api/programs')
@@ -71,11 +75,28 @@ export default async function ProgramsPage() {
     console.error('Failed to load programs list from API:', error)
   }
 
+  try {
+    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/settings/programs_page`, {
+      next: { revalidate: 60 }
+    })
+    if (res.ok) {
+      const json = await res.json()
+      settings = json.data
+    }
+  } catch (error) {
+    console.error('Failed to load programs page settings:', error)
+  }
+
+  const heroTitle = settings?.heroTitle || "Our Programs"
+  const heroSubtitle = settings?.heroSubtitle || "Explore our impactful initiatives across education, humanitarian response, community empowerment, and environmental sustainability."
+  const heroBgImage = settings?.heroBgImage || "/images/programs-hero.jpg"
+
   return (
     <div>
       <PageHero
-        title="Our Programs"
-        subtitle="We deliver comprehensive interventions designed to address immediate needs while building long-term resilience and capacity."
+        title={heroTitle}
+        subtitle={heroSubtitle}
+        backgroundImage={heroBgImage}
       />
 
       <section className="bg-background py-20">

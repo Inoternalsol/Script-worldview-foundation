@@ -10,22 +10,24 @@ import { useToast } from '@/components/ui/use-toast'
 import { Loader2, Save, ArrowLeft, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 
-export default function HomePageSettings() {
+export default function AboutPageSettings() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({
-    heroTitle: 'Shaping Minds. Transforming Communities.',
-    heroSubtitle: 'Script Worldview Foundation is dedicated to empowering individuals and transforming communities across Nigeria through education, humanitarian response, and sustainable development.',
-    heroBgImage: '/images/hero-bg.jpg',
-    missionHighlight: 'Advancing Education & Humanitarian Response',
-    missionStatement: 'We believe that lasting change starts with a renewed mindset. Through structured education, timely humanitarian intervention, and community-led development programs, we build resilient futures across Nigeria.',
+    heroTitle: 'Who We Are',
+    heroSubtitle: 'We are a faith-inspired organization committed to shaping minds and transforming communities across Nigeria through education, humanitarian response, and sustainable development.',
+    heroBgImage: '/images/about-hero.png',
+    missionText: 'To empower individuals and communities with the knowledge, resources, and support they need to build dignified and self-sustaining futures.',
+    visionText: 'A world where every community has the capacity to thrive, driven by educated minds and compassionate hearts.',
+    valuesText: 'Faith-inspired service, absolute integrity, compassionate action, and a commitment to sustainable excellence.',
+    quoteText: '"Faith-inspired, values-driven. We believe that true transformation starts with a renewed worldview."',
   })
 
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const res = await fetch('/api/admin/settings/home_page')
+        const res = await fetch('/api/admin/settings/about_page')
         if (res.ok) {
           const json = await res.json()
           if (json.data) {
@@ -33,13 +35,15 @@ export default function HomePageSettings() {
               heroTitle: json.data.heroTitle || formData.heroTitle,
               heroSubtitle: json.data.heroSubtitle || formData.heroSubtitle,
               heroBgImage: json.data.heroBgImage || formData.heroBgImage,
-              missionHighlight: json.data.missionHighlight || formData.missionHighlight,
-              missionStatement: json.data.missionStatement || formData.missionStatement,
+              missionText: json.data.missionText || formData.missionText,
+              visionText: json.data.visionText || formData.visionText,
+              valuesText: json.data.valuesText || formData.valuesText,
+              quoteText: json.data.quoteText || formData.quoteText,
             })
           }
         }
       } catch (error) {
-        console.error('Failed to load home page settings', error)
+        console.error('Failed to load about page settings', error)
       } finally {
         setLoading(false)
       }
@@ -52,7 +56,7 @@ export default function HomePageSettings() {
     setSaving(true)
 
     try {
-      const res = await fetch('/api/admin/settings/home_page', {
+      const res = await fetch('/api/admin/settings/about_page', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: formData }),
@@ -62,7 +66,7 @@ export default function HomePageSettings() {
 
       toast({
         title: 'Settings Saved',
-        description: 'The Home Page has been updated successfully.',
+        description: 'The About Us page has been updated successfully.',
       })
     } catch (error: any) {
       toast({
@@ -93,72 +97,95 @@ export default function HomePageSettings() {
       </Link>
 
       <div>
-        <h1 className="font-heading text-2xl font-bold text-foreground">Home Page Content Editor</h1>
-        <p className="mt-1 text-sm text-brand-muted">Update the main headlines, introductory copywriting, and background images on the public homepage.</p>
+        <h1 className="font-heading text-2xl font-bold text-foreground">About Us Page Content Editor</h1>
+        <p className="mt-1 text-sm text-brand-muted">Customize hero copywriting, institutional pillars, vision statements, and identity quote.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
-            <h3 className="text-lg font-semibold leading-none tracking-tight">Hero Section & Banner Image</h3>
+            <h3 className="text-lg font-semibold leading-none tracking-tight">Hero Section & Banner</h3>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="heroTitle">Hero Title</Label>
+              <Label htmlFor="heroTitle">Hero Headline</Label>
               <Input
                 id="heroTitle"
                 value={formData.heroTitle}
                 onChange={(e) => setFormData({ ...formData, heroTitle: e.target.value })}
-                placeholder="e.g. Empowering Lives, Transforming Communities"
+                placeholder="Who We Are"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="heroSubtitle">Hero Subtitle</Label>
+              <Label htmlFor="heroSubtitle">Hero Subtitle Description</Label>
               <Textarea
                 id="heroSubtitle"
                 value={formData.heroSubtitle}
                 onChange={(e) => setFormData({ ...formData, heroSubtitle: e.target.value })}
-                placeholder="e.g. Join us in making a difference..."
                 rows={3}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="heroBgImage" className="flex items-center gap-1.5">
-                <ImageIcon className="h-4 w-4 text-brand-primary" /> Hero Banner Background Image URL
+                <ImageIcon className="h-4 w-4 text-brand-primary" /> Banner Background Image URL
               </Label>
               <Input
                 id="heroBgImage"
                 value={formData.heroBgImage}
                 onChange={(e) => setFormData({ ...formData, heroBgImage: e.target.value })}
-                placeholder="/images/hero-bg.jpg or https://..."
+                placeholder="/images/about-hero.png"
               />
-              <p className="text-xs text-brand-muted">Enter a relative image path or full URL to customize the landing background image.</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <h3 className="text-lg font-semibold leading-none tracking-tight">Mission Strip</h3>
+            <h3 className="text-lg font-semibold leading-none tracking-tight">Mission, Vision & Core Values</h3>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="missionHighlight">Mission Highlight Headline (Bold text)</Label>
-              <Input
-                id="missionHighlight"
-                value={formData.missionHighlight}
-                onChange={(e) => setFormData({ ...formData, missionHighlight: e.target.value })}
-                placeholder="e.g. Advancing Education & Humanitarian Response"
+              <Label htmlFor="missionText">Our Mission Statement</Label>
+              <Textarea
+                id="missionText"
+                value={formData.missionText}
+                onChange={(e) => setFormData({ ...formData, missionText: e.target.value })}
+                rows={3}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="missionStatement">Mission Statement Description</Label>
+              <Label htmlFor="visionText">Our Vision Statement</Label>
               <Textarea
-                id="missionStatement"
-                value={formData.missionStatement}
-                onChange={(e) => setFormData({ ...formData, missionStatement: e.target.value })}
-                placeholder="e.g. Script Worldview Foundation is dedicated to..."
-                rows={4}
+                id="visionText"
+                value={formData.visionText}
+                onChange={(e) => setFormData({ ...formData, visionText: e.target.value })}
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="valuesText">Our Core Values</Label>
+              <Textarea
+                id="valuesText"
+                value={formData.valuesText}
+                onChange={(e) => setFormData({ ...formData, valuesText: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <h3 className="text-lg font-semibold leading-none tracking-tight">Identity Statement Banner</h3>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="quoteText">Highlighted Identity Quote</Label>
+              <Textarea
+                id="quoteText"
+                value={formData.quoteText}
+                onChange={(e) => setFormData({ ...formData, quoteText: e.target.value })}
+                rows={3}
               />
             </div>
           </CardContent>
@@ -170,7 +197,7 @@ export default function HomePageSettings() {
           </Button>
           <Button type="submit" disabled={saving} className="gap-2 bg-brand-primary hover:bg-brand-primary/90 text-white">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save Home Page Copy
+            Save About Us Copy
           </Button>
         </div>
       </form>

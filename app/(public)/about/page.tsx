@@ -5,13 +5,38 @@ import { Target, Eye, Heart, BookOpen, HeartHandshake, Users, FlaskConical, Grad
 import Image from 'next/image'
 import Link from 'next/link'
 
-export default function AboutPage() {
+import { getServerEnv } from '@/lib/env'
+
+export default async function AboutPage() {
+  const env = getServerEnv()
+  let settings = null
+  
+  try {
+    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/settings/about_page`, {
+      next: { revalidate: 60 }
+    })
+    if (res.ok) {
+      const json = await res.json()
+      settings = json.data
+    }
+  } catch (error) {
+    console.error('Failed to fetch about page settings:', error)
+  }
+
+  const heroTitle = settings?.heroTitle || "Who We Are"
+  const heroSubtitle = settings?.heroSubtitle || "We are a faith-inspired organization committed to shaping minds and transforming communities across Nigeria through education, humanitarian response, and sustainable development."
+  const heroBgImage = settings?.heroBgImage || "/images/about-hero.png"
+  const missionText = settings?.missionText || "To empower individuals and communities with the knowledge, resources, and support they need to build dignified and self-sustaining futures."
+  const visionText = settings?.visionText || "A world where every community has the capacity to thrive, driven by educated minds and compassionate hearts."
+  const valuesText = settings?.valuesText || "Faith-inspired service, absolute integrity, compassionate action, and a commitment to sustainable excellence."
+  const quoteText = settings?.quoteText || '"Faith-inspired, values-driven. We believe that true transformation starts with a renewed worldview."'
+
   return (
     <div>
       <PageHero
-        title="Who We Are"
-        subtitle="We are a faith-inspired organization committed to shaping minds and transforming communities across Nigeria through education, humanitarian response, and sustainable development."
-        backgroundImage="/images/about-hero.png"
+        title={heroTitle}
+        subtitle={heroSubtitle}
+        backgroundImage={heroBgImage}
       />
 
       {/* Mission, Vision, Values */}
@@ -22,21 +47,21 @@ export default function AboutPage() {
               <Target className="mx-auto mb-4 h-12 w-12 text-brand-secondary" />
               <h2 className="mb-4 font-heading text-2xl font-bold text-brand-primary">Our Mission</h2>
               <p className="text-brand-muted">
-                To empower individuals and communities with the knowledge, resources, and support they need to build dignified and self-sustaining futures.
+                {missionText}
               </p>
             </div>
             <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
               <Eye className="mx-auto mb-4 h-12 w-12 text-brand-secondary" />
               <h2 className="mb-4 font-heading text-2xl font-bold text-brand-primary">Our Vision</h2>
               <p className="text-brand-muted">
-                A world where every community has the capacity to thrive, driven by educated minds and compassionate hearts.
+                {visionText}
               </p>
             </div>
             <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
               <Heart className="mx-auto mb-4 h-12 w-12 text-brand-secondary" />
               <h2 className="mb-4 font-heading text-2xl font-bold text-brand-primary">Our Values</h2>
               <p className="text-brand-muted">
-                Faith-inspired service, absolute integrity, compassionate action, and a commitment to sustainable excellence.
+                {valuesText}
               </p>
             </div>
           </div>
@@ -47,7 +72,7 @@ export default function AboutPage() {
       <section className="bg-brand-primary py-24 text-center text-white">
         <div className="mx-auto max-w-4xl px-4">
           <h2 className="mb-6 font-accent text-3xl italic leading-relaxed md:text-5xl">
-            "Faith-inspired, values-driven. We believe that true transformation starts with a renewed worldview."
+            {quoteText}
           </h2>
           <Button variant="secondary" className="mt-8">
             Read Our Annual Report 2023

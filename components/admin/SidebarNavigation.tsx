@@ -20,6 +20,7 @@ import {
   Home,
   UserCheck,
   ShieldCheck,
+  Globe,
 } from 'lucide-react'
 
 const navSections = [
@@ -43,8 +44,8 @@ const navSections = [
   {
     label: 'Content',
     items: [
+      { href: '/admin/content/pages', label: 'Public Website Pages', icon: Globe },
       { href: '/admin/content/home', label: 'Home Page', icon: Home },
-      { href: '/admin/content/pages', label: 'Static Pages', icon: FileText },
       { href: '/admin/programs', label: 'Programs', icon: TrendingUp },
       { href: '/admin/blog', label: 'Blog Posts', icon: FileText },
       { href: '/admin/events', label: 'Events', icon: Calendar },

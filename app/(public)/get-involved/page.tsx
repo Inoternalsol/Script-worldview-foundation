@@ -3,12 +3,38 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Heart, Handshake, Users, Megaphone } from 'lucide-react'
 
-export default function GetInvolvedPage() {
+import { getServerEnv } from '@/lib/env'
+
+export default async function GetInvolvedPage() {
+  const env = getServerEnv()
+  let settings = null
+
+  try {
+    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/settings/get_involved_page`, {
+      next: { revalidate: 60 }
+    })
+    if (res.ok) {
+      const json = await res.json()
+      settings = json.data
+    }
+  } catch (error) {
+    console.error('Failed to fetch get involved page settings:', error)
+  }
+
+  const heroTitle = settings?.heroTitle || "Get Involved"
+  const heroSubtitle = settings?.heroSubtitle || "There are many ways to support our mission. Find the path that fits your passion and skills."
+  const donateTitle = settings?.donateTitle || "Donate"
+  const donateDesc = settings?.donateDesc || "Your financial support directly funds our programs, from scholarships to emergency relief. Every amount makes a difference."
+  const volunteerTitle = settings?.volunteerTitle || "Volunteer"
+  const volunteerDesc = settings?.volunteerDesc || "Join our network of dedicated individuals who give their time, skills, and energy to support our on-ground interventions."
+  const partnerTitle = settings?.partnerTitle || "Partner With Us"
+  const partnerDesc = settings?.partnerDesc || "We actively seek collaborations with corporations, other NGOs, and government agencies to amplify our impact."
+
   return (
     <div>
       <PageHero
-        title="Get Involved"
-        subtitle="There are many ways to support our mission. Find the path that fits your passion and skills."
+        title={heroTitle}
+        subtitle={heroSubtitle}
       />
 
       <section className="bg-background py-20">
@@ -19,9 +45,9 @@ export default function GetInvolvedPage() {
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary/10">
                 <Heart className="h-8 w-8 text-brand-primary" />
               </div>
-              <h2 className="mb-4 font-heading text-2xl font-bold text-brand-primary">Donate</h2>
+              <h2 className="mb-4 font-heading text-2xl font-bold text-brand-primary">{donateTitle}</h2>
               <p className="mb-8 text-brand-muted">
-                Your financial support directly funds our programs, from scholarships to emergency relief. Every amount makes a difference.
+                {donateDesc}
               </p>
               <Button asChild variant="cta">
                 <Link href="/donate">Make a Donation</Link>
@@ -32,9 +58,9 @@ export default function GetInvolvedPage() {
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary/10">
                 <Users className="h-8 w-8 text-brand-primary" />
               </div>
-              <h2 className="mb-4 font-heading text-2xl font-bold text-brand-primary">Volunteer</h2>
+              <h2 className="mb-4 font-heading text-2xl font-bold text-brand-primary">{volunteerTitle}</h2>
               <p className="mb-8 text-brand-muted">
-                Join our network of dedicated individuals who give their time, skills, and energy to support our on-ground interventions.
+                {volunteerDesc}
               </p>
               <Button asChild variant="secondary">
                 <Link href="/volunteers">Become a Volunteer</Link>
@@ -45,9 +71,9 @@ export default function GetInvolvedPage() {
               <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-brand-primary/10">
                 <Handshake className="h-8 w-8 text-brand-primary" />
               </div>
-              <h2 className="mb-4 font-heading text-2xl font-bold text-brand-primary">Partner With Us</h2>
+              <h2 className="mb-4 font-heading text-2xl font-bold text-brand-primary">{partnerTitle}</h2>
               <p className="mb-8 text-brand-muted">
-                We actively seek collaborations with corporations, other NGOs, and government agencies to amplify our impact.
+                {partnerDesc}
               </p>
               <Button asChild variant="secondary">
                 <Link href="/partners">View Partnerships</Link>

@@ -39,7 +39,7 @@ export default async function HomePage() {
     <>
       <OrganizationJsonLd />
       <div>
-        <HeroSection title={settings?.heroTitle} subtitle={settings?.heroSubtitle} />
+        <HeroSection title={settings?.heroTitle} subtitle={settings?.heroSubtitle} backgroundImage={settings?.heroBgImage} />
         <Reveal><ImpactCounter /></Reveal>
         <Reveal><MissionStrip highlight={settings?.missionHighlight} statement={settings?.missionStatement} /></Reveal>
         <Reveal><FeaturedPrograms /></Reveal>

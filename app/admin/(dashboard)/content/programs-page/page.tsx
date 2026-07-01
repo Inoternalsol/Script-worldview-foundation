@@ -10,22 +10,22 @@ import { useToast } from '@/components/ui/use-toast'
 import { Loader2, Save, ArrowLeft, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 
-export default function HomePageSettings() {
+export default function ProgramsPageSettings() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({
-    heroTitle: 'Shaping Minds. Transforming Communities.',
-    heroSubtitle: 'Script Worldview Foundation is dedicated to empowering individuals and transforming communities across Nigeria through education, humanitarian response, and sustainable development.',
-    heroBgImage: '/images/hero-bg.jpg',
-    missionHighlight: 'Advancing Education & Humanitarian Response',
-    missionStatement: 'We believe that lasting change starts with a renewed mindset. Through structured education, timely humanitarian intervention, and community-led development programs, we build resilient futures across Nigeria.',
+    heroTitle: 'Our Programs',
+    heroSubtitle: 'Explore our impactful initiatives across education, humanitarian response, community empowerment, and environmental sustainability.',
+    heroBgImage: '/images/programs-hero.jpg',
+    introTitle: 'Comprehensive Community Intervention',
+    introText: 'Our programs are carefully designed in collaboration with community stakeholders to ensure sustainable impact and long-term empowerment.',
   })
 
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const res = await fetch('/api/admin/settings/home_page')
+        const res = await fetch('/api/admin/settings/programs_page')
         if (res.ok) {
           const json = await res.json()
           if (json.data) {
@@ -33,13 +33,13 @@ export default function HomePageSettings() {
               heroTitle: json.data.heroTitle || formData.heroTitle,
               heroSubtitle: json.data.heroSubtitle || formData.heroSubtitle,
               heroBgImage: json.data.heroBgImage || formData.heroBgImage,
-              missionHighlight: json.data.missionHighlight || formData.missionHighlight,
-              missionStatement: json.data.missionStatement || formData.missionStatement,
+              introTitle: json.data.introTitle || formData.introTitle,
+              introText: json.data.introText || formData.introText,
             })
           }
         }
       } catch (error) {
-        console.error('Failed to load home page settings', error)
+        console.error('Failed to load programs page settings', error)
       } finally {
         setLoading(false)
       }
@@ -52,7 +52,7 @@ export default function HomePageSettings() {
     setSaving(true)
 
     try {
-      const res = await fetch('/api/admin/settings/home_page', {
+      const res = await fetch('/api/admin/settings/programs_page', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: formData }),
@@ -62,7 +62,7 @@ export default function HomePageSettings() {
 
       toast({
         title: 'Settings Saved',
-        description: 'The Home Page has been updated successfully.',
+        description: 'Programs Hub copywriting and header banner updated successfully.',
       })
     } catch (error: any) {
       toast({
@@ -93,23 +93,22 @@ export default function HomePageSettings() {
       </Link>
 
       <div>
-        <h1 className="font-heading text-2xl font-bold text-foreground">Home Page Content Editor</h1>
-        <p className="mt-1 text-sm text-brand-muted">Update the main headlines, introductory copywriting, and background images on the public homepage.</p>
+        <h1 className="font-heading text-2xl font-bold text-foreground">Programs Hub Content Editor</h1>
+        <p className="mt-1 text-sm text-brand-muted">Configure hero copy and banner introduction for the public Programs &amp; Initiatives directory.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
-            <h3 className="text-lg font-semibold leading-none tracking-tight">Hero Section & Banner Image</h3>
+            <h3 className="text-lg font-semibold leading-none tracking-tight">Hero Section & Banner</h3>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="heroTitle">Hero Title</Label>
+              <Label htmlFor="heroTitle">Hero Headline</Label>
               <Input
                 id="heroTitle"
                 value={formData.heroTitle}
                 onChange={(e) => setFormData({ ...formData, heroTitle: e.target.value })}
-                placeholder="e.g. Empowering Lives, Transforming Communities"
               />
             </div>
             <div className="space-y-2">
@@ -118,47 +117,43 @@ export default function HomePageSettings() {
                 id="heroSubtitle"
                 value={formData.heroSubtitle}
                 onChange={(e) => setFormData({ ...formData, heroSubtitle: e.target.value })}
-                placeholder="e.g. Join us in making a difference..."
                 rows={3}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="heroBgImage" className="flex items-center gap-1.5">
-                <ImageIcon className="h-4 w-4 text-brand-primary" /> Hero Banner Background Image URL
+                <ImageIcon className="h-4 w-4 text-brand-primary" /> Banner Background Image URL
               </Label>
               <Input
                 id="heroBgImage"
                 value={formData.heroBgImage}
                 onChange={(e) => setFormData({ ...formData, heroBgImage: e.target.value })}
-                placeholder="/images/hero-bg.jpg or https://..."
+                placeholder="/images/programs-hero.jpg"
               />
-              <p className="text-xs text-brand-muted">Enter a relative image path or full URL to customize the landing background image.</p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <h3 className="text-lg font-semibold leading-none tracking-tight">Mission Strip</h3>
+            <h3 className="text-lg font-semibold leading-none tracking-tight">Directory Introduction Strip</h3>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="missionHighlight">Mission Highlight Headline (Bold text)</Label>
+              <Label htmlFor="introTitle">Section Title</Label>
               <Input
-                id="missionHighlight"
-                value={formData.missionHighlight}
-                onChange={(e) => setFormData({ ...formData, missionHighlight: e.target.value })}
-                placeholder="e.g. Advancing Education & Humanitarian Response"
+                id="introTitle"
+                value={formData.introTitle}
+                onChange={(e) => setFormData({ ...formData, introTitle: e.target.value })}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="missionStatement">Mission Statement Description</Label>
+              <Label htmlFor="introText">Introduction Description</Label>
               <Textarea
-                id="missionStatement"
-                value={formData.missionStatement}
-                onChange={(e) => setFormData({ ...formData, missionStatement: e.target.value })}
-                placeholder="e.g. Script Worldview Foundation is dedicated to..."
-                rows={4}
+                id="introText"
+                value={formData.introText}
+                onChange={(e) => setFormData({ ...formData, introText: e.target.value })}
+                rows={3}
               />
             </div>
           </CardContent>
@@ -170,7 +165,7 @@ export default function HomePageSettings() {
           </Button>
           <Button type="submit" disabled={saving} className="gap-2 bg-brand-primary hover:bg-brand-primary/90 text-white">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save Home Page Copy
+            Save Programs Page Copy
           </Button>
         </div>
       </form>

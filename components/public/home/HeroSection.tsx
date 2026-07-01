@@ -8,7 +8,7 @@ import { useRef } from 'react'
 
 const blurDataURL = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSIxMCI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjMWEzYTVjIi8+PC9zdmc+'
 
-export function HeroSection({ title, subtitle }: { title?: string; subtitle?: string }) {
+export function HeroSection({ title, subtitle, backgroundImage }: { title?: string; subtitle?: string; backgroundImage?: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
   
   // Parallax hook
@@ -31,7 +31,7 @@ export function HeroSection({ title, subtitle }: { title?: string; subtitle?: st
           muted
           loop
           playsInline
-          poster="/images/home-hero.png"
+          poster={backgroundImage || "/images/home-hero.png"}
           className="absolute inset-0 h-full w-full object-cover opacity-50"
         >
           <source src="https://assets.mixkit.co/videos/preview/mixkit-african-children-smiling-at-the-camera-41873-large.mp4" type="video/mp4" />
