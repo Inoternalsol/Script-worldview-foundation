@@ -25,50 +25,58 @@ export async function DELETE(req: NextRequest, { params }: { params: { path: str
 }
 
 async function handleProxy(req: NextRequest, pathSegments: string[]) {
-  let env
   try {
-    env = getServerEnv()
-  } catch (err: any) {
-    console.error('Env validation failed on Next.js server:', err)
-    return NextResponse.json({ error: 'Server Env Configuration Error', message: err.message || String(err) }, { status: 500 })
-  }
+    let env
+    try {
+      env = getServerEnv()
+    } catch (err: any) {
+      console.error('Env validation failed on Next.js server:', err)
+      return NextResponse.json({ error: 'Server Env Configuration Error', message: err?.message || String(err) }, { status: 500 })
+    }
 
-  let session = null
-  try {
-    session = await auth()
-  } catch (err: any) {
-    console.error('API proxy auth verification error:', err)
-    return NextResponse.json({ error: 'Authentication verification failed', details: err.message }, { status: 401 })
-  }
+    let session = null
+    try {
+      session = await auth()
+    } catch (err: any) {
+      console.error('API proxy auth verification error:', err)
+      return NextResponse.json({ error: 'Authentication verification failed', details: err?.message || String(err) }, { status: 401 })
+    }
 
-  if (!session || !session.user) {
-    return NextResponse.json({ error: 'Unauthorized: Access Denied' }, { status: 401 })
-  }
+    if (!session || !session.user) {
+      return NextResponse.json({ error: 'Unauthorized: Access Denied' }, { status: 401 })
+    }
 
-  const user = session.user as any
-  const bearerToken = user.backendToken || await signBackendToken({
-    sub: user.id || '',
-    role: user.role || 'viewer',
-    department: user.department || null,
-  }, '10m')
+    const user = session.user as any
+    let bearerToken = user.backendToken
+    if (!bearerToken) {
+      try {
+        bearerToken = await signBackendToken({
+          sub: user.id || '',
+          role: user.role || 'viewer',
+          department: user.department || null,
+        }, '10m')
+      } catch (tokenErr: any) {
+        console.error('Failed to sign fallback backend token:', tokenErr)
+        return NextResponse.json({ error: 'JWT Signing Error', details: tokenErr?.message || String(tokenErr) }, { status: 500 })
+      }
+    }
 
-  const path = pathSegments.join('/')
-  const searchParams = req.nextUrl.searchParams.toString()
-  const targetUrl = `${env.NEXT_PUBLIC_API_URL}/api/admin/${path}${searchParams ? `?${searchParams}` : ''}`
+    const path = pathSegments.join('/')
+    const searchParams = req.nextUrl.searchParams.toString()
+    const targetUrl = `${env.NEXT_PUBLIC_API_URL}/api/admin/${path}${searchParams ? `?${searchParams}` : ''}`
 
-  const headers = new Headers()
-  headers.set('Authorization', `Bearer ${bearerToken}`)
-  headers.set('Content-Type', 'application/json')
+    const headers = new Headers()
+    headers.set('Authorization', `Bearer ${bearerToken}`)
+    headers.set('Content-Type', 'application/json')
 
-  const method = req.method
-  const isBodyMethod = ['POST', 'PUT', 'PATCH'].includes(method)
-  let body: any = undefined
+    const method = req.method
+    const isBodyMethod = ['POST', 'PUT', 'PATCH'].includes(method)
+    let body: any = undefined
 
-  if (isBodyMethod) {
-    body = await req.text().catch(() => '')
-  }
+    if (isBodyMethod) {
+      body = await req.text().catch(() => '')
+    }
 
-  try {
     const res = await fetch(targetUrl, {
       method,
       headers,
@@ -97,6 +105,14 @@ async function handleProxy(req: NextRequest, pathSegments: string[]) {
       responseData = responseBody
     }
 
+    if (!res.ok && typeof responseData === 'string') {
+      responseData = {
+        error: `Cloudflare Worker returned ${res.status}: ${responseData || res.statusText}`,
+        status: res.status,
+        targetUrl,
+      }
+    }
+
     // Run on-demand revalidation if the mutation succeeded
     const isMutation = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
     if (isMutation && res.status >= 200 && res.status < 300) {
@@ -115,8 +131,12 @@ async function handleProxy(req: NextRequest, pathSegments: string[]) {
       responseData,
       { status: res.status }
     )
-  } catch (error: any) {
-    console.error(`Proxy forwarding failed to: ${targetUrl}`, error)
-    return NextResponse.json({ error: 'Failed to communicate with API service', details: error.message }, { status: 502 })
+  } catch (fatalError: any) {
+    console.error('Unhandled fatal error in API proxy:', fatalError)
+    return NextResponse.json({
+      error: 'Next.js API Proxy Fatal Error',
+      message: fatalError?.message || String(fatalError),
+      stack: process.env.NODE_ENV === 'development' ? fatalError?.stack : undefined
+    }, { status: 500 })
   }
 }
