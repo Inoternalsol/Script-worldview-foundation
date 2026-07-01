@@ -50,31 +50,43 @@ stripeWebhook.post('/', async (c) => {
     return c.json({ ok: false }, 401);
   }
 
-  const event = JSON.parse(body);
+  let event;
+  try {
+    event = JSON.parse(body);
+  } catch (err) {
+    console.error('Stripe webhook malformed JSON:', err);
+    return c.json({ ok: false, error: 'Malformed payload' }, 400);
+  }
+
   const db = drizzle(c.env.DB);
 
   if (event.type === 'payment_intent.succeeded') {
-    const paymentIntent = event.data.object;
-    const donationId = paymentIntent.metadata.donationId;
+    const paymentIntent = event.data?.object || {};
+    const donationId = paymentIntent.metadata?.donationId;
 
     if (donationId) {
-      const result = await db.update(schema.donations)
-        .set({ 
-          status: 'completed',
-          updatedAt: new Date()
-        })
-        .where(eq(schema.donations.id, donationId))
-        .returning();
+      try {
+        const result = await db.update(schema.donations)
+          .set({ 
+            status: 'completed',
+            updatedAt: new Date()
+          })
+          .where(eq(schema.donations.id, donationId))
+          .returning();
 
-      if (result.length > 0) {
-        const donation = result[0];
-        
-        const receiptHtml = getDonationReceiptHtml(donation.donorName, donation.amount, donation.currency, donation.id);
-        await sendEmail(c.env, {
-          to: donation.donorEmail,
-          subject: 'Thank You for Your Donation - Script Worldview Foundation',
-          html: receiptHtml,
-        });
+        if (result.length > 0) {
+          const donation = result[0];
+          
+          const receiptHtml = getDonationReceiptHtml(donation.donorName, donation.amount, donation.currency, donation.id);
+          await sendEmail(c.env, {
+            to: donation.donorEmail,
+            subject: 'Thank You for Your Donation - Script Worldview Foundation',
+            html: receiptHtml,
+          });
+        }
+      } catch (dbErr) {
+        console.error('Stripe webhook DB update failure:', dbErr);
+        return c.json({ ok: false, error: 'Database processing error' }, 500);
       }
     }
   }

@@ -9,7 +9,9 @@
     "typecheck": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
     "deploy": "node node_modules/wrangler/bin/wrangler.js deploy",
     "db:generate": "node node_modules/drizzle-kit/bin.cjs generate",
-    "db:apply:local": "node node_modules/wrangler/bin/wrangler.js d1 migrations apply DB --local"
+    "db:apply:local": "node node_modules/wrangler/bin/wrangler.js d1 migrations apply DB --local",
+    "db:backup:remote": "node node_modules/wrangler/bin/wrangler.js d1 export DB --remote --output=backup-$(date +%s).sql",
+    "db:apply:remote": "node node_modules/wrangler/bin/wrangler.js d1 migrations apply DB --remote"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.8.0",

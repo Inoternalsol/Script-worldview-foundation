@@ -34,32 +34,46 @@ paystackWebhook.post('/', async (c) => {
     return c.json({ ok: false }, 401);
   }
 
-  const event = JSON.parse(body);
+  let event;
+  try {
+    event = JSON.parse(body);
+  } catch (err) {
+    console.error('Paystack webhook malformed JSON:', err);
+    return c.json({ ok: false, error: 'Malformed payload' }, 400);
+  }
+
   const db = drizzle(c.env.DB);
 
   if (event.event === 'charge.success') {
-    const data = event.data;
+    const data = event.data || {};
     const reference = data.reference;
 
-    // Update donation status
-    const result = await db.update(schema.donations)
-      .set({ 
-        status: 'completed',
-        updatedAt: new Date()
-      })
-      .where(eq(schema.donations.id, reference))
-      .returning();
+    if (reference) {
+      try {
+        // Update donation status
+        const result = await db.update(schema.donations)
+          .set({ 
+            status: 'completed',
+            updatedAt: new Date()
+          })
+          .where(eq(schema.donations.id, reference))
+          .returning();
 
-    if (result.length > 0) {
-      const donation = result[0];
-      
-      // Trigger receipt email
-      const receiptHtml = getDonationReceiptHtml(donation.donorName, donation.amount, donation.currency, donation.id);
-      await sendEmail(c.env, {
-        to: donation.donorEmail,
-        subject: 'Thank You for Your Donation - Script Worldview Foundation',
-        html: receiptHtml,
-      });
+        if (result.length > 0) {
+          const donation = result[0];
+          
+          // Trigger receipt email
+          const receiptHtml = getDonationReceiptHtml(donation.donorName, donation.amount, donation.currency, donation.id);
+          await sendEmail(c.env, {
+            to: donation.donorEmail,
+            subject: 'Thank You for Your Donation - Script Worldview Foundation',
+            html: receiptHtml,
+          });
+        }
+      } catch (dbErr) {
+        console.error('Paystack webhook DB update failure:', dbErr);
+        return c.json({ ok: false, error: 'Database processing error' }, 500);
+      }
     }
   }
 
