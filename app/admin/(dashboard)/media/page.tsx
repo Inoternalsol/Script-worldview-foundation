@@ -28,8 +28,9 @@ export default function MediaLibraryPage() {
 
   async function fetchMedia() {
     try {
-      const data = await adminClientFetch<MediaItem[]>('/media')
-      setMediaList(data || [])
+      const data: any = await adminClientFetch('/media')
+      const list = Array.isArray(data) ? data : (data?.data || [])
+      setMediaList(list)
     } catch (err: any) {
       toast({
         title: 'Error',

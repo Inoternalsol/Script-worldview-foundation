@@ -20,8 +20,10 @@ export default function PlatformAnalyticsPage() {
           adminClientFetch('/analytics'),
           adminClientFetch('/stats')
         ])
-        if (analyticsRes.data) setMonthlyData(analyticsRes.data)
-        if (statsRes.data) setStats(statsRes.data)
+        const analyticsList = Array.isArray(analyticsRes) ? analyticsRes : (analyticsRes?.data || [])
+        if (analyticsList) setMonthlyData(analyticsList)
+        const statsObj = statsRes?.volunteers !== undefined ? statsRes : (statsRes?.data || null)
+        if (statsObj) setStats(statsObj)
       } catch (err) {
         console.error(err)
       } finally {

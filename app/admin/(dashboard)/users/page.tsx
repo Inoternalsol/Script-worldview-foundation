@@ -30,8 +30,9 @@ export default function UsersManagementPage() {
 
   async function fetchUsers() {
     try {
-      const data = await adminClientFetch<User[]>('/users')
-      setUsersList(data || [])
+      const data: any = await adminClientFetch('/users')
+      const list = Array.isArray(data) ? data : (data?.data || [])
+      setUsersList(list)
     } catch (err: any) {
       toast({
         title: 'Error',
