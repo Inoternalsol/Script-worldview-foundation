@@ -10,7 +10,30 @@ import { getServerEnv } from '@/lib/env'
 export default async function AboutPage() {
   const env = getServerEnv()
   let settings = null
-  
+  let leaders = [
+    {
+      id: '1',
+      name: 'Rev. Joshua Sati',
+      role: 'Founder & Chairman',
+      bio: 'Visionary leader with over 15 years of experience in faith-inspired humanitarian work and rural community development across West Africa.',
+      photoUrl: '/images/team-founder.png',
+    },
+    {
+      id: '2',
+      name: 'Sarah Nnamdi',
+      role: 'Executive Director',
+      bio: 'Spearheads operational strategy and partnerships, ensuring every initiative brings sustainable, measurable impact to communities.',
+      photoUrl: '/images/team-staff1.png',
+    },
+    {
+      id: '3',
+      name: 'David Adeyemi',
+      role: 'Director of Programs',
+      bio: 'Oversees on-the-ground implementation of education and humanitarian projects, deeply connected with local community leaders.',
+      photoUrl: '/images/team-staff2.png',
+    },
+  ]
+
   try {
     const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/settings/about_page`, {
       next: { revalidate: 60 }
@@ -21,6 +44,20 @@ export default async function AboutPage() {
     }
   } catch (error) {
     console.error('Failed to fetch about page settings:', error)
+  }
+
+  try {
+    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/team`, {
+      next: { revalidate: 60 }
+    })
+    if (res.ok) {
+      const json = await res.json()
+      if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+        leaders = json.data.slice(0, 3)
+      }
+    }
+  } catch (error) {
+    console.error('Failed to fetch team for about page:', error)
   }
 
   const heroTitle = settings?.heroTitle || "Who We Are"
@@ -172,38 +209,25 @@ export default async function AboutPage() {
             description="Our board of trustees and executive team bring decades of experience in community development, faith-based leadership, and organizational governance."
           />
           <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="flex flex-col items-center">
-              <div className="relative mb-6 h-64 w-full overflow-hidden rounded-2xl">
-                <Image src="/images/team-founder.png" alt="Founder" fill className="object-cover" />
+            {leaders.map((leader: any, i: number) => (
+              <div key={leader.id || i} className="flex flex-col items-center">
+                <div className="relative mb-6 h-64 w-full overflow-hidden rounded-2xl bg-secondary/80">
+                  <Image
+                    src={leader.photoUrl || `https://avatar.vercel.sh/${encodeURIComponent(leader.name)}`}
+                    alt={leader.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <h3 className="font-heading text-xl font-bold text-brand-primary">{leader.name}</h3>
+                <p className="mt-1 text-sm font-medium uppercase tracking-wider text-brand-cta">{leader.role}</p>
+                {leader.bio && (
+                  <p className="mt-4 text-sm text-brand-muted px-4 line-clamp-3">
+                    {leader.bio}
+                  </p>
+                )}
               </div>
-              <h3 className="font-heading text-xl font-bold text-brand-primary">Rev. Joshua Sati</h3>
-              <p className="mt-1 text-sm font-medium uppercase tracking-wider text-brand-cta">Founder & Chairman</p>
-              <p className="mt-4 text-sm text-brand-muted px-4">
-                Visionary leader with over 15 years of experience in faith-inspired humanitarian work and rural community development across West Africa.
-              </p>
-            </div>
-            
-            <div className="flex flex-col items-center">
-              <div className="relative mb-6 h-64 w-full overflow-hidden rounded-2xl">
-                <Image src="/images/team-staff1.png" alt="Executive Director" fill className="object-cover" />
-              </div>
-              <h3 className="font-heading text-xl font-bold text-brand-primary">Sarah Nnamdi</h3>
-              <p className="mt-1 text-sm font-medium uppercase tracking-wider text-brand-cta">Executive Director</p>
-              <p className="mt-4 text-sm text-brand-muted px-4">
-                Spearheads operational strategy and partnerships, ensuring every initiative brings sustainable, measurable impact to communities.
-              </p>
-            </div>
-
-            <div className="flex flex-col items-center">
-              <div className="relative mb-6 h-64 w-full overflow-hidden rounded-2xl">
-                <Image src="/images/team-staff2.png" alt="Operations Manager" fill className="object-cover" />
-              </div>
-              <h3 className="font-heading text-xl font-bold text-brand-primary">David Adeyemi</h3>
-              <p className="mt-1 text-sm font-medium uppercase tracking-wider text-brand-cta">Director of Programs</p>
-              <p className="mt-4 text-sm text-brand-muted px-4">
-                Oversees on-the-ground implementation of education and humanitarian projects, deeply connected with local community leaders.
-              </p>
-            </div>
+            ))}
           </div>
           
           <div className="mt-16 flex justify-center">
