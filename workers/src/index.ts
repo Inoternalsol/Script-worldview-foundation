@@ -15,6 +15,9 @@ import paystackWebhook from './routes/webhooks/paystack'
 import { adminRoutes } from './routes/admin'
 import { settingsRoutes } from './routes/settings'
 import { teamRoutes } from './routes/team'
+import { transparencyRoutes } from './routes/transparency'
+import { revisionRoutes } from './routes/revisions'
+import { backupRoutes } from './routes/backups'
 import stripeWebhook from './routes/webhooks/stripe'
 import { Env } from './types'
 
@@ -44,6 +47,10 @@ app.route('/api/donations', donationRoutes)
 app.route('/api/campaigns', campaignsRoutes)
 app.route('/api/team', teamRoutes)
 app.route('/api/admin/team', teamRoutes)
+app.route('/api/transparency', transparencyRoutes)
+app.route('/api/admin/transparency', transparencyRoutes)
+app.route('/api/admin/revisions', revisionRoutes)
+app.route('/api/admin/backups', backupRoutes)
 app.route('/api/admin', adminRoutes)
 app.route('/api/settings', settingsRoutes)
 app.route('/api/webhooks/paystack', paystackWebhook)

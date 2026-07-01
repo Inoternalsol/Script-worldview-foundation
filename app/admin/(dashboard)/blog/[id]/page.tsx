@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { TipTapEditor } from '@/components/admin/content/TipTapEditor'
+import { RevisionDrawerClient } from '@/components/admin/RevisionDrawerClient'
 
 type BlogPost = {
   id: string
@@ -64,6 +65,24 @@ export default function EditBlogPostPage({ params }: { params: { id: string } })
     }
 
     try {
+      if (post) {
+        await fetch('/api/admin/revisions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            entityId: post.id,
+            entityType: 'blog_post',
+            title: post.title,
+            snapshotJson: JSON.stringify({
+              title: post.title,
+              content: post.content,
+              excerpt: post.excerpt,
+            }),
+            reason: 'Auto-snapshot prior to manual edit',
+          }),
+        }).catch(() => {})
+      }
+
       const res = await fetch(`/api/admin/blog/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -97,9 +116,16 @@ export default function EditBlogPostPage({ params }: { params: { id: string } })
         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Blog
       </Link>
 
-      <div>
-        <h1 className="font-heading text-2xl font-bold text-foreground">Edit Blog Post</h1>
-        <p className="mt-1 text-sm text-brand-muted">Modify the details of your blog article.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="font-heading text-2xl font-bold text-foreground">Edit Blog Post</h1>
+          <p className="mt-1 text-sm text-brand-muted">Modify the details of your blog article.</p>
+        </div>
+        <RevisionDrawerClient
+          entityId={id}
+          entityType="blog_post"
+          onRestored={() => window.location.reload()}
+        />
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6 rounded-xl border border-border bg-card p-6 shadow-sm">

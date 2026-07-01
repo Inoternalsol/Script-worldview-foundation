@@ -22,6 +22,13 @@
       "when": 1782405867244,
       "tag": "0002_nebulous_pixie",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1782920231837,
+      "tag": "0003_phase2_governance",
+      "breakpoints": true
     }
   ]
 }

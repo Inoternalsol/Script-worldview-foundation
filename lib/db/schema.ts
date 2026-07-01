@@ -418,4 +418,39 @@ export const teamMembers = sqliteTable(
   (t) => [index('team_members_category_idx').on(t.category)],
 )
 
+export const transparencyDocuments = sqliteTable(
+  'transparency_documents',
+  {
+    id: text('id').primaryKey(),
+    title: text('title').notNull(),
+    category: text('category', {
+      enum: ['financial_audit', 'annual_report', 'legal_certificate', 'impact_report'],
+    }).notNull(),
+    fileUrl: text('file_url').notNull(),
+    fileSize: text('file_size'),
+    year: integer('year').notNull(),
+    description: text('description'),
+    createdAt,
+    updatedAt,
+    deletedAt: integer('deleted_at', { mode: 'timestamp_ms' }),
+  },
+  (t) => [index('transparency_docs_category_idx').on(t.category), index('transparency_docs_year_idx').on(t.year)],
+)
+
+export const contentRevisions = sqliteTable(
+  'content_revisions',
+  {
+    id: text('id').primaryKey(),
+    entityId: text('entity_id').notNull(),
+    entityType: text('entity_type', { enum: ['page', 'blog_post'] }).notNull(),
+    title: text('title').notNull(),
+    snapshotJson: text('snapshot_json').notNull(),
+    reason: text('reason'),
+    updatedBy: text('updated_by'),
+    createdAt,
+  },
+  (t) => [index('content_revisions_entity_idx').on(t.entityId, t.entityType)],
+)
+
+
 

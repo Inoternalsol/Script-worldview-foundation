@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { RevisionDrawerClient } from '@/components/admin/RevisionDrawerClient'
 
 type Page = {
   id: string
@@ -50,10 +51,12 @@ export default function EditStaticPage({ params }: { params: { id: string } }) {
     setError(null)
 
     const form = new FormData(e.currentTarget)
-    
-    // Construct simple content JSON
-    const content = form.get('content') as string
-    const contentJson = JSON.stringify({ body: content })
+    const rawBody = form.get('contentBody') as string
+
+    // Store raw body inside JSON structure for pages
+    const contentJson = JSON.stringify({
+      body: rawBody,
+    })
 
     const body = {
       title: form.get('title') as string,
@@ -66,6 +69,26 @@ export default function EditStaticPage({ params }: { params: { id: string } }) {
     }
 
     try {
+      // Record a pre-save snapshot for rollback safety
+      if (page) {
+        await fetch('/api/admin/revisions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            entityId: page.id,
+            entityType: 'page',
+            title: page.title,
+            snapshotJson: JSON.stringify({
+              title: page.title,
+              contentJson: page.contentJson,
+              metaTitle: page.metaTitle,
+              metaDesc: page.metaDesc,
+            }),
+            reason: 'Auto-snapshot prior to manual edit',
+          }),
+        }).catch(() => {})
+      }
+
       const res = await fetch(`/api/admin/pages/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -108,9 +131,16 @@ export default function EditStaticPage({ params }: { params: { id: string } }) {
         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Pages
       </Link>
 
-      <div>
-        <h1 className="font-heading text-2xl font-bold text-foreground">Edit Page Content</h1>
-        <p className="mt-1 text-sm text-brand-muted">Modify copywriting and SEO metadata settings.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="font-heading text-2xl font-bold text-foreground">Edit Page Content</h1>
+          <p className="mt-1 text-sm text-brand-muted">Modify copywriting and SEO metadata settings.</p>
+        </div>
+        <RevisionDrawerClient
+          entityId={id}
+          entityType="page"
+          onRestored={() => window.location.reload()}
+        />
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6 rounded-xl border border-border bg-card p-6 shadow-sm">
