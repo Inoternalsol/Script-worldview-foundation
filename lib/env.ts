@@ -15,10 +15,15 @@ let cachedEnv: ServerEnv | null = null
 
 export function getServerEnv(): ServerEnv {
   if (!cachedEnv) {
+    let apiUrl = process.env.NEXT_PUBLIC_API_URL || undefined
+    if (process.env.NODE_ENV === 'production' && (!apiUrl || apiUrl.includes('localhost') || apiUrl.includes('swf.vercel.app'))) {
+      apiUrl = 'https://script-worldview-api.scriptworldview-dev.workers.dev'
+    }
+
     const raw = {
       NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || undefined,
       NEXTAUTH_URL: process.env.NEXTAUTH_URL || undefined,
-      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || undefined,
+      NEXT_PUBLIC_API_URL: apiUrl,
       NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || undefined,
       JWT_SECRET: process.env.JWT_SECRET || undefined,
     }
@@ -29,7 +34,7 @@ export function getServerEnv(): ServerEnv {
       cachedEnv = {
         NEXTAUTH_SECRET: raw.NEXTAUTH_SECRET || 'fallback-nextauth-secret',
         NEXTAUTH_URL: raw.NEXTAUTH_URL,
-        NEXT_PUBLIC_API_URL: raw.NEXT_PUBLIC_API_URL || 'http://localhost:8787',
+        NEXT_PUBLIC_API_URL: raw.NEXT_PUBLIC_API_URL || 'https://script-worldview-api.scriptworldview-dev.workers.dev',
         NEXT_PUBLIC_APP_URL: raw.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
         JWT_SECRET: raw.JWT_SECRET || 'development_jwt_secret_key_12345',
       }
