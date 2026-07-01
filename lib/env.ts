@@ -39,6 +39,9 @@ export function getServerEnv(): ServerEnv {
         JWT_SECRET: raw.JWT_SECRET || 'development_jwt_secret_key_12345',
       }
     }
+    if (cachedEnv.NEXT_PUBLIC_API_URL) {
+      cachedEnv.NEXT_PUBLIC_API_URL = cachedEnv.NEXT_PUBLIC_API_URL.replace(/\/+$/, '').replace(/\/api$/, '')
+    }
   }
   return cachedEnv
 }
