@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import { apiFetch, QueuedRequest } from '@/lib/api/client';
+import { apiFetch, QueuedRequest, getApiBaseUrl } from '@/lib/api/client';
 import { CloudLightning, Wifi, WifiOff, RefreshCw, CheckCircle2 } from 'lucide-react';
 
 export function OfflineSyncProvider({ children }: { children: React.ReactNode }) {
@@ -35,7 +35,7 @@ export function OfflineSyncProvider({ children }: { children: React.ReactNode })
     // Attempt to flush each request
     for (const req of queue) {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8787';
+        const baseUrl = getApiBaseUrl();
         
         // Use normal fetch so we do not trigger the interceptor again
         const res = await fetch(`${baseUrl}${req.path}`, {

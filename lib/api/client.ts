@@ -3,7 +3,14 @@ export type ApiError = {
 }
 
 export function getApiBaseUrl() {
-  return process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8787'
+  let url = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8787'
+  url = url.replace(/\/api\/?$/, '').replace(/\/$/, '')
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+    if (!url || url.includes('localhost') || url.includes('swf.vercel.app')) {
+      url = 'https://script-worldview-api.scriptworldview-dev.workers.dev'
+    }
+  }
+  return url
 }
 
 export interface QueuedRequest {
