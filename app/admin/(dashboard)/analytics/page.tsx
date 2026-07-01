@@ -2,14 +2,22 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { TrendingUp, Users, Heart, Eye, ArrowUpRight, Loader2 } from 'lucide-react'
+import { TrendingUp, Users, Heart, Eye, ArrowUpRight, Loader2, AlertCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { adminClientFetch } from '@/lib/admin-client'
+
+const DEFAULT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(name => ({
+  name,
+  donations: 0,
+  volunteers: 0,
+  pageViews: 0
+}))
 
 export default function PlatformAnalyticsPage() {
   const [activeMetric, setActiveMetric] = useState<'both' | 'volunteers' | 'donations'>('both')
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  const [monthlyData, setMonthlyData] = useState<any[]>([])
+  const [monthlyData, setMonthlyData] = useState<any[]>(DEFAULT_MONTHS)
+  const [isFallback, setIsFallback] = useState(false)
   const [stats, setStats] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -21,11 +29,18 @@ export default function PlatformAnalyticsPage() {
           adminClientFetch('/stats')
         ])
         const analyticsList = Array.isArray(analyticsRes) ? analyticsRes : (analyticsRes?.data || [])
-        if (analyticsList) setMonthlyData(analyticsList)
+        if (analyticsList && analyticsList.length > 0) {
+          setMonthlyData(analyticsList)
+          setIsFallback(false)
+        } else {
+          setMonthlyData(DEFAULT_MONTHS)
+          setIsFallback(true)
+        }
         const statsObj = statsRes?.volunteers !== undefined ? statsRes : (statsRes?.data || null)
         if (statsObj) setStats(statsObj)
       } catch (err) {
         console.error(err)
+        setIsFallback(true)
       } finally {
         setIsLoading(false)
       }
@@ -40,8 +55,6 @@ export default function PlatformAnalyticsPage() {
       </div>
     )
   }
-
-  if (!monthlyData.length) return null
 
   // Chart settings
   const width = 800
@@ -86,6 +99,14 @@ export default function PlatformAnalyticsPage() {
 
   return (
     <div className="space-y-8">
+      {isFallback && (
+        <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-800 dark:border-amber-900/40 dark:bg-amber-900/20 dark:text-amber-300">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+          <div className="text-xs">
+            <span className="font-bold">Live API Route Pending Deployment:</span> The backend endpoint <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-[11px] dark:bg-amber-800/40">/api/admin/analytics</code> returned 404 on the Cloudflare Worker. Showing default baseline charts. To enable live database analytics, publish the updated Worker code to Cloudflare via <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-[11px] dark:bg-amber-800/40">npx wrangler deploy</code> inside the <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-[11px] dark:bg-amber-800/40">workers/</code> directory.
+          </div>
+        </div>
+      )}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-heading text-2xl font-bold text-foreground">Platform Analytics</h1>
