@@ -103,7 +103,7 @@ export default async function AdminDashboardPage() {
               <StatCard
                 label="Total Donations"
                 value={stats.donations}
-                subValue={`₦${(stats.donationTotal / 100).toLocaleString()} raised`}
+                subValue={`₦${(stats.donationTotal / 100).toLocaleString('en-US')} raised`}
                 icon={Heart}
                 color="text-green-600"
               />
