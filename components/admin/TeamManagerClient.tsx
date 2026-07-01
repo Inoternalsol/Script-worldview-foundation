@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Plus, Pencil, User, Briefcase, Tag, Loader2 } from 'lucide-react'
 import { DeleteConfirmButton } from '@/components/admin/DeleteConfirmButton'
 import { toast } from '@/components/ui/use-toast'
+import { ImageUploadInput } from '@/components/admin/ImageUploadInput'
 
 type TeamMember = {
   id: string
@@ -306,22 +307,18 @@ export function TeamManagerClient({ initialMembers }: { initialMembers: TeamMemb
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2">
-                  <label htmlFor="team-photo" className="block text-xs font-semibold text-foreground mb-1">Headshot Photo URL</label>
-                  <input
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="team-photo" className="block text-xs font-semibold text-foreground mb-1">Headshot Photo</label>
+                  <ImageUploadInput
                     id="team-photo"
-                    type="url"
-                    aria-label="Headshot Photo URL"
-                    title="Headshot Photo URL"
-                    placeholder="https://..."
                     value={photoUrl}
-                    onChange={(e) => setPhotoUrl(e.target.value)}
-                    className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                    onChange={(url: string) => setPhotoUrl(url)}
+                    placeholder="Enter URL or upload headshot photo..."
                   />
                 </div>
-                <div>
-                  <label htmlFor="team-order" className="block text-xs font-semibold text-foreground mb-1">Sort Order</label>
+                <div className="w-1/3">
+                  <label htmlFor="team-order" className="block text-xs font-semibold text-foreground mb-1">Sort Order Index</label>
                   <input
                     id="team-order"
                     type="number"

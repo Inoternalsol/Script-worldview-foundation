@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { useToast } from '@/components/ui/use-toast'
 import { Loader2, Save, ArrowLeft, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
+import { ImageUploadInput } from '@/components/admin/ImageUploadInput'
 
 export default function AboutPageSettings() {
   const { toast } = useToast()
@@ -129,11 +130,11 @@ export default function AboutPageSettings() {
               <Label htmlFor="heroBgImage" className="flex items-center gap-1.5">
                 <ImageIcon className="h-4 w-4 text-brand-primary" /> Banner Background Image URL
               </Label>
-              <Input
+              <ImageUploadInput
                 id="heroBgImage"
                 value={formData.heroBgImage}
-                onChange={(e) => setFormData({ ...formData, heroBgImage: e.target.value })}
-                placeholder="/images/about-hero.png"
+                onChange={(url) => setFormData({ ...formData, heroBgImage: url })}
+                placeholder="/images/about-hero.png or click Upload Image..."
               />
             </div>
           </CardContent>
