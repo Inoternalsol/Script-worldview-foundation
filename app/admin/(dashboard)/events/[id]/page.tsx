@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { EventRegistrationsTable } from '@/components/admin/EventRegistrationsTable'
 
 type Event = {
   id: string
@@ -180,6 +181,8 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
           </Button>
         </div>
       </form>
+
+      <EventRegistrationsTable eventId={event.id} eventTitle={event.title} />
     </div>
   )
 }
