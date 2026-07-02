@@ -120,6 +120,12 @@ export function EventsTableClient({ events }: { events: Event[] }) {
                     >
                       <Pencil className="h-3 w-3" />Edit
                     </Link>
+                    <Link
+                      href={`/admin/events/${event.id}#attendees`}
+                      className="inline-flex items-center gap-1 rounded border border-brand-primary/20 bg-brand-primary/5 px-2 py-1 text-xs font-medium text-brand-primary hover:bg-brand-primary/10 transition-colors"
+                    >
+                      <Users className="h-3 w-3" />Attendees ({event.registrationsCount})
+                    </Link>
                     <DeleteConfirmButton id={event.id} endpoint="/api/admin/events" label="Event" />
                   </div>
                 </td>

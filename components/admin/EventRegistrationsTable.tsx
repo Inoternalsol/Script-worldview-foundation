@@ -66,7 +66,7 @@ export function EventRegistrationsTable({ eventId, eventTitle }: { eventId: stri
   }
 
   return (
-    <div className="mt-12 rounded-2xl border border-border bg-card p-6 shadow-card">
+    <div id="attendees" className="mt-12 scroll-mt-24 rounded-2xl border border-border bg-card p-6 shadow-card">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-6">
         <div>
           <div className="flex items-center gap-2 font-heading text-xl font-bold text-foreground">
