@@ -160,6 +160,7 @@ export default async function LeadershipPage() {
             <SectionHeader
               title="Board of Trustees & Senior Leadership"
               description="Our leadership team provides strategic direction and ensures the highest standards of governance and accountability."
+              centered={true}
             />
             <div className="mt-12 grid gap-8 md:grid-cols-3">
               {board.map((member) => (
@@ -183,6 +184,7 @@ export default async function LeadershipPage() {
             <SectionHeader
               title="Department Heads"
               description="The dedicated professionals leading our daily operations and programmatic impact."
+              centered={true}
             />
             <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {team.map((member) => (

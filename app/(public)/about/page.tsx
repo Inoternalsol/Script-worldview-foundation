@@ -207,6 +207,7 @@ export default async function AboutPage() {
             eyebrow="Leadership"
             title="Guided by Experience"
             description="Our board of trustees and executive team bring decades of experience in community development, faith-based leadership, and organizational governance."
+            centered={true}
           />
           <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {leaders.map((leader: any, i: number) => (
