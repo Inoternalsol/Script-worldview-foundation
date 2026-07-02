@@ -60,46 +60,54 @@ const fallbackTeam = [
   }
 ]
 
+import { getServerEnv } from '@/lib/env'
+
 export const revalidate = 60
 
 export default async function LeadershipPage() {
+  const env = getServerEnv()
   let board = fallbackBoard
   let executive = fallbackExecutive
   let team = fallbackTeam
 
   try {
-    const res = await apiFetch<any>('/api/team')
-    if (res.ok && Array.isArray(res.data) && res.data.length > 0) {
-      const allMembers = res.data
-      const execs = allMembers.filter((m: any) => m.category === 'executive')
-      const boards = allMembers.filter((m: any) => m.category === 'board')
-      const leads = allMembers.filter((m: any) => m.category === 'volunteer_lead')
+    const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/api/team`, {
+      next: { revalidate: 60 }
+    })
+    if (res.ok) {
+      const json = await res.json()
+      const allMembers = json.data
+      if (Array.isArray(allMembers) && allMembers.length > 0) {
+        const execs = allMembers.filter((m: any) => m.category === 'executive')
+        const boards = allMembers.filter((m: any) => m.category === 'board')
+        const leads = allMembers.filter((m: any) => m.category === 'volunteer_lead')
 
-      if (execs.length > 0) {
+        const primaryExec = execs.length > 0 ? execs[0] : allMembers[0]
         executive = {
-          name: execs[0].name,
-          role: execs[0].role,
-          bio: execs[0].bio || '',
-          imageUrl: execs[0].photoUrl || '/images/team-staff1.png',
+          name: primaryExec.name,
+          role: primaryExec.role,
+          bio: primaryExec.bio || '',
+          imageUrl: primaryExec.photoUrl || '/images/team-staff1.png',
         }
-      }
-      if (boards.length > 0) {
-        board = boards.map((m: any) => ({
+
+        const mapMember = (m: any) => ({
           id: m.id,
           name: m.name,
           role: m.role,
           bio: m.bio || '',
           imageUrl: m.photoUrl || `https://avatar.vercel.sh/${encodeURIComponent(m.name)}`,
-        }))
-      }
-      if (leads.length > 0) {
-        team = leads.map((m: any) => ({
-          id: m.id,
-          name: m.name,
-          role: m.role,
-          bio: m.bio || '',
-          imageUrl: m.photoUrl || `https://avatar.vercel.sh/${encodeURIComponent(m.name)}`,
-        }))
+        })
+
+        if (boards.length > 0) {
+          board = boards.map(mapMember)
+        } else {
+          // If no members explicitly in 'board' category, display remaining executives/members
+          const remaining = allMembers.filter((m: any) => m.id !== primaryExec.id && m.category !== 'volunteer_lead')
+          board = remaining.map(mapMember)
+        }
+
+        // If live data exists, don't show placeholder team members if leads is empty
+        team = leads.map(mapMember)
       }
     }
   } catch (error) {
@@ -146,46 +154,50 @@ export default async function LeadershipPage() {
       </section>
 
       {/* Board of Trustees */}
-      <section className="bg-background py-20">
-        <div className="mx-auto max-w-6xl px-4 md:px-8">
-          <SectionHeader
-            title="Board of Trustees"
-            description="Our board provides strategic direction and ensures the highest standards of governance and accountability."
-          />
-          <div className="mt-12 grid gap-8 md:grid-cols-3">
-            {board.map((member) => (
-              <TeamMemberCard 
-                key={member.id} 
-                name={member.name}
-                title={member.role}
-                imageUrl={member.imageUrl ?? "https://avatar.vercel.sh/" + member.name}
-                bio={member.bio}
-              />
-            ))}
+      {board.length > 0 && (
+        <section className="bg-background py-20">
+          <div className="mx-auto max-w-6xl px-4 md:px-8">
+            <SectionHeader
+              title="Board of Trustees & Senior Leadership"
+              description="Our leadership team provides strategic direction and ensures the highest standards of governance and accountability."
+            />
+            <div className="mt-12 grid gap-8 md:grid-cols-3">
+              {board.map((member) => (
+                <TeamMemberCard 
+                  key={member.id} 
+                  name={member.name}
+                  title={member.role}
+                  imageUrl={member.imageUrl ?? "https://avatar.vercel.sh/" + member.name}
+                  bio={member.bio}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Management Team */}
-      <section className="bg-card py-20">
-        <div className="mx-auto max-w-6xl px-4 md:px-8">
-          <SectionHeader
-            title="Department Heads"
-            description="The dedicated professionals leading our daily operations and programmatic impact."
-          />
-          <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {team.map((member) => (
-              <TeamMemberCard 
-                key={member.id} 
-                name={member.name}
-                title={member.role}
-                imageUrl={member.imageUrl ?? "https://avatar.vercel.sh/" + member.name}
-                bio={member.bio}
-              />
-            ))}
+      {team.length > 0 && (
+        <section className="bg-card py-20">
+          <div className="mx-auto max-w-6xl px-4 md:px-8">
+            <SectionHeader
+              title="Department Heads"
+              description="The dedicated professionals leading our daily operations and programmatic impact."
+            />
+            <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {team.map((member) => (
+                <TeamMemberCard 
+                  key={member.id} 
+                  name={member.name}
+                  title={member.role}
+                  imageUrl={member.imageUrl ?? "https://avatar.vercel.sh/" + member.name}
+                  bio={member.bio}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   )
 }

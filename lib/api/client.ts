@@ -5,7 +5,9 @@ export type ApiError = {
 export function getApiBaseUrl() {
   let url = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8787'
   url = url.replace(/\/api\/?$/, '').replace(/\/$/, '')
-  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+  const isProdServer = typeof window === 'undefined' && process.env.NODE_ENV === 'production'
+  const isProdClient = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  if (isProdServer || isProdClient) {
     if (!url || url.includes('localhost') || url.includes('swf.vercel.app')) {
       url = 'https://script-worldview-api.scriptworldview-dev.workers.dev'
     }
