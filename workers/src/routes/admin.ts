@@ -485,6 +485,136 @@ adminRoutes.patch('/events/:id', async (c) => {
   return c.json({ data: result[0] })
 })
 
+adminRoutes.delete('/events/:id', async (c) => {
+  const id = c.req.param('id')
+  const db = createDb(c.env.DB)
+  const result = await db
+    .update(events)
+    .set({ status: 'cancelled', updatedAt: new Date() })
+    .where(eq(events.id, id))
+    .returning()
+  if (!result.length) return c.json({ error: 'Not found' }, 404)
+  return c.json({ success: true })
+})
+
+// ─── Event Registrations (Admin CRUD) ─────────────────────────────
+const regCreateSchema = z.object({
+  name: z.string().min(1).max(255),
+  email: z.string().email(),
+  phone: z.string().optional().nullable(),
+  organization: z.string().optional().nullable(),
+  roleTitle: z.string().optional().nullable(),
+  dietaryNeeds: z.string().optional().nullable(),
+  accessibilityNeeds: z.string().optional().nullable(),
+  status: z.enum(['confirmed', 'cancelled', 'waitlist']).default('confirmed'),
+})
+
+adminRoutes.get('/events/:id/registrations', async (c) => {
+  const db = createDb(c.env.DB)
+  const eventId = c.req.param('id')
+  const regs = await db
+    .select()
+    .from(eventRegistrations)
+    .where(eq(eventRegistrations.eventId, eventId))
+    .orderBy(desc(eventRegistrations.registeredAt))
+  return c.json({ data: regs })
+})
+
+adminRoutes.post('/events/:id/registrations', async (c) => {
+  const eventId = c.req.param('id')
+  const parsed = regCreateSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'Invalid input', details: parsed.error.format() }, 400)
+
+  const db = createDb(c.env.DB)
+  const [event] = await db.select().from(events).where(eq(events.id, eventId)).limit(1)
+  if (!event) return c.json({ error: 'Event not found' }, 404)
+
+  const now = new Date()
+  const newReg = {
+    id: nanoid(),
+    eventId,
+    name: parsed.data.name,
+    email: parsed.data.email,
+    phone: parsed.data.phone || null,
+    organization: parsed.data.organization || null,
+    roleTitle: parsed.data.roleTitle || null,
+    dietaryNeeds: parsed.data.dietaryNeeds || null,
+    accessibilityNeeds: parsed.data.accessibilityNeeds || null,
+    status: parsed.data.status,
+    registeredAt: now,
+    createdAt: now,
+    updatedAt: now,
+  }
+
+  await db.insert(eventRegistrations).values(newReg)
+  if (parsed.data.status !== 'cancelled') {
+    await db
+      .update(events)
+      .set({ registrationsCount: (event.registrationsCount || 0) + 1 })
+      .where(eq(events.id, eventId))
+  }
+
+  return c.json({ data: newReg }, 201)
+})
+
+adminRoutes.patch('/events/:id/registrations/:regId', async (c) => {
+  const eventId = c.req.param('id')
+  const regId = c.req.param('regId')
+  const parsed = regCreateSchema.partial().safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'Invalid input' }, 400)
+
+  const db = createDb(c.env.DB)
+  const [existingReg] = await db.select().from(eventRegistrations).where(eq(eventRegistrations.id, regId)).limit(1)
+  if (!existingReg) return c.json({ error: 'Registration not found' }, 404)
+
+  const updateData: Record<string, any> = { ...parsed.data, updatedAt: new Date() }
+  const result = await db
+    .update(eventRegistrations)
+    .set(updateData)
+    .where(eq(eventRegistrations.id, regId))
+    .returning()
+
+  // Adjust count if status changed to/from cancelled
+  if (parsed.data.status && parsed.data.status !== existingReg.status) {
+    const [event] = await db.select().from(events).where(eq(events.id, eventId)).limit(1)
+    if (event) {
+      let diff = 0
+      if (existingReg.status === 'cancelled' && parsed.data.status !== 'cancelled') diff = 1
+      else if (existingReg.status !== 'cancelled' && parsed.data.status === 'cancelled') diff = -1
+      if (diff !== 0) {
+        await db
+          .update(events)
+          .set({ registrationsCount: Math.max(0, (event.registrationsCount || 0) + diff) })
+          .where(eq(events.id, eventId))
+      }
+    }
+  }
+
+  return c.json({ data: result[0] })
+})
+
+adminRoutes.delete('/events/:id/registrations/:regId', async (c) => {
+  const eventId = c.req.param('id')
+  const regId = c.req.param('regId')
+  const db = createDb(c.env.DB)
+  const [existingReg] = await db.select().from(eventRegistrations).where(eq(eventRegistrations.id, regId)).limit(1)
+  if (!existingReg) return c.json({ error: 'Registration not found' }, 404)
+
+  await db.delete(eventRegistrations).where(eq(eventRegistrations.id, regId))
+
+  if (existingReg.status !== 'cancelled') {
+    const [event] = await db.select().from(events).where(eq(events.id, eventId)).limit(1)
+    if (event && (event.registrationsCount || 0) > 0) {
+      await db
+        .update(events)
+        .set({ registrationsCount: Math.max(0, (event.registrationsCount || 1) - 1) })
+        .where(eq(events.id, eventId))
+    }
+  }
+
+  return c.json({ success: true })
+})
+
 // ─── Careers (Admin CRUD) ─────────────────────────────────────────
 adminRoutes.get('/careers', async (c) => {
   const db = createDb(c.env.DB)
