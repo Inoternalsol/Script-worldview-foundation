@@ -10,7 +10,18 @@ async function getTransparencyDocs() {
   }
 }
 
-export default async function TransparencyAdminPage() {
+import { Suspense } from 'react'
+import { AdminTableSkeleton } from '@/components/admin/AdminTableSkeleton'
+
+async function TransparencyLoader() {
   const docs = await getTransparencyDocs()
   return <TransparencyManagerClient initialDocs={docs} />
+}
+
+export default function TransparencyAdminPage() {
+  return (
+    <Suspense fallback={<AdminTableSkeleton />}>
+      <TransparencyLoader />
+    </Suspense>
+  )
 }

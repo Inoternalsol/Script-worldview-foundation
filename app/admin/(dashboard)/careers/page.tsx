@@ -21,7 +21,18 @@ async function getJobs(): Promise<Job[]> {
   }
 }
 
-export default async function CareersAdminPage() {
+import { Suspense } from 'react'
+import { AdminTableSkeleton } from '@/components/admin/AdminTableSkeleton'
+
+async function CareersLoader() {
   const jobs = await getJobs()
   return <CareersTableClient jobs={jobs} />
+}
+
+export default function CareersAdminPage() {
+  return (
+    <Suspense fallback={<AdminTableSkeleton />}>
+      <CareersLoader />
+    </Suspense>
+  )
 }

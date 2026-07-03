@@ -19,7 +19,18 @@ async function getSubscribers(): Promise<Subscriber[]> {
   }
 }
 
-export default async function NewsletterAdminPage() {
+import { Suspense } from 'react'
+import { AdminTableSkeleton } from '@/components/admin/AdminTableSkeleton'
+
+async function NewsletterLoader() {
   const subscribers = await getSubscribers()
   return <NewsletterSubscribersTable subscribers={subscribers} />
+}
+
+export default function NewsletterAdminPage() {
+  return (
+    <Suspense fallback={<AdminTableSkeleton />}>
+      <NewsletterLoader />
+    </Suspense>
+  )
 }

@@ -21,7 +21,18 @@ async function getEvents(): Promise<Event[]> {
   }
 }
 
-export default async function EventsAdminPage() {
+import { Suspense } from 'react'
+import { AdminTableSkeleton } from '@/components/admin/AdminTableSkeleton'
+
+async function EventsLoader() {
   const events = await getEvents()
   return <EventsTableClient events={events} />
+}
+
+export default function EventsAdminPage() {
+  return (
+    <Suspense fallback={<AdminTableSkeleton />}>
+      <EventsLoader />
+    </Suspense>
+  )
 }

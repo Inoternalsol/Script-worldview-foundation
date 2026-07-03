@@ -20,7 +20,18 @@ async function getCampaigns(): Promise<Campaign[]> {
   }
 }
 
-export default async function AdminCampaignsPage() {
+import { Suspense } from 'react'
+import { AdminTableSkeleton } from '@/components/admin/AdminTableSkeleton'
+
+async function CampaignsLoader() {
   const campaignsList = await getCampaigns()
   return <CampaignsTableClient campaigns={campaignsList} />
+}
+
+export default function AdminCampaignsPage() {
+  return (
+    <Suspense fallback={<AdminTableSkeleton />}>
+      <CampaignsLoader />
+    </Suspense>
+  )
 }

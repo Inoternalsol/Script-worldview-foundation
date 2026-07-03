@@ -20,7 +20,18 @@ async function getVolunteers(): Promise<Volunteer[]> {
   }
 }
 
-export default async function VolunteersAdminPage() {
+import { Suspense } from 'react'
+import { AdminTableSkeleton } from '@/components/admin/AdminTableSkeleton'
+
+async function VolunteersLoader() {
   const volunteers = await getVolunteers()
   return <VolunteersTable volunteers={volunteers} />
+}
+
+export default function VolunteersAdminPage() {
+  return (
+    <Suspense fallback={<AdminTableSkeleton />}>
+      <VolunteersLoader />
+    </Suspense>
+  )
 }

@@ -26,7 +26,18 @@ async function getPosts(): Promise<BlogPost[]> {
   }
 }
 
-export default async function BlogAdminPage() {
+import { Suspense } from 'react'
+import { AdminTableSkeleton } from '@/components/admin/AdminTableSkeleton'
+
+async function BlogLoader() {
   const posts = await getPosts()
   return <BlogTableClient posts={posts} />
+}
+
+export default function BlogAdminPage() {
+  return (
+    <Suspense fallback={<AdminTableSkeleton />}>
+      <BlogLoader />
+    </Suspense>
+  )
 }

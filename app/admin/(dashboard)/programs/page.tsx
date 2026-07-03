@@ -32,7 +32,10 @@ function categoryName(cat: string) {
   }
 }
 
-export default async function ProgramsAdminPage() {
+import { Suspense } from 'react'
+import { AdminTableSkeleton } from '@/components/admin/AdminTableSkeleton'
+
+async function ProgramsLoader() {
   const programs = await getPrograms()
 
   return (
@@ -105,5 +108,13 @@ export default async function ProgramsAdminPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function ProgramsAdminPage() {
+  return (
+    <Suspense fallback={<AdminTableSkeleton />}>
+      <ProgramsLoader />
+    </Suspense>
   )
 }

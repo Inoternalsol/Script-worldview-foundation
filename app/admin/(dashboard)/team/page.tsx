@@ -10,7 +10,18 @@ async function getTeamMembers() {
   }
 }
 
-export default async function TeamAdminPage() {
+import { Suspense } from 'react'
+import { AdminTableSkeleton } from '@/components/admin/AdminTableSkeleton'
+
+async function TeamLoader() {
   const members = await getTeamMembers()
   return <TeamManagerClient initialMembers={members} />
+}
+
+export default function TeamAdminPage() {
+  return (
+    <Suspense fallback={<AdminTableSkeleton />}>
+      <TeamLoader />
+    </Suspense>
+  )
 }

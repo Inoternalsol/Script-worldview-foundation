@@ -4,7 +4,11 @@ import { SignOutButton } from '@/components/admin/SignOutButton'
 import { SidebarNavigation } from '@/components/admin/SidebarNavigation'
 import { ThemeToggle } from '@/components/public/shared/ThemeToggle'
 
+import { Suspense } from 'react'
 import { AdminBreadcrumb } from '@/components/admin/AdminBreadcrumb'
+import { AdminTopProgressBar } from '@/components/admin/AdminTopProgressBar'
+
+export const dynamic = 'force-dynamic'
 
 export default async function AdminLayout({
   children,
@@ -21,6 +25,9 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-[calc(100vh-1px)] bg-[#F7F8FA]">
+      <Suspense fallback={null}>
+        <AdminTopProgressBar />
+      </Suspense>
       {/* Sidebar */}
       <aside className="hidden w-64 shrink-0 border-r border-border bg-card shadow-[1px_0_0_0_rgba(0,0,0,0.04)] md:flex md:flex-col">
         {/* Brand */}

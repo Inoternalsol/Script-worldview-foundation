@@ -23,7 +23,18 @@ async function getContacts(): Promise<Contact[]> {
   }
 }
 
-export default async function ContactsAdminPage() {
+import { Suspense } from 'react'
+import { AdminTableSkeleton } from '@/components/admin/AdminTableSkeleton'
+
+async function ContactsLoader() {
   const contactsList = await getContacts()
   return <ContactsTableClient contacts={contactsList} />
+}
+
+export default function ContactsAdminPage() {
+  return (
+    <Suspense fallback={<AdminTableSkeleton />}>
+      <ContactsLoader />
+    </Suspense>
+  )
 }

@@ -25,7 +25,18 @@ async function getDonations(): Promise<Donation[]> {
   }
 }
 
-export default async function DonationsAdminPage() {
+import { Suspense } from 'react'
+import { AdminTableSkeleton } from '@/components/admin/AdminTableSkeleton'
+
+async function DonationsLoader() {
   const donations = await getDonations()
   return <DonationsTableClient donations={donations} />
+}
+
+export default function DonationsAdminPage() {
+  return (
+    <Suspense fallback={<AdminTableSkeleton />}>
+      <DonationsLoader />
+    </Suspense>
+  )
 }

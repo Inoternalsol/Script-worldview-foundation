@@ -64,7 +64,10 @@ function StatCard({
   )
 }
 
-export default async function AdminDashboardPage() {
+import { Suspense } from 'react'
+import { AdminTableSkeleton } from '@/components/admin/AdminTableSkeleton'
+
+async function DashboardLoader() {
   const stats = await getStats()
 
   return (
@@ -152,5 +155,13 @@ export default async function AdminDashboardPage() {
         </>
       )}
     </div>
+  )
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <Suspense fallback={<AdminTableSkeleton />}>
+      <DashboardLoader />
+    </Suspense>
   )
 }

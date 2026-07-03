@@ -22,7 +22,10 @@ async function getLogs(): Promise<AuditLog[]> {
   }
 }
 
-export default async function SystemAuditLogsPage() {
+import { Suspense } from 'react'
+import { AdminTableSkeleton } from '@/components/admin/AdminTableSkeleton'
+
+async function AuditLogsLoader() {
   const logsList = await getLogs()
 
   return (
@@ -87,5 +90,13 @@ export default async function SystemAuditLogsPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function SystemAuditLogsPage() {
+  return (
+    <Suspense fallback={<AdminTableSkeleton />}>
+      <AuditLogsLoader />
+    </Suspense>
   )
 }
