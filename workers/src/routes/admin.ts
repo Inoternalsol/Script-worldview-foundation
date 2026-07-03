@@ -148,7 +148,7 @@ adminRoutes.get('/volunteers', async (c) => {
 adminRoutes.get('/volunteers/:id', async (c) => {
   const db = createDb(c.env.DB)
   const id = c.req.param('id')
-  const record = await db.select().from(volunteers).where(eq(volunteers.id, id)).get()
+  const [record] = await db.select().from(volunteers).where(eq(volunteers.id, id)).limit(1)
   
   if (!record) {
     return c.json({ error: 'Volunteer not found' }, 404)

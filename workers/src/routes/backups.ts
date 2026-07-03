@@ -17,13 +17,13 @@ backupRoutes.get('/status', authMiddleware, requireRole(['super_admin', 'dept_ad
 
   try {
     const [donationsCount, volunteersCount, eventsCount, blogCount, pagesCount, teamCount, docsCount] = await Promise.all([
-      db.select({ count: sql<number>`count(*)` }).from(donations).get(),
-      db.select({ count: sql<number>`count(*)` }).from(volunteers).get(),
-      db.select({ count: sql<number>`count(*)` }).from(events).get(),
-      db.select({ count: sql<number>`count(*)` }).from(blogPosts).get(),
-      db.select({ count: sql<number>`count(*)` }).from(pages).get(),
-      db.select({ count: sql<number>`count(*)` }).from(teamMembers).get(),
-      db.select({ count: sql<number>`count(*)` }).from(transparencyDocuments).get(),
+      db.select({ count: sql<number>`count(*)` }).from(donations).then(r => r[0]),
+      db.select({ count: sql<number>`count(*)` }).from(volunteers).then(r => r[0]),
+      db.select({ count: sql<number>`count(*)` }).from(events).then(r => r[0]),
+      db.select({ count: sql<number>`count(*)` }).from(blogPosts).then(r => r[0]),
+      db.select({ count: sql<number>`count(*)` }).from(pages).then(r => r[0]),
+      db.select({ count: sql<number>`count(*)` }).from(teamMembers).then(r => r[0]),
+      db.select({ count: sql<number>`count(*)` }).from(transparencyDocuments).then(r => r[0]),
     ])
 
     // Get latest backup triggers from audit logs
@@ -72,8 +72,8 @@ backupRoutes.post('/trigger', authMiddleware, requireRole(['super_admin', 'dept_
 
   // Execute snapshot query count
   const [donationsCount, volunteersCount] = await Promise.all([
-    db.select({ count: sql<number>`count(*)` }).from(donations).get(),
-    db.select({ count: sql<number>`count(*)` }).from(volunteers).get(),
+    db.select({ count: sql<number>`count(*)` }).from(donations).then(r => r[0]),
+    db.select({ count: sql<number>`count(*)` }).from(volunteers).then(r => r[0]),
   ])
 
   const details = {

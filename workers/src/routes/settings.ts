@@ -18,7 +18,7 @@ settingsRoutes.get('/:key', async (c) => {
   const key = c.req.param('key')
   
   try {
-    const setting = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).get()
+    const [setting] = await db.select().from(siteSettings).where(eq(siteSettings.key, key)).limit(1)
     
     if (!setting) {
       return c.json({ data: null })
