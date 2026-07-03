@@ -117,12 +117,13 @@ async function handleProxy(req: NextRequest, pathSegments: string[]) {
     const isMutation = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
     if (isMutation && res.status >= 200 && res.status < 300) {
       const segment = pathSegments[0]
-      if (['blog', 'events', 'campaigns', 'programs', 'careers'].includes(segment)) {
+      const routesToPurge = ['/', '/about', '/contact', '/get-involved', '/programs', '/blog', '/events', '/campaigns', '/careers', '/partners', '/stories', '/transparency']
+      if (['blog', 'events', 'campaigns', 'programs', 'careers', 'settings', 'pages'].includes(segment)) {
         try {
-          revalidatePath(`/${segment}`, 'layout')
-          console.log(`[ISR Revalidation] Purged cache for layout path: /${segment}`)
+          routesToPurge.forEach(r => revalidatePath(r, 'layout'))
+          console.log(`[ISR Revalidation] Purged cache for public pages after mutation on /${segment}`)
         } catch (revalErr) {
-          console.error(`[ISR Revalidation] Failed to revalidate /${segment}:`, revalErr)
+          console.error(`[ISR Revalidation] Failed to revalidate paths:`, revalErr)
         }
       }
     }
