@@ -555,7 +555,7 @@ const eventCreateSchema = z.object({
   address: z.string().optional(),
   description: z.string().min(1),
   capacity: z.number().int().optional(),
-  featuredImage: z.string().optional(),
+  featuredImage: z.string().optional().nullable(),
   speakersJson: z.string().optional(),
   status: z.enum(['upcoming', 'ongoing', 'past', 'cancelled']).default('upcoming'),
 })

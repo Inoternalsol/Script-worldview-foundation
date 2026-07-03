@@ -284,6 +284,8 @@ export function PagesManagerClient({ pagesList }: { pagesList: PageItem[] }) {
                         href={hub.slug}
                         target="_blank"
                         rel="noopener noreferrer"
+                        title={`View ${hub.title} Live`}
+                        aria-label={`View ${hub.title} Live`}
                         className="text-xs font-semibold text-brand-muted hover:text-emerald-600 inline-flex items-center gap-1"
                       >
                         <ArrowUpRight className="h-3.5 w-3.5" />

@@ -229,7 +229,17 @@ export default async function EventPage({ params }: { params: { slug: string } }
             />
           </div>
         ) : (
-          <div className="mb-12 aspect-[21/9] w-full rounded-2xl bg-secondary/80"></div>
+          <div className="relative mb-12 flex aspect-[21/9] w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-brand-primary via-brand-primary/90 to-[#0F2236] p-8 text-center shadow-lg">
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
+            <div className="relative z-10 max-w-2xl space-y-3">
+              <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-brand-accent">
+                Script Worldview Foundation Event
+              </span>
+              <h2 className="font-heading text-2xl font-black text-white sm:text-3xl md:text-4xl">
+                {event.title}
+              </h2>
+            </div>
+          </div>
         )}
 
         <div className="grid gap-12 lg:grid-cols-3">

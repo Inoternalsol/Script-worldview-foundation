@@ -26,7 +26,7 @@ const eventSchema = z.object({
   address: z.string().optional(),
   description: z.string().min(1),
   capacity: z.number().int().min(1).optional(),
-  featuredImage: z.string().url().optional(),
+  featuredImage: z.string().optional().nullable(),
   speakersJson: z.string().optional(),
   status: z.enum(['upcoming', 'ongoing', 'past', 'cancelled']).default('upcoming'),
 })

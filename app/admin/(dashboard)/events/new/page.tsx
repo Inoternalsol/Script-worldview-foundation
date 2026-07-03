@@ -8,11 +8,13 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { ImageUploadInput } from '@/components/admin/ImageUploadInput'
 
 export default function NewEventPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [featuredImage, setFeaturedImage] = useState<string>('')
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -29,6 +31,7 @@ export default function NewEventPage() {
       address: (form.get('address') as string) || undefined,
       description: form.get('description') as string,
       capacity: form.get('capacity') ? parseInt(form.get('capacity') as string) : undefined,
+      featuredImage: featuredImage || null,
       status: (form.get('status') as string) || 'upcoming',
     }
 
@@ -118,6 +121,15 @@ export default function NewEventPage() {
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="address">Address</Label>
             <Input id="address" name="address" placeholder="Full address" />
+          </div>
+
+          <div className="space-y-2 sm:col-span-2">
+            <Label>Featured Banner Image</Label>
+            <ImageUploadInput
+              value={featuredImage}
+              onChange={setFeaturedImage}
+              placeholder="Upload banner image file or paste URL..."
+            />
           </div>
 
           <div className="space-y-2 sm:col-span-2">

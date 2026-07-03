@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft, Users, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { EventRegistrationsTable } from '@/components/admin/EventRegistrationsTable'
+import { ImageUploadInput } from '@/components/admin/ImageUploadInput'
 
 type Event = {
   id: string
@@ -22,6 +23,7 @@ type Event = {
   capacity: number | null
   status: string
   registrationsCount?: number
+  featuredImage?: string | null
 }
 
 function formatDateTimeLocal(epoch: string | number) {
@@ -39,6 +41,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
   const [event, setEvent] = useState<Event | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'details' | 'attendees'>('details')
+  const [featuredImage, setFeaturedImage] = useState<string>('')
 
   useEffect(() => {
     async function fetchEvent() {
@@ -47,6 +50,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
         if (!res.ok) throw new Error('Failed to load event')
         const data = await res.json()
         setEvent(data.data)
+        setFeaturedImage(data.data?.featuredImage || '')
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -76,6 +80,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
       address: (form.get('address') as string) || undefined,
       description: form.get('description') as string,
       capacity: form.get('capacity') ? parseInt(form.get('capacity') as string) : undefined,
+      featuredImage: featuredImage || null,
       status: form.get('status') as string,
     }
 
@@ -206,6 +211,15 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="address">Address</Label>
               <Input id="address" name="address" defaultValue={event.address || ''} placeholder="Full address" />
+            </div>
+
+            <div className="space-y-2 sm:col-span-2">
+              <Label>Featured Banner Image</Label>
+              <ImageUploadInput
+                value={featuredImage}
+                onChange={setFeaturedImage}
+                placeholder="Upload banner image file or paste URL..."
+              />
             </div>
 
             <div className="space-y-2 sm:col-span-2">
