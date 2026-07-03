@@ -335,7 +335,7 @@ export function NewsletterSubscribersTable({
                         </button>
                       </td>
 
-                      <td className="px-5 py-4 text-gray-500 dark:text-gray-400 text-xs">
+                      <td className="px-5 py-4 text-gray-500 dark:text-gray-400 text-xs" suppressHydrationWarning>
                         {new Date(sub.subscribedAt).toLocaleDateString(undefined, {
                           month: 'short',
                           day: 'numeric',

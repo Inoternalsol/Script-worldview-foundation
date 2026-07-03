@@ -30,6 +30,14 @@ type Volunteer = {
   appliedAt: string | number
 }
 
+function formatDate(epochOrStr: string | number | null | undefined) {
+  if (!epochOrStr) return '—'
+  const d = new Date(epochOrStr)
+  if (isNaN(d.getTime())) return '—'
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  return `${months[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`
+}
+
 export function VolunteersTable({ volunteers: initialVolunteers }: { volunteers: Volunteer[] }) {
   const [volunteers, setVolunteers] = useState<Volunteer[]>(initialVolunteers)
   const [search, setSearch] = useState('')
@@ -330,12 +338,8 @@ export function VolunteersTable({ volunteers: initialVolunteers }: { volunteers:
                       <VolunteerStatusActions id={vol.id} currentStatus={vol.status} />
                     </td>
 
-                    <td className="px-5 py-4 text-gray-500 dark:text-gray-400 text-xs">
-                      {new Date(vol.appliedAt).toLocaleDateString(undefined, {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
+                    <td className="px-5 py-4 text-gray-500 dark:text-gray-400 text-xs" suppressHydrationWarning>
+                      {formatDate(vol.appliedAt)}
                     </td>
 
                     <td className="px-5 py-4 text-right">

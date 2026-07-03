@@ -483,7 +483,7 @@ export function JobApplicationsTable({
                     </td>
 
                     {/* Applied Date */}
-                    <td className="px-5 py-4 text-gray-500 dark:text-gray-400 text-xs">
+                    <td className="px-5 py-4 text-gray-500 dark:text-gray-400 text-xs" suppressHydrationWarning>
                       {app.appliedAt
                         ? new Date(app.appliedAt).toLocaleDateString(undefined, {
                             month: 'short',
