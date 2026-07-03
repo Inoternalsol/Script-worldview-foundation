@@ -1368,6 +1368,54 @@ adminRoutes.post('/settings', async (c) => {
   return c.json({ success: true, data: body })
 })
 
+// ─── Contacts Management ──────────────────────────────────────────
+adminRoutes.get('/contacts', async (c) => {
+  const db = createDb(c.env.DB)
+  const results = await db.select()
+    .from(contacts)
+    .where(isNull(contacts.deletedAt))
+    .orderBy(desc(contacts.createdAt))
+    .limit(200)
+  return c.json({ data: results })
+})
+
+adminRoutes.get('/contacts/:id', async (c) => {
+  const id = c.req.param('id')
+  const db = createDb(c.env.DB)
+  const result = await db.select()
+    .from(contacts)
+    .where(and(eq(contacts.id, id!), isNull(contacts.deletedAt)))
+    .limit(1)
+  if (!result.length) return c.json({ error: 'Contact not found' }, 404)
+  return c.json({ data: result[0] })
+})
+
+adminRoutes.patch('/contacts/:id', async (c) => {
+  const id = c.req.param('id')
+  const body = await c.req.json().catch(() => ({}))
+  const db = createDb(c.env.DB)
+  const result = await db.update(contacts)
+    .set({
+      ...(body.status ? { status: body.status } : {}),
+      updatedAt: new Date(),
+    })
+    .where(eq(contacts.id, id!))
+    .returning()
+  if (!result.length) return c.json({ error: 'Contact not found' }, 404)
+  return c.json({ data: result[0] })
+})
+
+adminRoutes.delete('/contacts/:id', async (c) => {
+  const id = c.req.param('id')
+  const db = createDb(c.env.DB)
+  const result = await db.update(contacts)
+    .set({ deletedAt: new Date(), updatedAt: new Date() })
+    .where(eq(contacts.id, id!))
+    .returning()
+  if (!result.length) return c.json({ error: 'Contact not found' }, 404)
+  return c.json({ ok: true, data: result[0] })
+})
+
 // ─── Email Dispatcher ─────────────────────────────────────────────
 adminRoutes.post('/email/send', async (c) => {
   // Mock sending and log action
