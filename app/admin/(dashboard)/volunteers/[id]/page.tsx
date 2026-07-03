@@ -19,9 +19,10 @@ export default function VolunteerDetailPage() {
   useEffect(() => {
     const fetchVolunteer = async () => {
       try {
-        const res = await adminClientFetch(`/volunteers/${id}`)
-        if (res.data) setVolunteer(res.data)
-        else throw new Error(res.error || 'Volunteer not found')
+        const res: any = await adminClientFetch(`/volunteers/${id}`)
+        const volunteerData = res?.data || (res && res.id ? res : null) || res
+        if (volunteerData && volunteerData.id) setVolunteer(volunteerData)
+        else throw new Error(res?.error || 'Volunteer not found')
       } catch (err: any) {
         toast({ title: 'Error', description: err.message, variant: 'destructive' })
         router.push('/admin/volunteers')
