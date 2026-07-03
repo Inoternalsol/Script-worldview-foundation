@@ -172,6 +172,54 @@ adminRoutes.patch('/volunteers/:id', async (c) => {
   return c.json({ data: result[0] })
 })
 
+const volunteerCreateSchema = z.object({
+  name: z.string().min(1).max(255),
+  email: z.string().email(),
+  phone: z.string().optional().nullable(),
+  location: z.string().optional().nullable(),
+  skillsJson: z.string().optional().nullable(),
+  availabilityJson: z.string().optional().nullable(),
+  languages: z.string().optional().nullable(),
+  motivation: z.string().optional().nullable(),
+  status: z.enum(['pending', 'approved', 'active', 'rejected']).default('approved'),
+})
+
+adminRoutes.post('/volunteers', async (c) => {
+  const parsed = volunteerCreateSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'Invalid input', details: parsed.error.format() }, 400)
+
+  const db = createDb(c.env.DB)
+  const now = new Date()
+  const newVol = {
+    id: nanoid(),
+    name: parsed.data.name,
+    email: parsed.data.email,
+    phone: parsed.data.phone || null,
+    location: parsed.data.location || null,
+    skillsJson: parsed.data.skillsJson || '[]',
+    availabilityJson: parsed.data.availabilityJson || '{}',
+    languages: parsed.data.languages || null,
+    motivation: parsed.data.motivation || null,
+    status: parsed.data.status,
+    appliedAt: now,
+    createdAt: now,
+    updatedAt: now,
+  }
+
+  await db.insert(volunteers).values(newVol)
+  return c.json({ data: newVol }, 201)
+})
+
+adminRoutes.delete('/volunteers/:id', async (c) => {
+  const id = c.req.param('id')
+  const db = createDb(c.env.DB)
+  const [existing] = await db.select().from(volunteers).where(eq(volunteers.id, id)).limit(1)
+  if (!existing) return c.json({ error: 'Volunteer not found' }, 404)
+
+  await db.delete(volunteers).where(eq(volunteers.id, id))
+  return c.json({ success: true })
+})
+
 // ─── Donations ────────────────────────────────────────────────────
 adminRoutes.get('/donations/export', async (c) => {
   const db = createDb(c.env.DB)
@@ -322,6 +370,71 @@ adminRoutes.get('/newsletter', async (c) => {
     .limit(200)
 
   return c.json({ data })
+})
+
+const newsletterCreateSchema = z.object({
+  email: z.string().email(),
+  firstName: z.string().optional().nullable(),
+  lastName: z.string().optional().nullable(),
+  status: z.enum(['active', 'unsubscribed']).default('active'),
+})
+
+adminRoutes.post('/newsletter', async (c) => {
+  const parsed = newsletterCreateSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'Invalid input', details: parsed.error.format() }, 400)
+
+  const db = createDb(c.env.DB)
+  const emailLower = parsed.data.email.toLowerCase()
+  const [existing] = await db.select().from(newsletterSubscribers).where(eq(newsletterSubscribers.email, emailLower)).limit(1)
+  if (existing) return c.json({ error: 'Subscriber already exists' }, 409)
+
+  const now = new Date()
+  const newSub = {
+    id: nanoid(),
+    email: emailLower,
+    firstName: parsed.data.firstName || null,
+    lastName: parsed.data.lastName || null,
+    preferencesJson: '{}',
+    status: parsed.data.status,
+    subscribedAt: now,
+    unsubscribedAt: parsed.data.status === 'unsubscribed' ? now : null,
+    createdAt: now,
+    updatedAt: now,
+  }
+
+  await db.insert(newsletterSubscribers).values(newSub)
+  return c.json({ data: newSub }, 201)
+})
+
+adminRoutes.patch('/newsletter/:id', async (c) => {
+  const id = c.req.param('id')
+  const body = await c.req.json().catch(() => null)
+  if (!body?.status) return c.json({ error: 'Status required' }, 400)
+
+  const db = createDb(c.env.DB)
+  const now = new Date()
+  const updateData: Record<string, any> = {
+    status: body.status,
+    updatedAt: now,
+  }
+  if (body.status === 'unsubscribed') updateData.unsubscribedAt = now
+
+  const result = await db
+    .update(newsletterSubscribers)
+    .set(updateData)
+    .where(eq(newsletterSubscribers.id, id))
+    .returning()
+
+  if (!result.length) return c.json({ error: 'Subscriber not found' }, 404)
+  return c.json({ data: result[0] })
+})
+
+adminRoutes.delete('/newsletter/:id', async (c) => {
+  const id = c.req.param('id')
+  const db = createDb(c.env.DB)
+  const result = await db.delete(newsletterSubscribers).where(eq(newsletterSubscribers.id, id)).returning()
+  if (!result.length) return c.json({ error: 'Subscriber not found' }, 404)
+  return c.json({ success: true })
 })
 
 // ─── Blog Posts (Admin CRUD) ──────────────────────────────────────
@@ -688,6 +801,84 @@ adminRoutes.patch('/careers/:id', async (c) => {
 })
 
 // ─── Job Applications ─────────────────────────────────────────────
+const jobAppCreateSchema = z.object({
+  name: z.string().min(1).max(255),
+  email: z.string().email(),
+  phone: z.string().optional().nullable(),
+  yearsExperience: z.number().int().optional().nullable(),
+  cvUrl: z.string().optional().nullable(),
+  coverLetter: z.string().optional().nullable(),
+  linkedinUrl: z.string().optional().nullable(),
+  status: z.enum(['received', 'reviewing', 'shortlisted', 'rejected', 'hired']).default('received'),
+})
+
+adminRoutes.get('/careers/:id/applications', async (c) => {
+  const db = createDb(c.env.DB)
+  const jobId = c.req.param('id')
+  const apps = await db
+    .select()
+    .from(jobApplications)
+    .where(eq(jobApplications.jobId, jobId))
+    .orderBy(desc(jobApplications.appliedAt))
+  return c.json({ data: apps })
+})
+
+adminRoutes.post('/careers/:id/applications', async (c) => {
+  const jobId = c.req.param('id')
+  const parsed = jobAppCreateSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'Invalid input', details: parsed.error.format() }, 400)
+
+  const db = createDb(c.env.DB)
+  const [job] = await db.select().from(jobPostings).where(eq(jobPostings.id, jobId)).limit(1)
+  if (!job) return c.json({ error: 'Job posting not found' }, 404)
+
+  const now = new Date()
+  const newApp = {
+    id: nanoid(),
+    jobId,
+    name: parsed.data.name,
+    email: parsed.data.email,
+    phone: parsed.data.phone || null,
+    yearsExperience: parsed.data.yearsExperience || null,
+    cvUrl: parsed.data.cvUrl || null,
+    coverLetter: parsed.data.coverLetter || null,
+    linkedinUrl: parsed.data.linkedinUrl || null,
+    status: parsed.data.status,
+    appliedAt: now,
+    createdAt: now,
+    updatedAt: now,
+  }
+
+  await db.insert(jobApplications).values(newApp)
+  return c.json({ data: newApp }, 201)
+})
+
+adminRoutes.patch('/careers/:id/applications/:appId', async (c) => {
+  const appId = c.req.param('appId')
+  const parsed = jobAppCreateSchema.partial().safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'Invalid input' }, 400)
+
+  const db = createDb(c.env.DB)
+  const updateData: Record<string, any> = { ...parsed.data, updatedAt: new Date() }
+
+  const result = await db
+    .update(jobApplications)
+    .set(updateData)
+    .where(eq(jobApplications.id, appId))
+    .returning()
+
+  if (!result.length) return c.json({ error: 'Application not found' }, 404)
+  return c.json({ data: result[0] })
+})
+
+adminRoutes.delete('/careers/:id/applications/:appId', async (c) => {
+  const appId = c.req.param('appId')
+  const db = createDb(c.env.DB)
+  const result = await db.delete(jobApplications).where(eq(jobApplications.id, appId)).returning()
+  if (!result.length) return c.json({ error: 'Application not found' }, 404)
+  return c.json({ success: true })
+})
+
 adminRoutes.get('/applications', async (c) => {
   const db = createDb(c.env.DB)
   const data = await db
@@ -743,7 +934,83 @@ adminRoutes.get('/campaigns/:id', async (c) => {
   const id = c.req.param('id')
   const [camp] = await db.select().from(campaigns).where(eq(campaigns.id, id)).limit(1)
   if (!camp) return c.json({ error: 'Not found' }, 404)
-  return c.json({ data: camp })
+
+  const campDonations = await db
+    .select()
+    .from(donations)
+    .where(and(eq(donations.campaignId, id), isNull(donations.deletedAt)))
+    .orderBy(desc(donations.donatedAt))
+
+  return c.json({ data: { ...camp, donations: campDonations } })
+})
+
+adminRoutes.get('/campaigns/:id/donations', async (c) => {
+  const db = createDb(c.env.DB)
+  const id = c.req.param('id')
+  const campDonations = await db
+    .select()
+    .from(donations)
+    .where(and(eq(donations.campaignId, id), isNull(donations.deletedAt)))
+    .orderBy(desc(donations.donatedAt))
+
+  return c.json({ data: campDonations })
+})
+
+const manualDonationSchema = z.object({
+  donorName: z.string().min(1).max(255),
+  donorEmail: z.string().email(),
+  donorPhone: z.string().optional().nullable(),
+  amount: z.number().int().min(1), // in cents
+  currency: z.string().default('USD'),
+  paymentRef: z.string().optional(),
+  gateway: z.enum(['paystack', 'stripe']).default('stripe'),
+  status: z.enum(['pending', 'completed', 'failed', 'refunded']).default('completed'),
+  anonymous: z.boolean().default(false),
+  dedicationMessage: z.string().optional().nullable(),
+})
+
+adminRoutes.post('/campaigns/:id/donations', async (c) => {
+  const campaignId = c.req.param('id')
+  const parsed = manualDonationSchema.safeParse(await c.req.json().catch(() => null))
+  if (!parsed.success) return c.json({ error: 'Invalid input', details: parsed.error.format() }, 400)
+
+  const db = createDb(c.env.DB)
+  const [camp] = await db.select().from(campaigns).where(eq(campaigns.id, campaignId)).limit(1)
+  if (!camp) return c.json({ error: 'Campaign not found' }, 404)
+
+  const now = new Date()
+  const newDonation = {
+    id: nanoid(),
+    donorName: parsed.data.donorName,
+    donorEmail: parsed.data.donorEmail,
+    donorPhone: parsed.data.donorPhone || null,
+    amount: parsed.data.amount,
+    currency: parsed.data.currency,
+    campaignId,
+    paymentRef: parsed.data.paymentRef || `offline_${nanoid(8)}`,
+    gateway: parsed.data.gateway,
+    status: parsed.data.status,
+    anonymous: parsed.data.anonymous,
+    dedicationMessage: parsed.data.dedicationMessage || null,
+    donatedAt: now,
+    createdAt: now,
+    updatedAt: now,
+  }
+
+  await db.insert(donations).values(newDonation)
+
+  if (parsed.data.status === 'completed') {
+    await db
+      .update(campaigns)
+      .set({
+        raisedAmount: (camp.raisedAmount || 0) + parsed.data.amount,
+        donorCount: (camp.donorCount || 0) + 1,
+        updatedAt: now,
+      })
+      .where(eq(campaigns.id, campaignId))
+  }
+
+  return c.json({ data: newDonation }, 201)
 })
 
 adminRoutes.post('/campaigns', async (c) => {
