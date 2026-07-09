@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@scriptworldviewfoundation.org"
+                placeholder="admin@scriptworldview.org"
                 {...form.register('email')}
               />
               {form.formState.errors.email?.message ? (

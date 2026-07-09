@@ -1,6 +1,6 @@
 const body = JSON.stringify({
   name: "Admin",
-  email: "admin@scriptworldviewfoundation.org",
+  email: "admin@scriptworldview.org",
   password: "SWF@admin2024",
   role: "super_admin"
 });

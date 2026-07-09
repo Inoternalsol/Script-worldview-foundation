@@ -24,7 +24,7 @@ export default function AccessibilityPage() {
               We welcome your feedback on the accessibility of the Script Worldview Foundation website. Please let us know if you encounter accessibility barriers:
             </p>
             <ul>
-              <li>Email: accessibility@scriptworldviewfoundation.org</li>
+              <li>Email: contact@scriptworldview.org</li>
               <li>Phone: +234 (0) 000 000 0000</li>
             </ul>
             <p>

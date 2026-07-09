@@ -53,7 +53,7 @@ export function TransparencyManagerClient({ initialDocs }: { initialDocs: Transp
     setEditingDoc(null)
     setTitle('')
     setCategory('financial_audit')
-    setFileUrl('https://scriptworldviewfoundation.org/reports/sample-audit.pdf')
+    setFileUrl('https://scriptworldview.org/reports/sample-audit.pdf')
     setFileSize('2.4 MB')
     setYear(new Date().getFullYear())
     setDescription('')

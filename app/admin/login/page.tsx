@@ -70,7 +70,7 @@ export default function AdminLoginPage() {
                 id="email"
                 type="email"
                 autoComplete="email"
-                placeholder="admin@scriptworldviewfoundation.org"
+                placeholder="admin@scriptworldview.org"
                 {...form.register('email')}
               />
               {form.formState.errors.email?.message ? (

@@ -40,7 +40,7 @@ export const ContactConfirmationEmail = ({
             In the meantime, feel free to explore our latest programs and impact stories on our website.
           </Text>
           <Section style={btnContainer}>
-            <Link style={button} href="https://scriptworldviewfoundation.org/programs">
+            <Link style={button} href="https://scriptworldview.org/programs">
               Explore Our Programs
             </Link>
           </Section>

@@ -18,7 +18,7 @@ export function SocialShareButtons({ title, url, description }: SocialShareButto
     if (typeof window !== 'undefined') {
       return url || window.location.href
     }
-    return url || 'https://scriptworldviewfoundation.org'
+    return url || 'https://scriptworldview.org'
   }
 
   const shareUrl = getShareUrl()

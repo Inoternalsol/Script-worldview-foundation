@@ -54,7 +54,7 @@ export const DonationReceiptEmail = ({
             We are deeply grateful for your partnership. Together, we are making a lasting impact.
           </Text>
           <Section style={btnContainer}>
-            <Link style={button} href="https://scriptworldviewfoundation.org/impact">
+            <Link style={button} href="https://scriptworldview.org/impact">
               View Our Impact Stories
             </Link>
           </Section>

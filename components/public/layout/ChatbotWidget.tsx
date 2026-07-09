@@ -75,12 +75,12 @@ function createReply(text: string) {
 
   // 8. Contact & Location
   if (t.includes('contact') || t.includes('email') || t.includes('phone') || t.includes('office') || t.includes('address') || t.includes('where') || t.includes('headquarter') || t.includes('jos') || t.includes('plateau')) {
-    return "You can reach us directly:\n• Office: 123 Foundation Way, Jos, Plateau State, Nigeria\n• Phone: +234 (0) 000 000 0000 (Mon-Fri, 9am - 5pm WAT)\n• Email: hello@scriptworldviewfoundation.org\n• Contact Form: Visit our /contact page to send a direct message!"
+    return "You can reach us directly:\n• Office: 123 Foundation Way, Jos, Plateau State, Nigeria\n• Phone: +234 (0) 000 000 0000 (Mon-Fri, 9am - 5pm WAT)\n• Email: contact@scriptworldview.org\n• Contact Form: Visit our /contact page to send a direct message!"
   }
 
   // 9. Partnerships
   if (t.includes('partner') || t.includes('collaboration') || t.includes('corporate')) {
-    return "We actively collaborate with corporations, other NGOs, and government bodies. To explore structural partnerships, please visit our Get Involved page or contact our partnership desk at hello@scriptworldviewfoundation.org."
+    return "We actively collaborate with corporations, other NGOs, and government bodies. To explore structural partnerships, please visit our Get Involved page or contact our partnership desk at contact@scriptworldview.org."
   }
 
   // 10. General Fallback

@@ -23,7 +23,7 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://scriptworldviewfoundation.org'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://scriptworldview.org'
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),

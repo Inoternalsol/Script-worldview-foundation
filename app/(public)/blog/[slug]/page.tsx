@@ -117,7 +117,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const post = await getPostData(params.slug)
   if (!post) return {}
 
-  const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://scriptworldviewfoundation.org'
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://scriptworldview.org'
   const ogImage = post.featuredImage || `${APP_URL}/images/og-image.png`
   const description = post.content.replace(/<[^>]*>/g, '').substring(0, 155) + '...'
 

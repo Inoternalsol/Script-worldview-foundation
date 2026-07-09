@@ -19,15 +19,15 @@ export default function AdminSettingsPage() {
 
   // General Settings
   const [orgName, setOrgName] = useState('Script Worldview Foundation')
-  const [contactEmail, setContactEmail] = useState('info@scriptworldviewfoundation.org')
+  const [contactEmail, setContactEmail] = useState('contact@scriptworldview.org')
   const [tagline, setTagline] = useState('Shaping Minds. Transforming Communities.')
   const [maintenance, setMaintenance] = useState(false)
   const [emailNotify, setEmailNotify] = useState(true)
 
   // Departmental Email Routing
-  const [donationsEmail, setDonationsEmail] = useState('finance@scriptworldviewfoundation.org')
-  const [volunteersEmail, setVolunteersEmail] = useState('volunteers@scriptworldviewfoundation.org')
-  const [careersEmail, setCareersEmail] = useState('careers@scriptworldviewfoundation.org')
+  const [donationsEmail, setDonationsEmail] = useState('finance@scriptworldview.org')
+  const [volunteersEmail, setVolunteersEmail] = useState('volunteers@scriptworldview.org')
+  const [careersEmail, setCareersEmail] = useState('careers@scriptworldview.org')
 
   // Backup status
   const [backupStatus, setBackupStatus] = useState<any>(null)
@@ -37,7 +37,7 @@ export default function AdminSettingsPage() {
       const s = await adminClientFetch('/settings')
       if (s) {
         setOrgName(s.orgName || 'Script Worldview Foundation')
-        setContactEmail(s.contactEmail || 'info@scriptworldviewfoundation.org')
+        setContactEmail(s.contactEmail || 'contact@scriptworldview.org')
         setTagline(s.tagline || 'Shaping Minds. Transforming Communities.')
         setMaintenance(s.maintenanceMode || false)
         setEmailNotify(s.emailNotify !== undefined ? s.emailNotify : true)

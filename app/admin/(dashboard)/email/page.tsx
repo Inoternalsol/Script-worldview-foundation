@@ -96,7 +96,7 @@ export default function AdminEmailCampaignsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="sender">Send From Address</Label>
-                <Input id="sender" defaultValue="noreply@scriptworldviewfoundation.org" disabled />
+                <Input id="sender" defaultValue="noreply@scriptworldview.org" disabled />
               </div>
             </div>
 

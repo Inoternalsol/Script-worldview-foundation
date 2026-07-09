@@ -13,7 +13,7 @@ export function getDevSeed() {
     {
       id: nanoid(),
       name: 'System Administrator',
-      email: 'admin@scriptworldviewfoundation.org',
+      email: 'admin@scriptworldview.org',
       role: 'super_admin',
       department: null,
     },

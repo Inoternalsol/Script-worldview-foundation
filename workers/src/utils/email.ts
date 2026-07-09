@@ -26,7 +26,7 @@ export async function sendEmail(env: { RESEND_API_KEY: string; EMAIL_FROM: strin
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: from || env.EMAIL_FROM || 'Script Worldview Foundation <noreply@scriptworldviewfoundation.org>',
+        from: from || env.EMAIL_FROM || 'Script Worldview Foundation <noreply@scriptworldview.org>',
         to: Array.isArray(to) ? to : [to],
         subject,
         html,

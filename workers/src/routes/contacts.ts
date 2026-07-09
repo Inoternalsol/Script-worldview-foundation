@@ -72,7 +72,7 @@ contactRoutes.post('/', rateLimit({ windowMs: 600000, maxRequests: 10, endpointL
 
     // 2. Send notification alert to internal department or admin
     const adminEmailHtml = getContactAdminNotificationHtml(parsed.data)
-    const adminRecipient = c.env.EMAIL_FROM || 'info@scriptworldviewfoundation.org'
+    const adminRecipient = c.env.EMAIL_FROM || 'contact@scriptworldview.org'
     await sendEmail(c.env, {
       to: adminRecipient,
       subject: `New Contact Submission: [${parsed.data.department}] ${parsed.data.subject || 'General inquiry'}`,

@@ -153,7 +153,7 @@ export default function UsersManagementPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email *</Label>
-                <Input id="email" name="email" type="email" required placeholder="name@scriptworldviewfoundation.org" />
+                <Input id="email" name="email" type="email" required placeholder="name@scriptworldview.org" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Temporary Password (Optional)</Label>

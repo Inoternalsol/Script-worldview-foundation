@@ -40,7 +40,7 @@ export const NewsletterWelcomeEmail = ({
             You can manage your preferences or unsubscribe at any time using the link in the footer below.
           </Text>
           <Section style={btnContainer}>
-            <Link style={button} href="https://scriptworldviewfoundation.org/blog">
+            <Link style={button} href="https://scriptworldview.org/blog">
               Read Our Latest Stories
             </Link>
           </Section>
@@ -55,7 +55,7 @@ export const NewsletterWelcomeEmail = ({
           <Text style={footer}>
             Script Worldview Foundation<br />
             Lagos, Nigeria<br />
-            <Link href="https://scriptworldviewfoundation.org/newsletter/unsubscribe" style={link}>Unsubscribe</Link>
+            <Link href="https://scriptworldview.org/newsletter/unsubscribe" style={link}>Unsubscribe</Link>
           </Text>
         </Section>
       </Container>

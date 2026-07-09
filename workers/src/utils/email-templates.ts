@@ -176,7 +176,7 @@ export function getContactConfirmationHtml(name: string): string {
       In the meantime, feel free to explore our active programs and read recent stories of impact from our communities on our website.
     </p>
     <div class="btn-container">
-      <a class="button button-primary" href="https://scriptworldviewfoundation.org/programs" target="_blank">Explore Our Programs</a>
+      <a class="button button-primary" href="https://scriptworldview.org/programs" target="_blank">Explore Our Programs</a>
     </div>
     <p class="paragraph" style="margin-top: 24px;">
       Best regards,<br />
@@ -218,7 +218,7 @@ export function getContactAdminNotificationHtml(data: {
     </div>
 
     <div class="btn-container">
-      <a class="button button-primary" href="https://scriptworldviewfoundation.org/admin" target="_blank">Access Admin Dashboard</a>
+      <a class="button button-primary" href="https://scriptworldview.org/admin" target="_blank">Access Admin Dashboard</a>
     </div>
   `
   return wrapEmailTemplate({ title: "New Contact Submission", previewText, contentHtml })
@@ -241,7 +241,7 @@ export function getVolunteerAcknowledgmentHtml(name: string): string {
       Thank you for your commitment to make a lasting difference in our communities.
     </p>
     <div class="btn-container">
-      <a class="button button-success" href="https://scriptworldviewfoundation.org/about" target="_blank">Learn More About Us</a>
+      <a class="button button-success" href="https://scriptworldview.org/about" target="_blank">Learn More About Us</a>
     </div>
     <p class="paragraph" style="margin-top: 24px;">
       Best regards,<br />
@@ -342,7 +342,7 @@ export function getDonationReceiptHtml(
       We are deeply grateful for your partnership. Together, we are creating tangible positive shifts.
     </p>
     <div class="btn-container">
-      <a class="button button-primary" href="https://scriptworldviewfoundation.org/impact" target="_blank">View Our Impact Stories</a>
+      <a class="button button-primary" href="https://scriptworldview.org/impact" target="_blank">View Our Impact Stories</a>
     </div>
     <p class="paragraph" style="margin-top: 24px;">
       With immense gratitude,<br />

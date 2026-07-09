@@ -51,7 +51,7 @@ export default function PrivacyPage() {
 
             <h2 className="text-brand-primary">5. Contact Us</h2>
             <p>
-              If you have questions about this Privacy Policy, please contact us at privacy@scriptworldviewfoundation.org.
+              If you have questions about this Privacy Policy, please contact us at contact@scriptworldview.org.
             </p>
           </div>
         </div>

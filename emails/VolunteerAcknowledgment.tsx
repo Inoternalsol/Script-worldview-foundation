@@ -40,7 +40,7 @@ export const VolunteerAcknowledgmentEmail = ({
             In the meantime, you can follow us on social media to stay updated on our latest activities.
           </Text>
           <Section style={btnContainer}>
-            <Link style={button} href="https://scriptworldviewfoundation.org/about">
+            <Link style={button} href="https://scriptworldview.org/about">
               Learn More About Us
             </Link>
           </Section>

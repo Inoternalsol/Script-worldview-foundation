@@ -29,8 +29,8 @@ export default async function ContactPage() {
   const addressDetails = settings?.addressDetails || "123 Foundation Way, Jos, Plateau State, Nigeria"
   const phonePrimary = settings?.phonePrimary || "+234 800 123 4567"
   const phoneSecondary = settings?.phoneSecondary || "+234 801 987 6543"
-  const emailPrimary = settings?.emailPrimary || "info@scriptworldviewfoundation.org"
-  const emailSecondary = settings?.emailSecondary || "partnerships@scriptworldviewfoundation.org"
+  const emailPrimary = settings?.emailPrimary || "contact@scriptworldview.org"
+  const emailSecondary = settings?.emailSecondary || "partnerships@scriptworldview.org"
   const hoursDetails = settings?.hoursDetails || "Monday — Friday: 8:00 AM — 5:00 PM (WAT)"
 
   return (

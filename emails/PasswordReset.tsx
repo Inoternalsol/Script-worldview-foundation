@@ -18,7 +18,7 @@ interface PasswordResetProps {
 
 export default function PasswordReset({
   name = 'Staff Member',
-  resetUrl = 'https://scriptworldviewfoundation.org/admin/reset-password?token=mock_token_123',
+  resetUrl = 'https://scriptworldview.org/admin/reset-password?token=mock_token_123',
 }: PasswordResetProps) {
   return (
     <Html>

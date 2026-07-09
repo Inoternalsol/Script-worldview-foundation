@@ -174,8 +174,8 @@ export function Footer() {
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Mail className="h-4 w-4 shrink-0 text-brand-accent" />
-                  <a href="mailto:hello@scriptworldviewfoundation.org" className="hover:text-white transition-colors break-all">
-                    hello@scriptworldviewfoundation.org
+                  <a href="mailto:contact@scriptworldview.org" className="hover:text-white transition-colors break-all">
+                    contact@scriptworldview.org
                   </a>
                 </li>
               </ul>

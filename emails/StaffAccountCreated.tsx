@@ -21,7 +21,7 @@ interface StaffAccountCreatedProps {
 export default function StaffAccountCreated({
   name = 'Staff Member',
   role = 'content_editor',
-  loginUrl = 'https://scriptworldviewfoundation.org/admin/login',
+  loginUrl = 'https://scriptworldview.org/admin/login',
 }: StaffAccountCreatedProps) {
   return (
     <Html>

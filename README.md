@@ -99,7 +99,7 @@ Create a `.dev.vars` file inside the `workers/` directory:
 ENVIRONMENT="development"
 JWT_SECRET="development_jwt_secret_key_12345"
 FRONTEND_URL="http://localhost:3000"
-EMAIL_FROM="noreply@scriptworldviewfoundation.org"
+EMAIL_FROM="noreply@scriptworldview.org"
 ```
 
 ### 3. Database Setup (Local D1 SQLite)

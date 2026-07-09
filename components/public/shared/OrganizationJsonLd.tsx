@@ -4,8 +4,8 @@ export function OrganizationJsonLd() {
     '@type': 'NGO',
     name: 'Script Worldview Foundation',
     alternateName: 'SWF',
-    url: 'https://scriptworldviewfoundation.org',
-    logo: 'https://scriptworldviewfoundation.org/logo.png',
+    url: 'https://scriptworldview.org',
+    logo: 'https://scriptworldview.org/logo.png',
     description:
       'A faith-inspired Nigerian NGO advancing education, humanitarian response, community development, and youth empowerment across Plateau State and Nigeria since 2016.',
     foundingDate: '2016',
@@ -22,7 +22,7 @@ export function OrganizationJsonLd() {
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'General',
-      email: 'hello@scriptworldviewfoundation.org',
+      email: 'contact@scriptworldview.org',
     },
     sameAs: [
       'https://www.facebook.com/scriptworldviewfoundation',

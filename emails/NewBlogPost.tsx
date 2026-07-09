@@ -21,7 +21,7 @@ interface NewBlogPostProps {
 export default function NewBlogPost({
   articleTitle = 'Rebuilding Communities: Lessons from Flood Interventions',
   articleExcerpt = 'In our latest field report, we explore community resilience models and rapid humanitarian response frameworks deployed in Shiroro.',
-  articleUrl = 'https://scriptworldviewfoundation.org/blog/rebuilding-communities-lessons',
+  articleUrl = 'https://scriptworldview.org/blog/rebuilding-communities-lessons',
 }: NewBlogPostProps) {
   return (
     <Html>

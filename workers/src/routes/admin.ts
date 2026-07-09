@@ -1333,7 +1333,7 @@ adminRoutes.get('/settings', async (c) => {
     return c.json({
       data: {
         orgName: 'Script Worldview Foundation',
-        contactEmail: 'info@scriptworldviewfoundation.org',
+        contactEmail: 'contact@scriptworldview.org',
         tagline: 'Shaping Minds. Transforming Communities.',
         maintenanceMode: false,
         emailNotify: true,

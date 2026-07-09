@@ -25,8 +25,8 @@ export default function ContactPageSettings() {
     phonePrimary: '+234 800 123 4567',
     phoneSecondary: '+234 801 987 6543',
     emailTitle: 'Send an Email',
-    emailPrimary: 'info@scriptworldviewfoundation.org',
-    emailSecondary: 'partnerships@scriptworldviewfoundation.org',
+    emailPrimary: 'contact@scriptworldview.org',
+    emailSecondary: 'partnerships@scriptworldview.org',
     hoursTitle: 'Working Hours',
     hoursDetails: 'Monday — Friday: 8:00 AM — 5:00 PM (WAT)',
   })

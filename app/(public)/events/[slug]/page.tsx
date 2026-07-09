@@ -142,7 +142,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const event = await getEventData(params.slug)
   if (!event) return {}
 
-  const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://scriptworldviewfoundation.org'
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://scriptworldview.org'
   const ogImage = event.featuredImage || `${APP_URL}/images/og-image.png`
   const description = event.description.replace(/<[^>]*>/g, '').substring(0, 155) + '...'
 
