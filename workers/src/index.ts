@@ -26,7 +26,18 @@ const app = new Hono<{ Bindings: Env }>()
 app.use(
   '*',
   cors({
-    origin: ['http://localhost:3000', 'https://swf.vercel.app'],
+    origin: (origin) => {
+      if (!origin) return '*'
+      if (
+        origin.includes('localhost') ||
+        origin.includes('scriptworldview.org') ||
+        origin.includes('vercel.app') ||
+        origin.includes('workers.dev')
+      ) {
+        return origin
+      }
+      return 'https://scriptworldview.org'
+    },
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
   }),

@@ -38,7 +38,7 @@ const navSections = [
       { href: '/admin/donations', label: 'Donations', icon: Heart },
       { href: '/admin/campaigns', label: 'Fundraisers', icon: Target },
       { href: '/admin/contacts', label: 'Messages', icon: MessageSquare },
-      { href: '/admin/newsletter', label: 'Newsletter', icon: Mail },
+      { href: '/admin/newsletter', label: 'Email Subscribers (CRM)', icon: Mail },
     ],
   },
   {
@@ -60,7 +60,7 @@ const navSections = [
     items: [
       { href: '/admin/users', label: 'Staff Accounts', icon: Shield },
       { href: '/admin/chatbot', label: 'AI Chatbot', icon: MessageSquare },
-      { href: '/admin/email', label: 'Email Dispatcher', icon: Mail },
+      { href: '/admin/email', label: 'Send Email Broadcasts', icon: Mail },
       { href: '/admin/audit-log', label: 'Audit Logs', icon: Terminal },
       { href: '/admin/settings', label: 'Settings', icon: Settings },
     ],

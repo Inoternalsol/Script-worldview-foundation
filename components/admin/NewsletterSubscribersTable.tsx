@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -191,7 +192,7 @@ export function NewsletterSubscribersTable({
         <div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
             <Newspaper className="h-5 w-5 text-emerald-600" />
-            Audience & Newsletter CRM
+            Email Subscribers & Audience CRM
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Total Audience: <span className="font-medium text-gray-900 dark:text-white">{subscribers.length}</span> · Active Recipients:{' '}
@@ -200,6 +201,13 @@ export function NewsletterSubscribersTable({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <Link href="/admin/email">
+            <Button variant="cta" size="sm" className="text-xs">
+              <Mail className="mr-1.5 h-3.5 w-3.5" />
+              Send Email Broadcasts
+            </Button>
+          </Link>
+
           <Button
             variant="outline"
             size="sm"

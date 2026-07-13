@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -62,9 +63,17 @@ export default function AdminEmailCampaignsPage() {
 
   return (
     <div className="space-y-8 max-w-4xl">
-      <div>
-        <h1 className="font-heading text-2xl font-bold text-foreground">Email Manager</h1>
-        <p className="mt-1 text-sm text-brand-muted">Compose and dispatch branded newsletters, press releases, or custom emails via Resend.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="font-heading text-2xl font-bold text-foreground">Send Email Broadcasts</h1>
+          <p className="mt-1 text-sm text-brand-muted">Compose and dispatch branded newsletters, press releases, or custom emails via Resend.</p>
+        </div>
+        <Link href="/admin/newsletter">
+          <Button variant="outline" size="sm" className="text-xs">
+            <Mail className="mr-1.5 h-3.5 w-3.5 text-emerald-600" />
+            Manage Subscribers (CRM)
+          </Button>
+        </Link>
       </div>
 
       <div className="grid gap-6">

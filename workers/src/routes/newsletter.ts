@@ -33,9 +33,10 @@ newsletterRoutes.post('/subscribe', rateLimit({ windowMs: 600000, maxRequests: 5
   }
 
   const db = createDb(c.env.DB)
+  const emailLower = parsed.data.email.toLowerCase().trim()
 
   // Check if already exists
-  const existing = await db.select().from(newsletterSubscribers).where(eq(newsletterSubscribers.email, parsed.data.email)).limit(1)
+  const existing = await db.select().from(newsletterSubscribers).where(eq(newsletterSubscribers.email, emailLower)).limit(1)
 
   if (existing.length) {
     if (existing[0].status === 'active') {
@@ -44,7 +45,7 @@ newsletterRoutes.post('/subscribe', rateLimit({ windowMs: 600000, maxRequests: 5
       // Re-activate
       await db.update(newsletterSubscribers)
         .set({ status: 'active', updatedAt: new Date() })
-        .where(eq(newsletterSubscribers.email, parsed.data.email))
+        .where(eq(newsletterSubscribers.email, emailLower))
       return c.json({ success: true, message: 'Subscription re-activated' }, 200)
     }
   }
@@ -53,6 +54,7 @@ newsletterRoutes.post('/subscribe', rateLimit({ windowMs: 600000, maxRequests: 5
   const newSubscriber = {
     id,
     ...parsed.data,
+    email: emailLower,
     status: 'active' as const,
     subscribedAt: new Date(),
     createdAt: new Date(),
