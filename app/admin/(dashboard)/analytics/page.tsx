@@ -405,11 +405,14 @@ export default function PlatformAnalyticsPage() {
             {/* Float Tooltip */}
             {hoveredIndex !== null && (
               <div
-                className="pointer-events-none absolute z-10 space-y-1 rounded-lg border border-border bg-card p-3 text-xs text-foreground shadow-lg"
-                style={{
-                  left: `${((points[hoveredIndex].x - paddingLeft) / chartWidth) * 80 + 10}%`,
-                  top: '10%',
+                ref={(el) => {
+                  if (el && hoveredIndex !== null && points[hoveredIndex]) {
+                    const leftPercent = ((points[hoveredIndex].x - paddingLeft) / chartWidth) * 80 + 10
+                    el.style.left = `${leftPercent}%`
+                    el.style.top = '10%'
+                  }
                 }}
+                className="pointer-events-none absolute z-10 space-y-1 rounded-lg border border-border bg-card p-3 text-xs text-foreground shadow-lg"
               >
                 <div className="mb-1 border-b border-border pb-1 font-bold">
                   {points[hoveredIndex].name} {new Date().getFullYear()}

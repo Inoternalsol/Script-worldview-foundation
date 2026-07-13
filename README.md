@@ -16,7 +16,7 @@ A modern, enterprise-grade web platform and content management system built for 
 
 ## 🏛️ System Architecture
 
-```
+```text
 +-----------------------------------------------------------------------+
 |                         Frontend (Next.js 14)                         |
 |  +---------------------+   +-------------------+   +---------------+  |
@@ -48,6 +48,7 @@ A modern, enterprise-grade web platform and content management system built for 
 ## 🛠️ Technology Stack
 
 ### Frontend Core
+
 - **Framework**: Next.js 14 (App Router, Server Actions, React Server Components)
 - **Styling**: Tailwind CSS, Vanilla CSS (`index.css`), Shadcn UI
 - **State & Data Fetching**: React Query (TanStack Query), Zustand
@@ -55,6 +56,7 @@ A modern, enterprise-grade web platform and content management system built for 
 - **Forms & Validation**: React Hook Form, Zod
 
 ### Backend Core
+
 - **Runtime**: Cloudflare Workers
 - **API Framework**: Hono.js (Lightweight Web Framework)
 - **Database & ORM**: Cloudflare D1 (SQLite) + Drizzle ORM
@@ -66,6 +68,7 @@ A modern, enterprise-grade web platform and content management system built for 
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - **Node.js**: `v20.x` or higher
 - **npm**: `v10.x` or higher
 - **Wrangler CLI**: For Cloudflare Workers local emulation (`npx wrangler`)
@@ -86,6 +89,7 @@ cd workers && npm install && cd ..
 ### 2. Environment Configuration
 
 Create a `.env` file in the root directory:
+
 ```env
 NEXTAUTH_SECRET="development_nextauth_secret_key_12345_should_be_long"
 NEXTAUTH_URL="http://localhost:3000"
@@ -95,6 +99,7 @@ JWT_SECRET="development_jwt_secret_key_12345"
 ```
 
 Create a `.dev.vars` file inside the `workers/` directory:
+
 ```env
 ENVIRONMENT="development"
 JWT_SECRET="development_jwt_secret_key_12345"
@@ -105,6 +110,7 @@ EMAIL_FROM="noreply@scriptworldview.org"
 ### 3. Database Setup (Local D1 SQLite)
 
 Apply Drizzle database migrations to your local Cloudflare D1 database:
+
 ```bash
 cd workers
 npm run db:apply:local
@@ -116,12 +122,14 @@ cd ..
 Open two terminal windows or run them concurrently:
 
 **Terminal 1: Cloudflare Worker API Server (`http://localhost:8787`)**
+
 ```bash
 cd workers
 npm run dev
 ```
 
 **Terminal 2: Next.js Frontend Application (`http://localhost:3000`)**
+
 ```bash
 npm run dev
 ```
@@ -153,12 +161,14 @@ Once registered, navigate to [http://localhost:3000/admin/login](http://localhos
 The project includes an automated end-to-end QA verification suite that validates all public API endpoints, protected Admin CRM routes, JWT authentication, CMS page creation, storage media upload/delete, and Next.js frontend route accessibility.
 
 To run the full QA test suite:
+
 ```bash
 node scratch/qa-test-suite.mjs
 ```
 
-### Expected Output:
-```
+### Expected Output
+
+```text
 ====================================================
 🚀 STARTING SWF PLATFORM TOTAL QA TEST SUITE
 ====================================================
@@ -179,11 +189,13 @@ node scratch/qa-test-suite.mjs
 ## 📦 Production Building & Deployment
 
 ### Build Next.js Production Bundle
+
 ```bash
 npm run build
 ```
 
 ### Build & Deploy Cloudflare Worker
+
 ```bash
 cd workers
 npm run build
