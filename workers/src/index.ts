@@ -27,21 +27,58 @@ app.use(
   '*',
   cors({
     origin: (origin) => {
-      if (!origin) return '*'
-      if (
-        origin.includes('localhost') ||
-        origin.includes('scriptworldview.org') ||
-        origin.includes('vercel.app') ||
-        origin.includes('workers.dev')
-      ) {
-        return origin
-      }
-      return 'https://scriptworldview.org'
+      return origin || '*'
     },
-    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+    allowHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Accept',
+      'Origin',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers',
+      'Cache-Control',
+      'Pragma',
+    ],
+    exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
+    maxAge: 86400,
+    credentials: true,
   }),
 )
+
+app.options('*', (c) => {
+  return c.body(null, 204)
+})
+
+app.notFound((c) => {
+  const origin = c.req.header('Origin') || '*'
+  return c.json(
+    { error: 'Not Found: Route does not exist on Worker API' },
+    404,
+    {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, Accept, Origin',
+    }
+  )
+})
+
+app.onError((err, c) => {
+  console.error(`Error on ${c.req.method} ${c.req.url}:`, err)
+  const origin = c.req.header('Origin') || '*'
+  return c.json(
+    { error: err.message || 'Internal Server Error' },
+    500,
+    {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, Accept, Origin',
+    }
+  )
+})
 
 app.get('/health', (c) => c.json({ ok: true }))
 

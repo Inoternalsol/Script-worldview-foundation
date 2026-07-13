@@ -24,6 +24,20 @@ export async function DELETE(req: NextRequest, { params }: { params: { path: str
   return handleProxy(req, params.path)
 }
 
+export async function OPTIONS(req: NextRequest) {
+  const origin = req.headers.get('origin') || '*'
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With, Accept, Origin, Access-Control-Request-Method, Access-Control-Request-Headers',
+      'Access-Control-Max-Age': '86400',
+    },
+  })
+}
+
 async function handleProxy(req: NextRequest, pathSegments: string[]) {
   try {
     let env
