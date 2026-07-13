@@ -48,6 +48,7 @@ eventsRoutes.get('/', async (c) => {
     .orderBy(desc(events.date))
     .limit(50)
 
+  c.header('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=86400')
   return c.json({ data: allEvents })
 })
 
@@ -62,6 +63,7 @@ eventsRoutes.get('/:slug', async (c) => {
     return c.json({ error: 'Event not found' }, 404)
   }
 
+  c.header('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=86400')
   return c.json({ data: eventList[0] })
 })
 
@@ -69,6 +71,9 @@ eventsRoutes.get('/:slug', async (c) => {
 eventsRoutes.post('/:id/register', async (c) => {
   const eventId = c.req.param('id')
   const body = await c.req.json().catch(() => ({}))
+  if (body._honeypot || (typeof body.website === 'string' && body.website.trim().length > 0)) {
+    return c.json({ success: true, id: nanoid() }, 201)
+  }
   
   const registrationSchema = z.object({
     name: z.string().min(1),

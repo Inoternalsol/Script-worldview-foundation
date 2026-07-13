@@ -41,6 +41,10 @@ const contactSchema = z.object({
 // POST /api/contacts - Public submission
 contactRoutes.post('/', rateLimit({ windowMs: 600000, maxRequests: 10, endpointLabel: 'contact form submission' }), async (c) => {
   const body = await c.req.json().catch(() => ({}))
+  // Silent Honeypot check: instantly return 201 if spam bot filled out hidden fields
+  if (body._honeypot || (typeof body.website === 'string' && body.website.trim().length > 0)) {
+    return c.json({ success: true, id: nanoid() }, 201)
+  }
   const parsed = contactSchema.safeParse(body)
 
   if (!parsed.success) {

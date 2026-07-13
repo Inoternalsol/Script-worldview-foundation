@@ -33,6 +33,9 @@ const volunteerSchema = z.object({
 // POST /api/volunteers - Public submission
 volunteerRoutes.post('/', rateLimit({ windowMs: 600000, maxRequests: 10, endpointLabel: 'volunteer application submission' }), async (c) => {
   const body = await c.req.json().catch(() => ({}))
+  if (body._honeypot || (typeof body.website === 'string' && body.website.trim().length > 0)) {
+    return c.json({ success: true, id: nanoid() }, 201)
+  }
   const parsed = volunteerSchema.safeParse(body)
 
   if (!parsed.success) {

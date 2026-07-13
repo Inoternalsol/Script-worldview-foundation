@@ -24,12 +24,17 @@ const initializeDonationSchema = z.object({
   campaignId: z.string().optional(),
   isAnonymous: z.boolean().default(false),
   paymentGateway: z.enum(['paystack', 'stripe']),
+  _honeypot: z.string().optional(),
+  website: z.string().optional(),
 });
 
 // Initialize a donation
 donations.post('/', rateLimit({ windowMs: 600000, maxRequests: 10, endpointLabel: 'donation initialization' }), zValidator('json', initializeDonationSchema), async (c) => {
   const db = drizzle(c.env.DB);
   const data = c.req.valid('json');
+  if (data._honeypot || (typeof data.website === 'string' && data.website.trim().length > 0)) {
+    return c.json({ success: true, authorizationUrl: 'https://scriptworldview.org/donate/success', reference: nanoid() });
+  }
   const donationId = nanoid();
 
   try {

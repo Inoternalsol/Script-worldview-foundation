@@ -58,6 +58,9 @@ blogRoutes.get('/', async (c) => {
       .where(and(...conditions))
   ])
 
+  if (targetStatus === 'published') {
+    c.header('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=86400')
+  }
   return c.json({ data: posts, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } })
 })
 
@@ -80,6 +83,9 @@ blogRoutes.get('/:slug', async (c) => {
       .run()
   )
 
+  if (post[0].status === 'published') {
+    c.header('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=86400')
+  }
   return c.json({ data: post[0] })
 })
 

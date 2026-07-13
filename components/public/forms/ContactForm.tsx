@@ -35,6 +35,7 @@ const contactFormSchema = z.object({
   department: z.enum(['general', 'education', 'humanitarian', 'community', 'hr', 'press', 'partnership']),
   subject: z.string().min(5, { message: 'Subject must be at least 5 characters.' }),
   message: z.string().min(10, { message: 'Message must be at least 10 characters.' }),
+  _honeypot: z.string().optional(),
 });
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
@@ -51,6 +52,7 @@ export function ContactForm() {
       department: 'general',
       subject: '',
       message: '',
+      _honeypot: '',
     },
   });
 
@@ -89,6 +91,16 @@ export function ContactForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <input
+          type="text"
+          name="_honeypot"
+          className="hidden opacity-0 absolute -left-[9999px]"
+          aria-hidden="true"
+          aria-label="Do not fill this field"
+          tabIndex={-1}
+          autoComplete="off"
+          onChange={(e) => form.setValue('_honeypot', e.target.value)}
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <CustomFormField
             control={form.control}

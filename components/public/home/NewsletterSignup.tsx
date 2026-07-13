@@ -8,6 +8,7 @@ import { apiFetch } from '@/lib/api/client'
 
 export function NewsletterSignup() {
   const [email, setEmail] = useState('')
+  const [honeypot, setHoneypot] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,7 +17,7 @@ export function NewsletterSignup() {
     try {
       const result = await apiFetch<any>('/api/newsletter/subscribe', {
         method: 'POST',
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, _honeypot: honeypot }),
       })
       if (result.ok) {
         setStatus('success')
@@ -44,6 +45,17 @@ export function NewsletterSignup() {
         </p>
         
         <form onSubmit={handleSubmit} className="mx-auto flex max-w-md flex-col gap-3 sm:flex-row">
+          <input
+            type="text"
+            name="_honeypot"
+            className="hidden opacity-0 absolute -left-[9999px]"
+            aria-hidden="true"
+            aria-label="Do not fill this field"
+            tabIndex={-1}
+            autoComplete="off"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+          />
           <label htmlFor="home-newsletter-email" className="sr-only">Email address</label>
           <Input
             id="home-newsletter-email"
