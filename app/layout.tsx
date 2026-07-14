@@ -55,6 +55,11 @@ export const metadata: Metadata = {
     description: 'Advancing education, humanitarian response, and community development across Nigeria.',
     images: ['/og-image.png'],
   },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/logo.png',
+  },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
 };
 

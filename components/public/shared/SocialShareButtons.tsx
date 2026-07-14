@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Share2, Copy, Check, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
@@ -13,15 +13,18 @@ interface SocialShareButtonsProps {
 
 export function SocialShareButtons({ title, url, description }: SocialShareButtonsProps) {
   const [copied, setCopied] = useState(false)
+  const [shareUrl, setShareUrl] = useState(url || 'https://scriptworldview.org')
+  const [canNativeShare, setCanNativeShare] = useState(false)
 
-  const getShareUrl = () => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
-      return url || window.location.href
+      setShareUrl(url || window.location.href)
     }
-    return url || 'https://scriptworldview.org'
-  }
+    if (typeof navigator !== 'undefined' && 'share' in navigator) {
+      setCanNativeShare(true)
+    }
+  }, [url])
 
-  const shareUrl = getShareUrl()
   const encodedUrl = encodeURIComponent(shareUrl)
   const encodedTitle = encodeURIComponent(title)
 
@@ -57,7 +60,7 @@ export function SocialShareButtons({ title, url, description }: SocialShareButto
       </span>
 
       {/* Native Web Share API if supported */}
-      {typeof navigator !== 'undefined' && 'share' in navigator && (
+      {canNativeShare && (
         <Button
           variant="outline"
           size="sm"
