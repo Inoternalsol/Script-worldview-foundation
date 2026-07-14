@@ -203,7 +203,7 @@ export default function AdminSettingsPage() {
               </div>
             </div>
             {backupStatus?.status === 'HEALTHY' && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border dark:border-emerald-800/40">
                 <CheckCircle2 className="h-3.5 w-3.5" /> Edge D1 Healthy
               </span>
             )}
@@ -240,7 +240,7 @@ export default function AdminSettingsPage() {
                 variant="outline"
                 disabled={runningBackup}
                 onClick={handleTriggerBackup}
-                className="flex items-center gap-2 border-emerald-600/30 text-emerald-700 hover:bg-emerald-50 text-xs font-semibold"
+                className="flex items-center gap-2 border-emerald-600/30 text-emerald-700 hover:bg-emerald-50 text-xs font-semibold dark:text-emerald-300 dark:hover:bg-emerald-950/40"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${runningBackup ? 'animate-spin' : ''}`} />
                 {runningBackup ? 'Verifying D1...' : 'Run Verification Snapshot'}

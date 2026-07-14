@@ -24,7 +24,7 @@ export default async function AdminLayout({
   const user = session?.user as any
 
   return (
-    <div className="flex min-h-[calc(100vh-1px)] bg-[#F7F8FA]">
+    <div className="flex min-h-[calc(100vh-1px)] bg-[#F7F8FA] dark:bg-background">
       <Suspense fallback={null}>
         <AdminTopProgressBar />
       </Suspense>
@@ -82,7 +82,7 @@ export default async function AdminLayout({
               <Link
                 href="/"
                 target="_blank"
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-black/4"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-black/4 dark:hover:bg-white/10"
               >
                 View Live Site ↗
               </Link>

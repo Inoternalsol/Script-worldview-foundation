@@ -88,7 +88,7 @@ async function ProgramsLoader() {
                     </td>
                     <td className="px-4 py-3 text-brand-muted">{prog.sortOrder}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${prog.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-secondary text-muted-foreground'}`}>
+                      <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${prog.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-950/60 dark:text-green-300 dark:border dark:border-green-800/40' : 'bg-secondary text-muted-foreground'}`}>
                         {prog.status}
                       </span>
                     </td>

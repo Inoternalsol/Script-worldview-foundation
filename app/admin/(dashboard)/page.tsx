@@ -82,10 +82,10 @@ async function DashboardLoader() {
       </div>
 
       {!stats ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
-          <AlertCircle className="mx-auto mb-2 h-8 w-8 text-amber-500" />
-          <p className="font-medium text-amber-800">Unable to connect to the API</p>
-          <p className="mt-1 text-sm text-amber-600">
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center dark:bg-amber-950/40 dark:border-amber-800/50">
+          <AlertCircle className="mx-auto mb-2 h-8 w-8 text-amber-500 dark:text-amber-400" />
+          <p className="font-medium text-amber-800 dark:text-amber-200">Unable to connect to the API</p>
+          <p className="mt-1 text-sm text-amber-600 dark:text-amber-300">
             Make sure the Cloudflare Worker is deployed and the API URL is configured.
           </p>
         </div>
