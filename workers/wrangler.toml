@@ -9,7 +9,7 @@ database_id = "f91625b7-923f-4d97-a898-e2dbded2cba4"
 
 [[kv_namespaces]]
 binding = "RATE_LIMITER_KV"
-id = "rate_limiter_placeholder_id"
+id = "b1f76d528b074c698b35222f15807905"
 preview_id = "rate_limiter_placeholder_id"
 
 [vars]
