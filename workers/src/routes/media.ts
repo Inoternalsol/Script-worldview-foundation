@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid'
 import { eq, desc, sql } from 'drizzle-orm'
 import { createDb } from '../db/client'
 import { mediaLibrary } from '../../../lib/db/schema'
+import { uploadToCloudinary } from '../utils/cloudinary'
 import { authMiddleware, requireRole } from '../middleware/auth'
 import { Env } from '../types'
 
@@ -48,34 +49,41 @@ mediaRoutes.get('/signature', requireRole(['super_admin', 'dept_admin', 'content
   })
 })
 
-const uploadSchema = z.object({
-  filename: z.string(),
-  url: z.string().url(),
-  type: z.enum(['image', 'video', 'document']),
-  sizeBytes: z.number().int().optional(),
-  altText: z.string().optional(),
-  category: z.string().optional(),
-  tagsJson: z.string().optional()
-})
-
 mediaRoutes.post('/', requireRole(['super_admin', 'dept_admin', 'content_editor']), async (c) => {
-  const parsed = uploadSchema.safeParse(await c.req.json().catch(() => null))
-  if (!parsed.success) {
-    return c.json({ error: 'Invalid input', details: parsed.error.format() }, 400)
+  const body = await c.req.parseBody().catch(() => null)
+  if (!body || !body['file']) {
+    return c.json({ error: 'Invalid input, missing file in form data' }, 400)
   }
 
-  const db = createDb(c.env.DB)
-  const user = c.get('user')
+  const file = body['file'] as File
+  const altText = (body['altText'] as string) || file.name
 
-  const newMedia = {
-    id: nanoid(),
-    ...parsed.data,
-    uploadedBy: user.id
+  try {
+    const cloudinaryRes = await uploadToCloudinary(file, c.env, { folder: 'script-worldview' })
+    
+    const db = createDb(c.env.DB)
+    const user = c.get('user')
+
+    let type: 'image' | 'video' | 'document' = 'document'
+    if (file.type.startsWith('image/')) type = 'image'
+    else if (file.type.startsWith('video/')) type = 'video'
+
+    const newMedia = {
+      id: nanoid(),
+      filename: file.name,
+      url: cloudinaryRes.secure_url,
+      type,
+      sizeBytes: file.size,
+      altText,
+      uploadedBy: user.id
+    }
+
+    await db.insert(mediaLibrary).values(newMedia)
+    
+    return c.json({ data: newMedia, url: cloudinaryRes.secure_url, type }, 201)
+  } catch (err: any) {
+    return c.json({ error: err.message || 'Upload failed' }, 500)
   }
-
-  await db.insert(mediaLibrary).values(newMedia)
-  
-  return c.json({ data: newMedia }, 201)
 })
 
 mediaRoutes.get('/', requireRole(['super_admin', 'dept_admin', 'content_editor']), async (c) => {
