@@ -18,6 +18,7 @@ import {
   MessageCircle,
   Search,
   Loader2,
+  Trash2,
 } from 'lucide-react'
 import { useCsvExport } from './hooks/useCsvExport'
 import { useClipboard } from './hooks/useClipboard'
