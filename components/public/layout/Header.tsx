@@ -128,7 +128,7 @@ export function Header() {
                     <DropdownMenu.Content
                       sideOffset={12}
                       align="start"
-                      className="min-w-56 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 rounded-2xl border border-border bg-card p-2 shadow-xl"
+                      className="min-w-56 z-[100] animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 rounded-2xl border border-border bg-card p-2 shadow-xl"
                     >
                       {item.children.map((child) => (
                         <DropdownMenu.Item key={child.href} asChild>
@@ -221,7 +221,7 @@ export function Header() {
             : "border-slate-200/50 dark:border-white/5 bg-white/98 dark:bg-slate-950/98"
         )}
       >
-        <div className="mx-auto max-w-6xl px-4 py-4 space-y-1">
+        <div className="mx-auto max-w-6xl px-5 py-6 space-y-1.5">
           {nav.flatMap((item) => {
             if (item.children?.length) {
               return [
@@ -236,7 +236,7 @@ export function Header() {
                     key={child.href}
                     href={child.href}
                     className={cn(
-                      'block rounded-xl px-4 py-2.5 text-sm transition-colors',
+                      'block rounded-xl px-5 py-3 text-base transition-colors',
                       isTransparent
                         ? 'text-white/80 hover:bg-white/10 hover:text-white'
                         : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-brand-primary dark:hover:text-white',
@@ -257,7 +257,7 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'block rounded-xl px-4 py-2.5 text-sm font-medium transition-colors',
+                  'block rounded-xl px-5 py-3 text-base font-semibold transition-colors',
                   isTransparent
                     ? 'text-white/85 hover:bg-white/10 hover:text-white'
                     : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-brand-primary dark:hover:text-white',

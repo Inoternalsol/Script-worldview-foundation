@@ -132,12 +132,17 @@ authRoutes.post('/forgot-password', async (c) => {
   const successResponse = { ok: true, message: 'If the email exists, a password reset link has been sent' }
 
   if (!user) {
+    // Hash a dummy password to equalize response times and prevent email enumeration
+    await bcrypt.hash('dummy_password_timing_fix_123', 12)
     return c.json(successResponse)
   }
 
   try {
     const secret = new TextEncoder().encode(c.env.JWT_SECRET)
-    const token = await new SignJWT({ email: user.email })
+    const token = await new SignJWT({ 
+      email: user.email,
+      hashPrefix: user.passwordHash.substring(0, 10) // Bind token to current password state
+    })
       .setProtectedHeader({ alg: 'HS256' })
       .setExpirationTime('15m')
       .sign(secret)
@@ -147,15 +152,19 @@ authRoutes.post('/forgot-password', async (c) => {
 
     const htmlContent = getPasswordResetHtml(user.name, resetUrl)
     
-    // Send email using Resend
-    await sendEmail({
-      RESEND_API_KEY: c.env.RESEND_API_KEY,
-      EMAIL_FROM: c.env.EMAIL_FROM
-    }, {
-      to: user.email,
-      subject: 'Reset Your Password - Script Worldview Foundation',
-      html: htmlContent,
-    })
+    // Send email using Resend in background
+    c.executionCtx.waitUntil(
+      sendEmail({
+        RESEND_API_KEY: c.env.RESEND_API_KEY,
+        EMAIL_FROM: c.env.EMAIL_FROM
+      }, {
+        to: user.email,
+        subject: 'Reset Your Password - Script Worldview Foundation',
+        html: htmlContent,
+      }).catch(err => {
+        console.error('Failed to send reset email:', err)
+      })
+    )
 
     return c.json(successResponse)
   } catch (error: any) {
@@ -177,9 +186,20 @@ authRoutes.post('/reset-password', async (c) => {
     const secret = new TextEncoder().encode(c.env.JWT_SECRET)
     const { payload } = await jwtVerify(parsed.data.token, secret)
     const email = payload.email as string | undefined
+    const hashPrefix = payload.hashPrefix as string | undefined
 
-    if (!email) {
+    if (!email || !hashPrefix) {
       return c.json({ error: 'Invalid token payload' }, 400)
+    }
+
+    const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1)
+    if (!user) {
+      return c.json({ error: 'User not found' }, 404)
+    }
+
+    // Check if the password was already changed since the token was issued
+    if (user.passwordHash.substring(0, 10) !== hashPrefix) {
+      return c.json({ error: 'Reset token has been used or is invalid' }, 400)
     }
 
     const passwordHash = await bcrypt.hash(parsed.data.password, 12)

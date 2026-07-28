@@ -9,11 +9,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { adminClientFetch } from '@/lib/admin-client'
+import { ImageUploadInput } from '@/components/admin/ImageUploadInput'
 
 export default function NewProgramPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [featuredImage, setFeaturedImage] = useState<string>('')
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -28,7 +30,7 @@ export default function NewProgramPage() {
       category: form.get('category') as string,
       description: form.get('description') as string,
       icon: (form.get('icon') as string) || undefined,
-      featuredImage: (form.get('featuredImage') as string) || undefined,
+      featuredImage: featuredImage || undefined,
       status: (form.get('status') as string) || 'active',
       sortOrder: parseInt(form.get('sortOrder') as string || '0', 10),
     }
@@ -96,9 +98,9 @@ export default function NewProgramPage() {
             <Input id="icon" name="icon" placeholder="BookOpen, Heart, Shield, Users, etc." />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="featuredImage">Featured Image URL</Label>
-            <Input id="featuredImage" name="featuredImage" type="url" placeholder="https://..." />
+          <div className="space-y-2 sm:col-span-2">
+            <Label>Featured Image</Label>
+            <ImageUploadInput value={featuredImage} onChange={setFeaturedImage} placeholder="Upload image file or paste URL..." />
           </div>
 
           <div className="space-y-2">

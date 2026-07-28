@@ -17,6 +17,8 @@ import {
   Send,
   Newspaper,
 } from 'lucide-react'
+import { useCsvExport } from './hooks/useCsvExport'
+import { useClipboard } from './hooks/useClipboard'
 
 type Subscriber = {
   id: string
@@ -35,11 +37,12 @@ export function NewsletterSubscribersTable({
   const [subscribers, setSubscribers] = useState<Subscriber[]>(initialSubscribers)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [copiedId, setCopiedId] = useState<string | null>(null)
-
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false)
   const [adding, setAdding] = useState(false)
+
+  const { exportCsv } = useCsvExport<Subscriber>()
+  const { copyText, copyBulk, copiedId } = useClipboard()
 
   const filteredSubscribers = useMemo(() => {
     return subscribers.filter((s) => {
@@ -59,31 +62,9 @@ export function NewsletterSubscribersTable({
     return subscribers.filter((s) => s.status === 'active').length
   }, [subscribers])
 
-  const handleCopyText = (text: string, id: string, label: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedId(id)
-    toast({
-      title: 'Copied to clipboard',
-      description: `${label} copied to clipboard.`,
-    })
-    setTimeout(() => setCopiedId(null), 2000)
-  }
-
   const handleCopyAllEmails = () => {
-    const emails = filteredSubscribers.map((s) => s.email).filter(Boolean).join(', ')
-    if (!emails) {
-      toast({
-        title: 'No emails found',
-        description: 'No subscriber email addresses match current filters.',
-        variant: 'destructive',
-      })
-      return
-    }
-    navigator.clipboard.writeText(emails)
-    toast({
-      title: 'Copied subscriber mailing list',
-      description: `Copied ${filteredSubscribers.length} email address(es) ready for newsletter broadcasting.`,
-    })
+    const emails = filteredSubscribers.map((s) => s.email)
+    copyBulk(emails, 'subscriber mailing list')
   }
 
   const handleBroadcastBCC = () => {
@@ -107,23 +88,18 @@ export function NewsletterSubscribersTable({
   }
 
   const handleExportCSV = () => {
-    const headers = ['Email', 'First Name', 'Last Name', 'Status', 'Subscribed At']
-    const rows = filteredSubscribers.map((s) => [
-      `"${s.email}"`,
-      `"${s.firstName || ''}"`,
-      `"${s.lastName || ''}"`,
-      s.status,
-      `"${new Date(s.subscribedAt).toLocaleString()}"`,
-    ])
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n')
-    const encodedUri = encodeURI(csvContent)
-    const link = document.createElement('a')
-    link.setAttribute('href', encodedUri)
-    link.setAttribute('download', 'newsletter_subscribers.csv')
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    exportCsv(
+      'newsletter_subscribers.csv',
+      ['Email', 'First Name', 'Last Name', 'Status', 'Subscribed At'],
+      filteredSubscribers,
+      (s) => [
+        s.email,
+        s.firstName || '',
+        s.lastName || '',
+        s.status,
+        new Date(s.subscribedAt).toLocaleString(),
+      ]
+    )
   }
 
   const handleStatusToggle = async (id: string, currentStatus: string) => {
@@ -311,7 +287,7 @@ export function NewsletterSubscribersTable({
                           </a>
                           <button
                             type="button"
-                            onClick={() => handleCopyText(sub.email, `${sub.id}-email`, 'Email')}
+                            onClick={() => copyText(sub.email, `${sub.id}-email`, 'Email')}
                             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                             title="Copy email address"
                           >

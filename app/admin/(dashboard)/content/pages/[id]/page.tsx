@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { RevisionDrawerClient } from '@/components/admin/RevisionDrawerClient'
+import { ImageUploadInput } from '@/components/admin/ImageUploadInput'
 
 type Page = {
   id: string
@@ -28,6 +29,7 @@ export default function EditStaticPage({ params }: { params: { id: string } }) {
   const [saving, setSaving] = useState(false)
   const [page, setPage] = useState<Page | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [ogImage, setOgImage] = useState<string>('')
 
   useEffect(() => {
     async function fetchPage() {
@@ -36,6 +38,7 @@ export default function EditStaticPage({ params }: { params: { id: string } }) {
         if (!res.ok) throw new Error('Failed to load page data')
         const data = await res.json()
         setPage(data.data)
+        setOgImage(data.data.ogImage || '')
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -64,7 +67,7 @@ export default function EditStaticPage({ params }: { params: { id: string } }) {
       contentJson,
       metaTitle: (form.get('metaTitle') as string) || undefined,
       metaDesc: (form.get('metaDesc') as string) || undefined,
-      ogImage: (form.get('ogImage') as string) || undefined,
+      ogImage: ogImage || undefined,
       status: form.get('status') as string,
     }
 
@@ -180,8 +183,8 @@ export default function EditStaticPage({ params }: { params: { id: string } }) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="ogImage">SEO OpenGraph Image URL</Label>
-            <Input id="ogImage" name="ogImage" defaultValue={page.ogImage || ''} placeholder="https://..." />
+            <Label>SEO OpenGraph Image</Label>
+            <ImageUploadInput value={ogImage} onChange={setOgImage} placeholder="Upload image file or paste URL..." />
           </div>
 
           <div className="space-y-2 sm:col-span-2">

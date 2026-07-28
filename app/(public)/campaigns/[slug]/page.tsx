@@ -4,6 +4,7 @@ import { ArrowLeft, Target, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DonationProgressBar } from '@/components/public/shared/DonationProgressBar'
 import { SocialShareButtons } from '@/components/public/shared/SocialShareButtons'
+import DOMPurify from 'isomorphic-dompurify'
 
 // Mock Data
 const mockCampaigns = [
@@ -88,7 +89,7 @@ export default async function CampaignPage({ params }: { params: { slug: string 
             
             <div 
               className="prose prose-lg max-w-none text-brand-muted prose-headings:font-heading prose-headings:text-brand-primary"
-              dangerouslySetInnerHTML={{ __html: campaign.description }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(campaign.description) }}
             />
             <div className="mt-8">
               <SocialShareButtons title={campaign.title} />

@@ -8,11 +8,13 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { ImageUploadInput } from '@/components/admin/ImageUploadInput'
 
 export default function NewCampaignPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [featuredImage, setFeaturedImage] = useState<string>('')
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -26,7 +28,7 @@ export default function NewCampaignPage() {
       goalAmount: parseInt(form.get('goalAmount') as string),
       deadline: form.get('deadline') ? new Date(form.get('deadline') as string).getTime() : undefined,
       description: form.get('description') as string,
-      featuredImage: (form.get('featuredImage') as string) || undefined,
+      featuredImage: featuredImage || undefined,
       status: (form.get('status') as string) || 'active',
     }
 
@@ -102,8 +104,8 @@ export default function NewCampaignPage() {
           </div>
 
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="featuredImage">Featured Image URL</Label>
-            <Input id="featuredImage" name="featuredImage" placeholder="https://..." />
+            <Label>Featured Image</Label>
+            <ImageUploadInput value={featuredImage} onChange={setFeaturedImage} placeholder="Upload image file or paste URL..." />
           </div>
 
           <div className="space-y-2 sm:col-span-2">

@@ -8,6 +8,7 @@ import { authMiddleware, requireRole } from '../middleware/auth'
 import { sendEmail } from '../utils/email'
 import { getCareerAcknowledgmentHtml } from '../utils/email-templates'
 import { rateLimit } from '../middleware/rateLimit'
+import { uploadToCloudinary } from '../utils/cloudinary'
 
 type Bindings = {
   DB: D1Database
@@ -46,6 +47,42 @@ const applicationSchema = z.object({
   cvUrl: z.string().url(), // We'll handle upload on frontend and pass URL
   coverLetter: z.string().optional(),
   linkedinUrl: z.string().url().optional(),
+})
+
+// POST /api/careers/upload - Public CV upload
+careerRoutes.post('/upload', rateLimit({ windowMs: 3600000, maxRequests: 5, endpointLabel: 'cv upload' }), async (c) => {
+  try {
+    const formData = await c.req.parseBody()
+    const file = formData['file'] as File
+
+    if (!file) {
+      return c.json({ error: 'No file provided' }, 400)
+    }
+
+    // Limit file size to 10MB
+    if (file.size > 10 * 1024 * 1024) {
+      return c.json({ error: 'File size must be less than 10MB' }, 400)
+    }
+
+    const validTypes = [
+      'application/pdf', 
+      'application/msword', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ]
+    if (!validTypes.includes(file.type)) {
+      return c.json({ error: 'Only PDF and Word documents are allowed' }, 400)
+    }
+
+    const cloudinaryResult = await uploadToCloudinary(c.env, file, 'script-worldview-careers')
+    
+    return c.json({ 
+      success: true, 
+      url: cloudinaryResult.secure_url 
+    })
+  } catch (err: any) {
+    console.error('CV Upload Error:', err)
+    return c.json({ error: err.message || 'CV Upload Failed' }, 500)
+  }
 })
 
 // POST /api/careers/applications - Public application submission

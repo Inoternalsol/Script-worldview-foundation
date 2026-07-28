@@ -1,11 +1,13 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
+import { MediaPicker } from './MediaPicker'
 import StarterKit from '@tiptap/starter-kit'
 import Link from '@tiptap/extension-link'
 import TextAlign from '@tiptap/extension-text-align'
 import Placeholder from '@tiptap/extension-placeholder'
+import Image from '@tiptap/extension-image'
 import { cn } from '@/lib/utils'
 import {
   Bold,
@@ -26,6 +28,7 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  ImageIcon,
 } from 'lucide-react'
 
 interface TipTapEditorProps {
@@ -35,6 +38,8 @@ interface TipTapEditorProps {
 }
 
 export function TipTapEditor({ value, onChange, placeholder = 'Write your article...' }: TipTapEditorProps) {
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false)
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -53,6 +58,11 @@ export function TipTapEditor({ value, onChange, placeholder = 'Write your articl
       }),
       Placeholder.configure({
         placeholder,
+      }),
+      Image.configure({
+        HTMLAttributes: {
+          class: 'rounded-lg max-w-full h-auto',
+        },
       }),
     ],
     content: value,
@@ -287,6 +297,14 @@ export function TipTapEditor({ value, onChange, placeholder = 'Write your articl
         </button>
         <button
           type="button"
+          onClick={() => setMediaPickerOpen(true)}
+          className="p-1.5 rounded-lg hover:bg-secondary/80 transition-colors"
+          title="Add Media"
+        >
+          <ImageIcon className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
           onClick={() => editor.chain().focus().unsetLink().run()}
           disabled={!editor.isActive('link')}
           className="p-1.5 rounded-lg hover:bg-secondary/80 transition-colors disabled:opacity-40"
@@ -320,6 +338,19 @@ export function TipTapEditor({ value, onChange, placeholder = 'Write your articl
 
       {/* Editor Area */}
       <EditorContent editor={editor} />
+      
+      <MediaPicker
+        isOpen={mediaPickerOpen}
+        onOpenChange={setMediaPickerOpen}
+        onSelect={(url, type, altText) => {
+          if (type === 'image') {
+            editor.chain().focus().setImage({ src: url, alt: altText }).run()
+          } else {
+            // For documents and videos, we insert a link to it
+            editor.chain().focus().extendMarkRange('link').setLink({ href: url }).insertContent(altText || 'View Media').run()
+          }
+        }}
+      />
     </div>
   )
 }

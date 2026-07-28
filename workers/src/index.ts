@@ -19,6 +19,8 @@ import { transparencyRoutes } from './routes/transparency'
 import { revisionRoutes } from './routes/revisions'
 import { backupRoutes } from './routes/backups'
 import stripeWebhook from './routes/webhooks/stripe'
+import { mediaRoutes } from './routes/media'
+import { rateLimitMiddleware } from './middleware/rateLimit'
 import { Env } from './types'
 
 const app = new Hono<{ Bindings: Env }>()
@@ -46,6 +48,8 @@ app.use(
     credentials: true,
   }),
 )
+
+app.use('*', rateLimitMiddleware)
 
 app.options('*', (c) => {
   return c.body(null, 204)
@@ -105,6 +109,8 @@ app.route('/api/admin', adminRoutes)
 app.route('/api/settings', settingsRoutes)
 app.route('/api/webhooks/paystack', paystackWebhook)
 app.route('/api/webhooks/stripe', stripeWebhook)
+app.route('/api/media', mediaRoutes)
+app.route('/api/admin/media', mediaRoutes)
 
 export default app
 

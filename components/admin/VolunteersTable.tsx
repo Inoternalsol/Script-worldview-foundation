@@ -19,6 +19,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { VolunteerStatusActions } from '@/components/admin/VolunteerStatusActions'
+import { useCsvExport } from './hooks/useCsvExport'
+import { useClipboard } from './hooks/useClipboard'
 
 type Volunteer = {
   id: string
@@ -45,6 +47,8 @@ export function VolunteersTable({ volunteers: initialVolunteers }: { volunteers:
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [adding, setAdding] = useState(false)
+  const { exportCsv } = useCsvExport<Volunteer>()
+  const { copyBulk } = useClipboard()
 
   const filtered = useMemo(() => {
     return volunteers.filter((v) => {
@@ -69,48 +73,13 @@ export function VolunteersTable({ volunteers: initialVolunteers }: { volunteers:
     setTimeout(() => setCopiedId(null), 2000)
   }
 
-  const handleCopyAllEmails = () => {
-    const emails = filtered.map((v) => v.email).filter(Boolean).join(', ')
-    if (!emails) {
-      toast({
-        title: 'No emails found',
-        description: 'There are no volunteer emails matching current filters.',
-        variant: 'destructive',
-      })
-      return
-    }
-    navigator.clipboard.writeText(emails)
-    toast({
-      title: 'Copied volunteer emails',
-      description: `Copied ${filtered.length} email address(es) formatted for bulk pasting.`,
-    })
-  }
-
-  const handleEmailAllBCC = () => {
-    const emails = filtered.map((v) => v.email).filter(Boolean).join(',')
-    if (!emails) return
-    window.open(`mailto:?bcc=${encodeURIComponent(emails)}&subject=${encodeURIComponent('Update from Script Worldview Foundation')}`, '_blank')
-  }
-
   const handleExportCSV = () => {
-    const headers = ['Name', 'Email', 'Phone', 'Location', 'Status', 'Applied At']
-    const rows = filtered.map((v) => [
-      `"${v.name.replace(/"/g, '""')}"`,
-      `"${v.email}"`,
-      `"${v.phone || ''}"`,
-      `"${v.location || ''}"`,
-      v.status,
-      `"${new Date(v.appliedAt).toLocaleString()}"`,
-    ])
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n')
-    const encodedUri = encodeURI(csvContent)
-    const link = document.createElement('a')
-    link.setAttribute('href', encodedUri)
-    link.setAttribute('download', 'volunteers_list.csv')
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    exportCsv(
+      'volunteers_list.csv',
+      ['Name', 'Email', 'Phone', 'Location', 'Status', 'Applied At'],
+      filtered,
+      (v) => [v.name, v.email, v.phone || '', v.location || '', v.status, new Date(v.appliedAt).toLocaleString()]
+    )
   }
 
   const handleDelete = async (id: string) => {
@@ -173,7 +142,7 @@ export function VolunteersTable({ volunteers: initialVolunteers }: { volunteers:
           <Button
             variant="outline"
             size="sm"
-            onClick={handleCopyAllEmails}
+            onClick={() => copyBulk(filtered.map(v => v.email), 'volunteer emails')}
             title="Copy all filtered volunteer emails"
             className="text-xs"
           >
@@ -184,7 +153,10 @@ export function VolunteersTable({ volunteers: initialVolunteers }: { volunteers:
           <Button
             variant="outline"
             size="sm"
-            onClick={handleEmailAllBCC}
+            onClick={() => {
+              const emails = filtered.map((v) => v.email).filter(Boolean).join(',')
+              if (emails) window.open(`mailto:?bcc=${encodeURIComponent(emails)}&subject=${encodeURIComponent('Update from Script Worldview Foundation')}`, '_blank')
+            }}
             title="Email all filtered volunteers via default client"
             className="text-xs"
           >

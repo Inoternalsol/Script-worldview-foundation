@@ -8,11 +8,13 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { ImageUploadInput } from '@/components/admin/ImageUploadInput'
 
 export default function NewStaticPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [ogImage, setOgImage] = useState<string>('')
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -31,7 +33,7 @@ export default function NewStaticPage() {
       contentJson,
       metaTitle: (form.get('metaTitle') as string) || undefined,
       metaDesc: (form.get('metaDesc') as string) || undefined,
-      ogImage: (form.get('ogImage') as string) || undefined,
+      ogImage: ogImage || undefined,
       status: (form.get('status') as string) || 'draft',
     }
 
@@ -106,8 +108,8 @@ export default function NewStaticPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="ogImage">SEO OpenGraph Image URL</Label>
-            <Input id="ogImage" name="ogImage" placeholder="https://..." />
+            <Label>SEO OpenGraph Image</Label>
+            <ImageUploadInput value={ogImage} onChange={setOgImage} placeholder="Upload image file or paste URL..." />
           </div>
 
           <div className="space-y-2 sm:col-span-2">

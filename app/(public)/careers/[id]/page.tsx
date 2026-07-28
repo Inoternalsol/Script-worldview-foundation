@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Briefcase, MapPin, Clock } from 'lucide-react'
 import { CareerApplicationForm } from '@/components/public/forms/CareerApplicationForm'
+import DOMPurify from 'isomorphic-dompurify'
 
 // Mock Data
 const mockJobs = [
@@ -106,7 +107,7 @@ export default async function CareerPage({ params }: { params: { id: string } })
 
           <div 
             className="prose prose-lg max-w-none text-brand-muted prose-headings:font-heading prose-headings:text-brand-primary"
-            dangerouslySetInnerHTML={{ __html: job.description }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(job.description) }}
           />
 
           <div className="mt-12">

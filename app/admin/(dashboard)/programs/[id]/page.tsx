@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { ImageUploadInput } from '@/components/admin/ImageUploadInput'
 
 type Program = {
   id: string
@@ -29,6 +30,7 @@ export default function EditProgramPage({ params }: { params: { id: string } }) 
   const [deleting, setDeleting] = useState(false)
   const [program, setProgram] = useState<Program | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [featuredImage, setFeaturedImage] = useState<string>('')
 
   useEffect(() => {
     async function fetchProgram() {
@@ -37,6 +39,7 @@ export default function EditProgramPage({ params }: { params: { id: string } }) 
         if (!res.ok) throw new Error('Failed to load program')
         const data = await res.json()
         setProgram(data.data)
+        setFeaturedImage(data.data.featuredImage || '')
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -58,7 +61,7 @@ export default function EditProgramPage({ params }: { params: { id: string } }) 
       category: form.get('category') as string,
       description: form.get('description') as string,
       icon: (form.get('icon') as string) || null,
-      featuredImage: (form.get('featuredImage') as string) || null,
+      featuredImage: featuredImage || null,
       status: form.get('status') as string,
       sortOrder: parseInt(form.get('sortOrder') as string || '0', 10),
     }
@@ -165,9 +168,9 @@ export default function EditProgramPage({ params }: { params: { id: string } }) 
             <Input id="icon" name="icon" defaultValue={program.icon || ''} placeholder="BookOpen, Heart, Shield, Users, etc." />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="featuredImage">Featured Image URL</Label>
-            <Input id="featuredImage" name="featuredImage" type="url" defaultValue={program.featuredImage || ''} placeholder="https://..." />
+          <div className="space-y-2 sm:col-span-2">
+            <Label>Featured Image</Label>
+            <ImageUploadInput value={featuredImage} onChange={setFeaturedImage} placeholder="Upload image file or paste URL..." />
           </div>
 
           <div className="space-y-2">

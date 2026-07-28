@@ -28,6 +28,7 @@ import {
   Building2,
   Calendar,
 } from 'lucide-react'
+import { useClipboard } from './hooks/useClipboard'
 
 type Contact = {
   id: string
@@ -58,7 +59,8 @@ export function ContactsTableClient({ contacts: initialContacts }: { contacts: C
 
   const [selectedMessage, setSelectedMessage] = useState<Contact | null>(null)
   const [updatingStatus, setUpdatingStatus] = useState(false)
-  const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  const { copyText, copiedId } = useClipboard()
 
   const filtered = useMemo(() => {
     return contactsList.filter((c) => {
@@ -86,16 +88,6 @@ export function ContactsTableClient({ contacts: initialContacts }: { contacts: C
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page)
     }
-  }
-
-  const handleCopyText = (text: string, id: string, label: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedId(id)
-    toast({
-      title: 'Copied to clipboard',
-      description: `${label} copied to clipboard.`,
-    })
-    setTimeout(() => setCopiedId(null), 2000)
   }
 
   const handleStatusChange = async (id: string, newStatus: string) => {
@@ -316,7 +308,7 @@ export function ContactsTableClient({ contacts: initialContacts }: { contacts: C
                   </a>
                   <button
                     type="button"
-                    onClick={() => handleCopyText(selectedMessage.email, `${selectedMessage.id}-email`, 'Email')}
+                    onClick={() => copyText(selectedMessage.email, `${selectedMessage.id}-email`, 'Email')}
                     className="text-gray-400 hover:text-gray-600 ml-1"
                     title="Copy email address"
                   >
@@ -350,7 +342,7 @@ export function ContactsTableClient({ contacts: initialContacts }: { contacts: C
                     </a>
                     <button
                       type="button"
-                      onClick={() => handleCopyText(selectedMessage.phone!, `${selectedMessage.id}-phone`, 'Phone')}
+                      onClick={() => copyText(selectedMessage.phone!, `${selectedMessage.id}-phone`, 'Phone')}
                       className="text-gray-400 hover:text-gray-600 ml-1"
                       title="Copy phone number"
                     >

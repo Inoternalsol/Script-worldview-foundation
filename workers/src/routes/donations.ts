@@ -100,6 +100,7 @@ donations.post('/', rateLimit({ windowMs: 600000, maxRequests: 10, endpointLabel
         headers: {
           Authorization: `Bearer ${c.env.STRIPE_SECRET_KEY}`,
           'Content-Type': 'application/x-www-form-urlencoded',
+          'Idempotency-Key': donationId,
         },
         body: new URLSearchParams({
           amount: amountCents.toString(),

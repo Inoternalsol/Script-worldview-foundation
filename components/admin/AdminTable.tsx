@@ -11,6 +11,7 @@ interface AdminTableShellProps {
   filterBar?: ReactNode
   children: ReactNode
   /** Keys to search across (matched against row data string values) */
+  searchKeys?: string[]
 }
 
 export function AdminTableShell({
@@ -135,13 +136,30 @@ export function Th({ children }: { children: ReactNode }) {
 }
 
 /** Status badge */
-export function StatusBadge({ status, colorMap }: { status: string; colorMap: Record<string, string> }) {
+export function StatusBadge<T extends string = string>({ status, colorMap }: { status: T; colorMap: Record<T, string> }) {
   const cls = colorMap[status] ?? 'bg-secondary text-muted-foreground'
   return (
     <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${cls}`}>
       {status.replace(/_/g, ' ')}
     </span>
   )
+}
+
+/** Helper to generate pagination sliding window */
+function getPageNumbers(currentPage: number, totalPages: number) {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1)
+  }
+  
+  if (currentPage <= 4) {
+    return [1, 2, 3, 4, 5, '...', totalPages]
+  }
+  
+  if (currentPage >= totalPages - 3) {
+    return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages]
+  }
+  
+  return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages]
 }
 
 /** Reusable pagination controls */
@@ -160,6 +178,8 @@ export function TablePagination({
   endIndex: number
   totalItems: number
 }) {
+  const pageNumbers = getPageNumbers(currentPage, totalPages)
+
   return (
     <div className="flex items-center justify-between border-t border-border bg-card px-4 py-3 sm:px-6">
       <div className="flex flex-1 justify-between sm:hidden">
@@ -197,8 +217,19 @@ export function TablePagination({
                 <span className="sr-only">Previous</span>
                 &larr;
               </button>
-              {Array.from({ length: totalPages }).map((_, idx) => {
-                const pageNum = idx + 1
+              {pageNumbers.map((page, idx) => {
+                if (page === '...') {
+                  return (
+                    <span
+                      key={`ellipsis-${idx}`}
+                      className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-foreground ring-1 ring-inset ring-input focus:outline-offset-0"
+                    >
+                      ...
+                    </span>
+                  )
+                }
+
+                const pageNum = page as number
                 const isCurrent = pageNum === currentPage
                 return (
                   <button

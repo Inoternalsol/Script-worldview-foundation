@@ -19,6 +19,8 @@ import {
   Loader2,
   DollarSign,
 } from 'lucide-react'
+import { useCsvExport } from './hooks/useCsvExport'
+import { useClipboard } from './hooks/useClipboard'
 
 type Donation = {
   id: string
@@ -46,11 +48,12 @@ export function CampaignDonationsTable({
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('')
-  const [copiedId, setCopiedId] = useState<string | null>(null)
-
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false)
   const [adding, setAdding] = useState(false)
+
+  const { exportCsv } = useCsvExport<Donation>()
+  const { copyText, copyBulk, copiedId } = useClipboard()
 
   const loadDonations = async () => {
     setLoading(true)
@@ -88,31 +91,9 @@ export function CampaignDonationsTable({
     return filteredDonations.reduce((sum, d) => sum + (Number(d.amount) || 0), 0)
   }, [filteredDonations])
 
-  const handleCopyText = (text: string, id: string, label: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedId(id)
-    toast({
-      title: 'Copied to clipboard',
-      description: `${label} copied to clipboard.`,
-    })
-    setTimeout(() => setCopiedId(null), 2000)
-  }
-
   const handleCopyAllEmails = () => {
-    const emails = filteredDonations.map((d) => d.donorEmail).filter(Boolean).join(', ')
-    if (!emails) {
-      toast({
-        title: 'No emails found',
-        description: 'No donor email addresses match current filters.',
-        variant: 'destructive',
-      })
-      return
-    }
-    navigator.clipboard.writeText(emails)
-    toast({
-      title: 'Copied donor emails',
-      description: `Copied ${filteredDonations.length} email address(es).`,
-    })
+    const emails = filteredDonations.map((d) => d.donorEmail)
+    copyBulk(emails, 'donor emails')
   }
 
   const handleEmailAllBCC = () => {
@@ -131,26 +112,21 @@ export function CampaignDonationsTable({
   }
 
   const handleExportCSV = () => {
-    const headers = ['Donor Name', 'Donor Email', 'Amount', 'Currency', 'Payment Method', 'Reference', 'Message', 'Date']
-    const rows = filteredDonations.map((d) => [
-      `"${d.donorName.replace(/"/g, '""')}"`,
-      `"${d.donorEmail}"`,
-      d.amount,
-      d.currency,
-      d.paymentMethod,
-      `"${d.reference || ''}"`,
-      `"${(d.message || '').replace(/"/g, '""')}"`,
-      `"${d.createdAt ? new Date(d.createdAt).toLocaleString() : ''}"`,
-    ])
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n')
-    const encodedUri = encodeURI(csvContent)
-    const link = document.createElement('a')
-    link.setAttribute('href', encodedUri)
-    link.setAttribute('download', `${campaignTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_donors.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    exportCsv(
+      `${campaignTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_donors.csv`,
+      ['Donor Name', 'Donor Email', 'Amount', 'Currency', 'Payment Method', 'Reference', 'Message', 'Date'],
+      filteredDonations,
+      (d) => [
+        d.donorName,
+        d.donorEmail,
+        d.amount.toString(),
+        d.currency,
+        d.paymentMethod,
+        d.reference || '',
+        d.message || '',
+        d.createdAt ? new Date(d.createdAt).toLocaleString() : '',
+      ]
+    )
   }
 
   const handleAddSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -303,7 +279,7 @@ export function CampaignDonationsTable({
                         </a>
                         <button
                           type="button"
-                          onClick={() => handleCopyText(d.donorEmail, `${d.id}-email`, 'Email')}
+                          onClick={() => copyText(d.donorEmail, `${d.id}-email`, 'Email')}
                           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                         >
                           {copiedId === `${d.id}-email` ? (

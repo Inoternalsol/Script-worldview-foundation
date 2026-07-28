@@ -91,35 +91,30 @@ export default function MediaLibraryPage() {
         ? 'video' 
         : 'document'
 
-    const reader = new FileReader()
-    reader.onload = async (event) => {
-      const base64Url = event.target?.result as string
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('altText', file.name)
+      
+      const data = await adminClientFetch<MediaItem>('/media', {
+        method: 'POST',
+        body: formData,
+      })
 
-      try {
-        const data = await adminClientFetch<MediaItem>('/media', {
-          method: 'POST',
-          body: JSON.stringify({
-            filename: file.name,
-            type,
-            sizeBytes: file.size,
-            url: base64Url
-          }),
-        })
+      if (!data || !data.id) throw new Error('Failed to upload media')
 
-        setMediaList((prev) => [data, ...prev])
-        toast({
-          title: 'Uploaded',
-          description: `${file.name} uploaded successfully.`,
-        })
-      } catch (err: any) {
-        toast({
-          title: 'Upload Failed',
-          description: err.message,
-          variant: 'destructive',
-        })
-      }
+      setMediaList((prev) => [data, ...prev])
+      toast({
+        title: 'Uploaded',
+        description: `${file.name} uploaded successfully.`,
+      })
+    } catch (err: any) {
+      toast({
+        title: 'Upload Failed',
+        description: err.message,
+        variant: 'destructive',
+      })
     }
-    reader.readAsDataURL(file)
   }
 
   function formatBytes(bytes: number | null) {

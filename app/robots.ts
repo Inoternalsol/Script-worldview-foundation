@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://swf.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://scriptworldview.org'
 
   return {
     rules: {
@@ -9,9 +9,8 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: [
         '/admin/',
-        '/admin/*',
         '/api/',
-        '/api/*',
+        '/_next/',
       ],
     },
     sitemap: `${baseUrl}/sitemap.xml`,

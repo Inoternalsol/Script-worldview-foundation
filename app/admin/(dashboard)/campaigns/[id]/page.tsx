@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft, HeartHandshake, Layers } from 'lucide-react'
 import Link from 'next/link'
 import { CampaignDonationsTable } from '@/components/admin/CampaignDonationsTable'
+import { ImageUploadInput } from '@/components/admin/ImageUploadInput'
 
 type Campaign = {
   id: string
@@ -37,6 +38,7 @@ export default function EditCampaignPage({ params }: { params: { id: string } })
   const [campaign, setCampaign] = useState<Campaign | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'details' | 'donors'>('details')
+  const [featuredImage, setFeaturedImage] = useState<string>('')
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location.hash === '#donors') {
@@ -49,6 +51,7 @@ export default function EditCampaignPage({ params }: { params: { id: string } })
         if (!res.ok) throw new Error('Failed to load campaign')
         const data = await res.json()
         setCampaign(data.data)
+        setFeaturedImage(data.data.featuredImage || '')
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -70,7 +73,7 @@ export default function EditCampaignPage({ params }: { params: { id: string } })
       goalAmount: parseInt(form.get('goalAmount') as string),
       deadline: form.get('deadline') ? new Date(form.get('deadline') as string).getTime() : undefined,
       description: form.get('description') as string,
-      featuredImage: (form.get('featuredImage') as string) || undefined,
+      featuredImage: featuredImage || undefined,
       status: form.get('status') as string,
     }
 
@@ -188,8 +191,8 @@ export default function EditCampaignPage({ params }: { params: { id: string } })
             </div>
 
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="featuredImage">Featured Image URL</Label>
-              <Input id="featuredImage" name="featuredImage" defaultValue={campaign.featuredImage || ''} placeholder="https://..." />
+              <Label>Featured Image</Label>
+              <ImageUploadInput value={featuredImage} onChange={setFeaturedImage} placeholder="Upload image file or paste URL..." />
             </div>
 
             <div className="space-y-2 sm:col-span-2">

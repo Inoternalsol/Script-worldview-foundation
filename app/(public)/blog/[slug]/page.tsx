@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Calendar, Clock, User, ArrowLeft } from 'lucide-react'
 import { SocialShareButtons } from '@/components/public/shared/SocialShareButtons'
+import DOMPurify from 'isomorphic-dompurify'
 
 import Image from 'next/image'
 
@@ -220,7 +221,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
         {/* Content */}
         <div 
           className="prose prose-lg max-w-none text-brand-muted prose-headings:font-heading prose-headings:text-brand-primary prose-a:text-brand-secondary prose-blockquote:border-l-brand-secondary"
-          dangerouslySetInnerHTML={{ __html: post.content }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
         />
 
         {/* Footer & Share */}

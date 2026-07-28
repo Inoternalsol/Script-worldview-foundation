@@ -16,10 +16,11 @@ import {
   Check,
   ExternalLink,
   MessageCircle,
-  Trash2,
   Search,
   Loader2,
 } from 'lucide-react'
+import { useCsvExport } from './hooks/useCsvExport'
+import { useClipboard } from './hooks/useClipboard'
 
 type Registration = {
   id: string
@@ -57,12 +58,12 @@ export function EventRegistrationsTable({
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
-  // Copy feedback state
-  const [copiedId, setCopiedId] = useState<string | null>(null)
-
   // Add Attendee Modal state
   const [showAddModal, setShowAddModal] = useState(false)
   const [adding, setAdding] = useState(false)
+
+  const { exportCsv } = useCsvExport<Registration>()
+  const { copyText, copyBulk, copiedId } = useClipboard()
 
   const loadRegistrations = async () => {
     setLoading(true)
@@ -103,68 +104,40 @@ export function EventRegistrationsTable({
     })
   }, [registrations, searchQuery, statusFilter])
 
-  const copyToClipboard = (text: string, id: string, label: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedId(id)
-    toast({
-      title: `${label} copied!`,
-      description: text,
-    })
-    setTimeout(() => setCopiedId(null), 2000)
-  }
-
   const copyAllEmails = () => {
-    const emails = filteredRegistrations
-      .map((r) => r.email)
-      .filter(Boolean)
-      .join(', ')
-    if (!emails) return
-    navigator.clipboard.writeText(emails)
-    toast({
-      title: 'Copied all attendee emails!',
-      description: `Copied ${filteredRegistrations.length} email addresses ready for BCC.`,
-    })
+    const emails = filteredRegistrations.map((r) => r.email)
+    copyBulk(emails, 'attendee emails')
   }
 
   const exportCSV = () => {
     if (filteredRegistrations.length === 0) return
 
-    const headers = [
-      'Name',
-      'Email',
-      'Phone',
-      'Organization',
-      'Role',
-      'Status',
-      'Dietary Needs',
-      'Accessibility Needs',
-      'Registered At',
-    ]
-    const rows = filteredRegistrations.map((r) => [
-      `"${(r.name || '').replace(/"/g, '""')}"`,
-      `"${(r.email || '').replace(/"/g, '""')}"`,
-      `"${(r.phone || '').replace(/"/g, '""')}"`,
-      `"${(r.organization || '').replace(/"/g, '""')}"`,
-      `"${(r.roleTitle || '').replace(/"/g, '""')}"`,
-      `"${r.status || 'confirmed'}"`,
-      `"${(r.dietaryNeeds || '').replace(/"/g, '""')}"`,
-      `"${(r.accessibilityNeeds || '').replace(/"/g, '""')}"`,
-      `"${new Date(r.registeredAt || r.createdAt || Date.now()).toLocaleString()}"`,
-    ])
-
-    const csvContent =
-      'data:text/csv;charset=utf-8,' +
-      [headers.join(','), ...rows.map((e) => e.join(','))].join('\n')
-    const encodedUri = encodeURI(csvContent)
-    const link = document.createElement('a')
-    link.setAttribute('href', encodedUri)
-    link.setAttribute(
-      'download',
-      `${eventTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-attendees.csv`
+    exportCsv(
+      `${eventTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-attendees.csv`,
+      [
+        'Name',
+        'Email',
+        'Phone',
+        'Organization',
+        'Role',
+        'Status',
+        'Dietary Needs',
+        'Accessibility Needs',
+        'Registered At',
+      ],
+      filteredRegistrations,
+      (r) => [
+        r.name,
+        r.email,
+        r.phone || '',
+        r.organization || '',
+        r.roleTitle || '',
+        r.status || 'confirmed',
+        r.dietaryNeeds || '',
+        r.accessibilityNeeds || '',
+        new Date(r.registeredAt || r.createdAt || Date.now()).toLocaleString(),
+      ]
     )
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
   }
 
   const handleStatusChange = async (regId: string, newStatus: string) => {
@@ -409,7 +382,7 @@ export function EventRegistrationsTable({
                         </a>
                         <button
                           type="button"
-                          onClick={() => copyToClipboard(reg.email, `email-${reg.id}`, 'Email')}
+                          onClick={() => copyText(reg.email, `email-${reg.id}`, 'Email')}
                           className="text-brand-muted hover:text-foreground p-0.5 rounded transition-colors"
                           title="Copy Email"
                         >
@@ -444,7 +417,7 @@ export function EventRegistrationsTable({
                           )}
                           <button
                             type="button"
-                            onClick={() => copyToClipboard(reg.phone!, `phone-${reg.id}`, 'Phone')}
+                            onClick={() => copyText(reg.phone!, `phone-${reg.id}`, 'Phone')}
                             className="text-brand-muted hover:text-foreground p-0.5 rounded transition-colors"
                             title="Copy Phone"
                           >

@@ -23,6 +23,8 @@ import {
   Eye,
   Linkedin,
 } from 'lucide-react'
+import { useCsvExport } from './hooks/useCsvExport'
+import { useClipboard } from './hooks/useClipboard'
 
 type JobApplication = {
   id: string
@@ -61,13 +63,13 @@ export function JobApplicationsTable({
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
-  // Copy feedback state
-  const [copiedId, setCopiedId] = useState<string | null>(null)
-
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false)
   const [adding, setAdding] = useState(false)
   const [selectedAppModal, setSelectedAppModal] = useState<JobApplication | null>(null)
+
+  const { exportCsv } = useCsvExport<JobApplication>()
+  const { copyText, copyBulk, copiedId } = useClipboard()
 
   const loadApplications = async () => {
     setLoading(true)
@@ -105,31 +107,9 @@ export function JobApplicationsTable({
     })
   }, [applications, searchQuery, statusFilter])
 
-  const handleCopyText = (text: string, id: string, label: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedId(id)
-    toast({
-      title: 'Copied to clipboard',
-      description: `${label} copied to clipboard.`,
-    })
-    setTimeout(() => setCopiedId(null), 2000)
-  }
-
   const handleCopyAllEmails = () => {
-    const emails = filteredApplications.map((a) => a.email).filter(Boolean).join(', ')
-    if (!emails) {
-      toast({
-        title: 'No emails found',
-        description: 'There are no applicant emails matching current filters.',
-        variant: 'destructive',
-      })
-      return
-    }
-    navigator.clipboard.writeText(emails)
-    toast({
-      title: 'Copied applicant emails',
-      description: `Copied ${filteredApplications.length} email address(es) formatted for bulk pasting.`,
-    })
+    const emails = filteredApplications.map((a) => a.email)
+    copyBulk(emails, 'applicant emails')
   }
 
   const handleEmailAllBCC = () => {
@@ -139,26 +119,21 @@ export function JobApplicationsTable({
   }
 
   const handleExportCSV = () => {
-    const headers = ['Name', 'Email', 'Phone', 'Years Experience', 'CV URL', 'LinkedIn URL', 'Status', 'Applied At']
-    const rows = filteredApplications.map((a) => [
-      `"${a.name.replace(/"/g, '""')}"`,
-      `"${a.email}"`,
-      `"${a.phone || ''}"`,
-      `"${a.yearsExperience || ''}"`,
-      `"${a.cvUrl || ''}"`,
-      `"${a.linkedinUrl || ''}"`,
-      a.status,
-      `"${a.appliedAt ? new Date(a.appliedAt).toLocaleString() : ''}"`,
-    ])
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n')
-    const encodedUri = encodeURI(csvContent)
-    const link = document.createElement('a')
-    link.setAttribute('href', encodedUri)
-    link.setAttribute('download', `${jobTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_applicants.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    exportCsv(
+      `${jobTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_applicants.csv`,
+      ['Name', 'Email', 'Phone', 'Years Experience', 'CV URL', 'LinkedIn URL', 'Status', 'Applied At'],
+      filteredApplications,
+      (a) => [
+        a.name,
+        a.email,
+        a.phone || '',
+        a.yearsExperience?.toString() || '',
+        a.cvUrl || '',
+        a.linkedinUrl || '',
+        a.status,
+        a.appliedAt ? new Date(a.appliedAt).toLocaleString() : '',
+      ]
+    )
   }
 
   const handleStatusChange = async (appId: string, newStatus: string) => {
@@ -373,7 +348,7 @@ export function JobApplicationsTable({
                           </a>
                           <button
                             type="button"
-                            onClick={() => handleCopyText(app.email, `${app.id}-email`, 'Email')}
+                            onClick={() => copyText(app.email, `${app.id}-email`, 'Email')}
                             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                             title="Copy email address"
                           >
@@ -408,7 +383,7 @@ export function JobApplicationsTable({
                             </a>
                             <button
                               type="button"
-                              onClick={() => handleCopyText(app.phone!, `${app.id}-phone`, 'Phone')}
+                              onClick={() => copyText(app.phone!, `${app.id}-phone`, 'Phone')}
                               className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                               title="Copy phone number"
                             >

@@ -66,7 +66,7 @@ export function CareerApplicationForm({ jobId, jobTitle }: CareerApplicationForm
       const formData = new FormData()
       formData.append('file', file)
 
-      const res = await fetch('/api/careers/upload', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/careers/upload`, {
         method: 'POST',
         body: formData,
       })
@@ -252,11 +252,11 @@ export function CareerApplicationForm({ jobId, jobTitle }: CareerApplicationForm
             )}
           />
 
-          <Button type="submit" className="w-full bg-[#1A3A5C] hover:bg-[#1A3A5C]/90 text-white font-bold h-12" disabled={isLoading || isUploading}>
-            {isLoading ? (
+          <Button type="submit" className="w-full bg-[#1A3A5C] hover:bg-[#1A3A5C]/90 text-white font-bold h-12" disabled={isLoading || isUploading || !form.getValues('cvUrl')}>
+            {isLoading || isUploading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting Application...
+                {isUploading ? 'Uploading CV...' : 'Submitting Application...'}
               </>
             ) : (
               'Submit Application'

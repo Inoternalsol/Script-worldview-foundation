@@ -9,12 +9,14 @@ import { Textarea } from '@/components/ui/textarea'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { TipTapEditor } from '@/components/admin/content/TipTapEditor'
+import { ImageUploadInput } from '@/components/admin/ImageUploadInput'
 
 export default function NewBlogPostPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [content, setContent] = useState('')
+  const [featuredImage, setFeaturedImage] = useState<string>('')
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -28,7 +30,7 @@ export default function NewBlogPostPage() {
       content: content,
       excerpt: (form.get('excerpt') as string) || undefined,
       categoryId: (form.get('categoryId') as string) || undefined,
-      featuredImage: (form.get('featuredImage') as string) || undefined,
+      featuredImage: featuredImage || undefined,
       status: (form.get('status') as string) || 'draft',
     }
 
@@ -106,8 +108,8 @@ export default function NewBlogPostPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="featuredImage">Featured Image URL</Label>
-            <Input id="featuredImage" name="featuredImage" placeholder="https://..." />
+            <Label>Featured Image</Label>
+            <ImageUploadInput value={featuredImage} onChange={setFeaturedImage} placeholder="Upload image file or paste URL..." />
           </div>
 
           <div className="space-y-2">

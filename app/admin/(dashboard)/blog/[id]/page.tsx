@@ -10,6 +10,7 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { TipTapEditor } from '@/components/admin/content/TipTapEditor'
 import { RevisionDrawerClient } from '@/components/admin/RevisionDrawerClient'
+import { ImageUploadInput } from '@/components/admin/ImageUploadInput'
 
 type BlogPost = {
   id: string
@@ -30,6 +31,7 @@ export default function EditBlogPostPage({ params }: { params: { id: string } })
   const [post, setPost] = useState<BlogPost | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [content, setContent] = useState('')
+  const [featuredImage, setFeaturedImage] = useState<string>('')
 
   useEffect(() => {
     async function fetchPost() {
@@ -39,6 +41,7 @@ export default function EditBlogPostPage({ params }: { params: { id: string } })
         const data = await res.json()
         setPost(data.data)
         setContent(data.data.content || '')
+        setFeaturedImage(data.data.featuredImage || '')
       } catch (err: any) {
         setError(err.message)
       } finally {
@@ -60,7 +63,7 @@ export default function EditBlogPostPage({ params }: { params: { id: string } })
       content: content,
       excerpt: (form.get('excerpt') as string) || undefined,
       categoryId: (form.get('categoryId') as string) || undefined,
-      featuredImage: (form.get('featuredImage') as string) || undefined,
+      featuredImage: featuredImage || undefined,
       status: form.get('status') as string,
     }
 
@@ -168,8 +171,8 @@ export default function EditBlogPostPage({ params }: { params: { id: string } })
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="featuredImage">Featured Image URL</Label>
-            <Input id="featuredImage" name="featuredImage" defaultValue={post.featuredImage || ''} placeholder="https://..." />
+            <Label>Featured Image</Label>
+            <ImageUploadInput value={featuredImage} onChange={setFeaturedImage} placeholder="Upload image file or paste URL..." />
           </div>
 
           <div className="space-y-2">

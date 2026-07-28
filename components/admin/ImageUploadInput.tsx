@@ -33,49 +33,38 @@ export function ImageUploadInput({ value, onChange, placeholder = 'https://... o
     }
 
     setUploading(true)
-    const reader = new FileReader()
-    reader.onload = async (event) => {
-      const base64Url = event.target?.result as string
-
-      try {
-        // Automatically save to the Media Library so it persists cleanly
-        const data: any = await adminClientFetch('/media', {
-          method: 'POST',
-          body: JSON.stringify({
-            filename: file.name,
-            type: 'image',
-            sizeBytes: file.size,
-            url: base64Url,
-          }),
-        })
-
-        const finalUrl = data?.url || base64Url
-        onChange(finalUrl)
-        toast({
-          title: 'Image Uploaded',
-          description: `${file.name} uploaded successfully.`,
-        })
-      } catch (err: any) {
-        // If API fails, fallback to DataURL directly
-        onChange(base64Url)
-        toast({
-          title: 'Uploaded locally',
-          description: 'Image loaded directly into form.',
-        })
-      } finally {
-        setUploading(false)
-        if (fileInputRef.current) fileInputRef.current.value = ''
+    setUploading(true)
+    
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('altText', file.name)
+      
+      const data: any = await adminClientFetch('/media', {
+        method: 'POST',
+        body: formData,
+      })
+      
+      if (!data || !data.url) {
+        throw new Error('Upload failed or returned invalid data')
       }
-    }
-    reader.onerror = () => {
-      setUploading(false)
+      
+      onChange(data.url)
       toast({
-        title: 'Error reading file',
-        description: 'Failed to read image file.',
+        title: 'Image Uploaded',
+        description: `${file.name} uploaded to Cloudinary successfully.`,
+      })
+    } catch (err: any) {
+      console.error(err)
+      toast({
+        title: 'Upload Error',
+        description: err.message || 'Failed to upload image.',
         variant: 'destructive',
       })
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
-    reader.readAsDataURL(file)
   }
 
   return (

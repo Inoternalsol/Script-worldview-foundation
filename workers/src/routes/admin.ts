@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import { eq, desc, asc, sql, count, and, isNull } from 'drizzle-orm'
 import { createDb } from '../db/client'
+import { createCrudHandlers } from '../utils/crud'
 import {
   volunteers,
   donations,
@@ -21,7 +22,8 @@ import {
   programs,
 } from '../../../lib/db/schema'
 import { Env } from '../types'
-import { authMiddleware } from '../middleware/auth'
+import { authMiddleware, requireRole } from '../middleware/auth'
+import { uploadToCloudinary } from '../utils/cloudinary'
 import bcrypt from 'bcryptjs'
 import { settingsRoutes } from './settings'
 import { sendEmail } from '../utils/email'
@@ -32,7 +34,7 @@ export const adminRoutes = new Hono<{ Bindings: Env }>()
 adminRoutes.route('/settings', settingsRoutes)
 
 // Enforce authentication on all admin endpoints (Phase 9)
-adminRoutes.use('*', authMiddleware)
+adminRoutes.use('*', authMiddleware, requireRole(['super_admin', 'dept_admin', 'content_editor']))
 
 // ─── Dashboard Stats ──────────────────────────────────────────────
 adminRoutes.get('/stats', async (c) => {
@@ -50,7 +52,7 @@ adminRoutes.get('/stats', async (c) => {
     donationTotalArr,
     pendingVolunteersArr,
     newContactsArr
-  ] = await Promise.all([
+  ] = await db.batch([
     db.select({ count: count() }).from(volunteers),
     db.select({ count: count() }).from(donations).where(isNull(donations.deletedAt)),
     db.select({ count: count() }).from(contacts),
@@ -126,51 +128,9 @@ adminRoutes.get('/analytics', async (c) => {
 })
 
 // ─── Volunteers ───────────────────────────────────────────────────
-adminRoutes.get('/volunteers', async (c) => {
-  const db = createDb(c.env.DB)
-  const status = c.req.query('status')
+createCrudHandlers(adminRoutes, '/volunteers', volunteers, volunteers.appliedAt)
 
-  const conditions = []
-  if (status) {
-    conditions.push(eq(volunteers.status, status as any))
-  }
 
-  const data = await db
-    .select()
-    .from(volunteers)
-    .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(desc(volunteers.appliedAt))
-    .limit(200)
-
-  return c.json({ data })
-})
-
-adminRoutes.get('/volunteers/:id', async (c) => {
-  const db = createDb(c.env.DB)
-  const id = c.req.param('id')
-  const [record] = await db.select().from(volunteers).where(eq(volunteers.id, id)).limit(1)
-  
-  if (!record) {
-    return c.json({ error: 'Volunteer not found' }, 404)
-  }
-  return c.json({ data: record })
-})
-
-adminRoutes.patch('/volunteers/:id', async (c) => {
-  const db = createDb(c.env.DB)
-  const id = c.req.param('id')
-  const body = await c.req.json().catch(() => null)
-  if (!body?.status) return c.json({ error: 'Status required' }, 400)
-
-  const result = await db
-    .update(volunteers)
-    .set({ status: body.status, updatedAt: new Date() })
-    .where(eq(volunteers.id, id))
-    .returning()
-
-  if (!result.length) return c.json({ error: 'Not found' }, 404)
-  return c.json({ data: result[0] })
-})
 
 const volunteerCreateSchema = z.object({
   name: z.string().min(1).max(255),
@@ -210,77 +170,59 @@ adminRoutes.post('/volunteers', async (c) => {
   return c.json({ data: newVol }, 201)
 })
 
-adminRoutes.delete('/volunteers/:id', async (c) => {
-  const id = c.req.param('id')
-  const db = createDb(c.env.DB)
-  const [existing] = await db.select().from(volunteers).where(eq(volunteers.id, id)).limit(1)
-  if (!existing) return c.json({ error: 'Volunteer not found' }, 404)
-
-  await db.delete(volunteers).where(eq(volunteers.id, id))
-  return c.json({ success: true })
-})
 
 // ─── Donations ────────────────────────────────────────────────────
 adminRoutes.get('/donations/export', async (c) => {
-  const db = createDb(c.env.DB)
-  const data = await db
-    .select()
-    .from(donations)
-    .where(isNull(donations.deletedAt))
-    .orderBy(desc(donations.donatedAt))
-
-  const escapeCsv = (val: any) => {
-    if (val === null || val === undefined) return ''
-    const str = String(val)
-    if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
-      return `"${str.replace(/"/g, '""')}"`
+  const { streamText } = await import('hono/streaming')
+  
+  return streamText(c, async (stream) => {
+    const headers = [
+      'ID', 'Donor Name', 'Donor Email', 'Donor Phone', 'Amount', 'Currency',
+      'Campaign ID', 'Payment Ref', 'Gateway', 'Status', 'Anonymous',
+      'Dedication Message', 'Donated At', 'Created At'
+    ]
+    await stream.write(headers.join(',') + '\n')
+    
+    let offset = 0
+    const limit = 500
+    const db = createDb(c.env.DB)
+    while (true) {
+      const data = await db
+        .select()
+        .from(donations)
+        .where(isNull(donations.deletedAt))
+        .orderBy(desc(donations.donatedAt))
+        .limit(limit)
+        .offset(offset)
+        
+      if (data.length === 0) break
+      
+      const escapeCsv = (val: any) => {
+        if (val == null) return ''
+        const str = String(val)
+        if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+          return `"${str.replace(/"/g, '""')}"`
+        }
+        return str
+      }
+      
+      const chunkRows = data.map((d) => [
+        d.id, d.anonymous ? 'Anonymous' : d.donorName, d.donorEmail, d.donorPhone || '',
+        (d.amount / 100).toFixed(2), d.currency, d.campaignId || '', d.paymentRef,
+        d.gateway, d.status, d.anonymous ? 'true' : 'false', d.dedicationMessage || '',
+        d.donatedAt ? new Date(d.donatedAt).toISOString() : '',
+        d.createdAt ? new Date(d.createdAt).toISOString() : ''
+      ])
+      
+      await stream.write(chunkRows.map((row) => row.map(escapeCsv).join(',')).join('\n') + '\n')
+      offset += limit
     }
-    return str
-  }
-
-  const headers = [
-    'ID',
-    'Donor Name',
-    'Donor Email',
-    'Donor Phone',
-    'Amount',
-    'Currency',
-    'Campaign ID',
-    'Payment Ref',
-    'Gateway',
-    'Status',
-    'Anonymous',
-    'Dedication Message',
-    'Donated At',
-    'Created At',
-  ]
-
-  const rows = data.map((d) => [
-    d.id,
-    d.anonymous ? 'Anonymous' : d.donorName,
-    d.donorEmail,
-    d.donorPhone || '',
-    (d.amount / 100).toFixed(2),
-    d.currency,
-    d.campaignId || '',
-    d.paymentRef,
-    d.gateway,
-    d.status,
-    d.anonymous ? 'true' : 'false',
-    d.dedicationMessage || '',
-    d.donatedAt ? new Date(d.donatedAt).toISOString() : '',
-    d.createdAt ? new Date(d.createdAt).toISOString() : '',
-  ])
-
-  const csvContent = [
-    headers.join(','),
-    ...rows.map((row) => row.map(escapeCsv).join(',')),
-  ].join('\n')
-
-  return c.text(csvContent, 200, {
-    'Content-Type': 'text/csv',
-    'Content-Disposition': 'attachment; filename="donations.csv"',
-    'Access-Control-Expose-Headers': 'Content-Disposition',
+  }, {
+    headers: {
+      'Content-Type': 'text/csv',
+      'Content-Disposition': 'attachment; filename="donations.csv"',
+      'Access-Control-Expose-Headers': 'Content-Disposition'
+    }
   })
 })
 
@@ -311,54 +253,23 @@ adminRoutes.post('/donations/:id/receipt', async (c) => {
 
   const receiptHtml = getDonationReceiptHtml(donation.donorName, donation.amount, donation.currency, donation.id)
   
-  const emailResult = await sendEmail(c.env, {
-    to: donation.donorEmail,
-    subject: 'Receipt: Your Donation to Script Worldview Foundation',
-    html: receiptHtml,
-  })
-
-  if (!emailResult.success) {
-    return c.json({ error: 'Failed to send email', details: emailResult.error }, 500)
-  }
+  c.executionCtx.waitUntil(
+    sendEmail(c.env, {
+      to: donation.donorEmail,
+      subject: 'Receipt: Your Donation to Script Worldview Foundation',
+      html: receiptHtml,
+    }).then(emailResult => {
+      if (!emailResult.success) {
+        console.error('Failed to send donation receipt email:', emailResult.error)
+      }
+    })
+  )
 
   return c.json({ success: true })
 })
 
 // ─── Contacts ─────────────────────────────────────────────────────
-adminRoutes.get('/contacts', async (c) => {
-  const db = createDb(c.env.DB)
-  const status = c.req.query('status')
-
-  const conditions = []
-  if (status) {
-    conditions.push(eq(contacts.status, status as any))
-  }
-
-  const data = await db
-    .select()
-    .from(contacts)
-    .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(desc(contacts.createdAt))
-    .limit(200)
-
-  return c.json({ data })
-})
-
-adminRoutes.patch('/contacts/:id', async (c) => {
-  const db = createDb(c.env.DB)
-  const id = c.req.param('id')
-  const body = await c.req.json().catch(() => null)
-  if (!body?.status) return c.json({ error: 'Status required' }, 400)
-
-  const result = await db
-    .update(contacts)
-    .set({ status: body.status, updatedAt: new Date() })
-    .where(eq(contacts.id, id))
-    .returning()
-
-  if (!result.length) return c.json({ error: 'Not found' }, 404)
-  return c.json({ data: result[0] })
-})
+createCrudHandlers(adminRoutes, '/contacts', contacts, contacts.createdAt)
 
 // ─── Newsletter ───────────────────────────────────────────────────
 adminRoutes.get('/newsletter', async (c) => {
@@ -663,7 +574,7 @@ adminRoutes.post('/events/:id/registrations', async (c) => {
   if (parsed.data.status !== 'cancelled') {
     await db
       .update(events)
-      .set({ registrationsCount: (event.registrationsCount || 0) + 1 })
+      .set({ registrationsCount: sql`registrationsCount + 1` })
       .where(eq(events.id, eventId))
   }
 
@@ -689,17 +600,14 @@ adminRoutes.patch('/events/:id/registrations/:regId', async (c) => {
 
   // Adjust count if status changed to/from cancelled
   if (parsed.data.status && parsed.data.status !== existingReg.status) {
-    const [event] = await db.select().from(events).where(eq(events.id, eventId)).limit(1)
-    if (event) {
-      let diff = 0
-      if (existingReg.status === 'cancelled' && parsed.data.status !== 'cancelled') diff = 1
-      else if (existingReg.status !== 'cancelled' && parsed.data.status === 'cancelled') diff = -1
-      if (diff !== 0) {
-        await db
-          .update(events)
-          .set({ registrationsCount: Math.max(0, (event.registrationsCount || 0) + diff) })
-          .where(eq(events.id, eventId))
-      }
+    let diff = 0
+    if (existingReg.status === 'cancelled' && parsed.data.status !== 'cancelled') diff = 1
+    else if (existingReg.status !== 'cancelled' && parsed.data.status === 'cancelled') diff = -1
+    if (diff !== 0) {
+      await db
+        .update(events)
+        .set({ registrationsCount: sql`MAX(0, registrationsCount + ${diff})` })
+        .where(eq(events.id, eventId))
     }
   }
 
@@ -716,13 +624,10 @@ adminRoutes.delete('/events/:id/registrations/:regId', async (c) => {
   await db.delete(eventRegistrations).where(eq(eventRegistrations.id, regId))
 
   if (existingReg.status !== 'cancelled') {
-    const [event] = await db.select().from(events).where(eq(events.id, eventId)).limit(1)
-    if (event && (event.registrationsCount || 0) > 0) {
-      await db
-        .update(events)
-        .set({ registrationsCount: Math.max(0, (event.registrationsCount || 1) - 1) })
-        .where(eq(events.id, eventId))
-    }
+    await db
+      .update(events)
+      .set({ registrationsCount: sql`MAX(0, registrationsCount - 1)` })
+      .where(eq(events.id, eventId))
   }
 
   return c.json({ success: true })
@@ -1069,19 +974,7 @@ const pageCreateSchema = z.object({
   status: z.enum(['draft', 'published']).default('draft'),
 })
 
-adminRoutes.get('/pages', async (c) => {
-  const db = createDb(c.env.DB)
-  const data = await db.select().from(pages).orderBy(desc(pages.updatedAt))
-  return c.json({ data })
-})
-
-adminRoutes.get('/pages/:id', async (c) => {
-  const db = createDb(c.env.DB)
-  const id = c.req.param('id')
-  const [p] = await db.select().from(pages).where(eq(pages.id, id)).limit(1)
-  if (!p) return c.json({ error: 'Not found' }, 404)
-  return c.json({ data: p })
-})
+createCrudHandlers(adminRoutes, '/pages', pages, pages.updatedAt)
 
 adminRoutes.post('/pages', async (c) => {
   const parsed = pageCreateSchema.safeParse(await c.req.json().catch(() => null))
@@ -1103,25 +996,6 @@ adminRoutes.post('/pages', async (c) => {
   }
 })
 
-adminRoutes.patch('/pages/:id', async (c) => {
-  const id = c.req.param('id')
-  const parsed = pageCreateSchema.partial().safeParse(await c.req.json().catch(() => null))
-  if (!parsed.success) return c.json({ error: 'Invalid input' }, 400)
-
-  const db = createDb(c.env.DB)
-  const result = await db.update(pages).set({ ...parsed.data, updatedAt: new Date() }).where(eq(pages.id, id)).returning()
-  if (!result.length) return c.json({ error: 'Not found' }, 404)
-  return c.json({ data: result[0] })
-})
-
-adminRoutes.delete('/pages/:id', async (c) => {
-  const id = c.req.param('id')
-  const db = createDb(c.env.DB)
-  const result = await db.delete(pages).where(eq(pages.id, id)).returning()
-  if (!result.length) return c.json({ error: 'Not found' }, 404)
-  return c.json({ success: true })
-})
-
 // ─── Programs (Admin CRUD) ────────────────────────────────────────
 const programCreateSchema = z.object({
   name: z.string().min(1).max(255),
@@ -1134,22 +1008,7 @@ const programCreateSchema = z.object({
   sortOrder: z.number().int().default(0),
 })
 
-adminRoutes.get('/programs', async (c) => {
-  const db = createDb(c.env.DB)
-  const data = await db
-    .select()
-    .from(programs)
-    .orderBy(asc(programs.sortOrder), asc(programs.name))
-  return c.json({ data })
-})
-
-adminRoutes.get('/programs/:id', async (c) => {
-  const db = createDb(c.env.DB)
-  const id = c.req.param('id')
-  const [prog] = await db.select().from(programs).where(eq(programs.id, id)).limit(1)
-  if (!prog) return c.json({ error: 'Not found' }, 404)
-  return c.json({ data: prog })
-})
+createCrudHandlers(adminRoutes, '/programs', programs, programs.name)
 
 adminRoutes.post('/programs', async (c) => {
   const parsed = programCreateSchema.safeParse(await c.req.json().catch(() => null))
@@ -1170,25 +1029,6 @@ adminRoutes.post('/programs', async (c) => {
     if (err.message?.includes('UNIQUE')) return c.json({ error: 'Slug already exists' }, 409)
     return c.json({ error: 'Database error', message: err.message }, 500)
   }
-})
-
-adminRoutes.patch('/programs/:id', async (c) => {
-  const id = c.req.param('id')
-  const parsed = programCreateSchema.partial().safeParse(await c.req.json().catch(() => null))
-  if (!parsed.success) return c.json({ error: 'Invalid input' }, 400)
-
-  const db = createDb(c.env.DB)
-  const result = await db.update(programs).set({ ...parsed.data, updatedAt: new Date() }).where(eq(programs.id, id)).returning()
-  if (!result.length) return c.json({ error: 'Not found' }, 404)
-  return c.json({ data: result[0] })
-})
-
-adminRoutes.delete('/programs/:id', async (c) => {
-  const id = c.req.param('id')
-  const db = createDb(c.env.DB)
-  const result = await db.delete(programs).where(eq(programs.id, id)).returning()
-  if (!result.length) return c.json({ error: 'Not found' }, 404)
-  return c.json({ success: true })
 })
 
 // ─── Users CRUD ───────────────────────────────────────────────────
@@ -1285,21 +1125,46 @@ adminRoutes.get('/media', async (c) => {
 })
 
 adminRoutes.post('/media', async (c) => {
-  const parsed = mediaCreateSchema.safeParse(await c.req.json().catch(() => null))
-  if (!parsed.success) return c.json({ error: 'Invalid input', details: parsed.error.format() }, 400)
+  try {
+    const body = await c.req.parseBody()
+    const file = body['file'] as File | undefined
+    const altText = body['altText'] as string | undefined
+    const category = body['category'] as string | undefined
 
-  const db = createDb(c.env.DB)
-  const newMedia = {
-    id: nanoid(),
-    ...parsed.data,
-    url: parsed.data.url || `/images/${parsed.data.filename}`,
-    sizeBytes: parsed.data.sizeBytes || 1024,
-    tagsJson: '[]',
-    uploadedBy: null,
+    if (!file || !(file instanceof File)) {
+      return c.json({ error: 'No file uploaded' }, 400)
+    }
+
+    // Determine resource type based on mime type
+    let resourceType: 'image' | 'video' | 'raw' = 'raw'
+    if (file.type.startsWith('image/')) resourceType = 'image'
+    else if (file.type.startsWith('video/')) resourceType = 'video'
+
+    // Upload to Cloudinary
+    const cloudinaryResult = await uploadToCloudinary(file, c.env, {
+      folder: 'script-worldview-media',
+      resourceType,
+    })
+
+    const db = createDb(c.env.DB)
+    const newMedia = {
+      id: nanoid(),
+      filename: file.name || cloudinaryResult.public_id,
+      url: cloudinaryResult.secure_url,
+      type: resourceType === 'raw' ? 'document' : resourceType,
+      sizeBytes: file.size || cloudinaryResult.bytes,
+      altText: altText || null,
+      category: category || null,
+      tagsJson: '[]',
+      uploadedBy: null, // can be extracted from JWT if needed
+    }
+
+    await db.insert(mediaLibrary).values(newMedia)
+    return c.json({ data: newMedia }, 201)
+  } catch (error: any) {
+    console.error('Media upload error:', error)
+    return c.json({ error: error.message || 'Failed to upload media' }, 500)
   }
-
-  await db.insert(mediaLibrary).values(newMedia)
-  return c.json({ data: newMedia }, 201)
 })
 
 adminRoutes.delete('/media/:id', async (c) => {

@@ -8,4 +8,8 @@ export type Env = {
   RESEND_API_KEY: string;
   EMAIL_FROM: string;
   JWT_SECRET: string;
+  CLOUDINARY_CLOUD_NAME: string;
+  CLOUDINARY_API_KEY: string;
+  CLOUDINARY_API_SECRET: string;
+  RATE_LIMITER_KV: KVNamespace;
 };

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, Calendar, MapPin, Clock } from 'lucide-react'
 import { EventRegistrationSection } from '@/components/public/events/EventRegistrationSection'
+import DOMPurify from 'isomorphic-dompurify'
 
 // Mock Data
 const mockEvents = [
@@ -267,7 +268,7 @@ export default async function EventPage({ params }: { params: { slug: string } }
 
             <div 
               className="prose prose-lg max-w-none text-brand-muted prose-headings:font-heading prose-headings:text-brand-primary"
-              dangerouslySetInnerHTML={{ __html: event.description }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(event.description) }}
             />
 
             {event.speakers && event.speakers.length > 0 && (

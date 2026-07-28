@@ -1,54 +1,59 @@
-import { MiddlewareHandler } from 'hono'
+import { Context, Next } from 'hono'
+import { Env } from '../types'
 
-// Simple sliding window in-memory rate tracker
-// Maps Client IP address string to an array of request epoch timestamps
-const ipRequestHistory = new Map<string, number[]>()
+const WINDOW_SIZE_MS = 60 * 1000 // 1 minute
+const MAX_REQUESTS = 30 // 30 requests per minute
 
-export type RateLimitOptions = {
-  windowMs: number // Window duration in milliseconds (e.g. 10 minutes = 600,000ms)
-  maxRequests: number // Maximum allowed requests within the window
-  endpointLabel?: string // Visual identifier for the blocked resource
-}
+export const rateLimitMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) => {
+  const method = c.req.method
+  // Only rate limit mutating methods
+  if (['GET', 'OPTIONS', 'HEAD'].includes(method)) {
+    return next()
+  }
 
-export function rateLimit(options: RateLimitOptions): MiddlewareHandler {
-  const { windowMs, maxRequests, endpointLabel = 'API endpoint' } = options
+  // Check if KV is bound
+  if (!c.env.RATE_LIMITER_KV) {
+    return next()
+  }
 
-  return async (c, next) => {
-    // 1. Identify Client IP
-    const clientIp = 
-      c.req.header('CF-Connecting-IP') || 
-      c.req.header('X-Real-IP') || 
-      c.req.header('X-Forwarded-For')?.split(',')[0].trim() || 
-      '127.0.0.1'
+  const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || 'unknown'
+  if (ip === 'unknown') {
+    return next()
+  }
 
-    const now = Date.now()
+  const key = `ratelimit:${ip}`
+  const now = Date.now()
 
-    // 2. Fetch history and clean up expired request timestamps
-    let timestamps = ipRequestHistory.get(clientIp) || []
-    timestamps = timestamps.filter((time) => now - time < windowMs)
+  try {
+    const rawData = await c.env.RATE_LIMITER_KV.get(key)
+    
+    let count = 1
+    let expiresAt = now + WINDOW_SIZE_MS
 
-    // 3. Check threshold limits
-    if (timestamps.length >= maxRequests) {
-      const remainingMs = windowMs - (now - timestamps[0])
-      const remainingMinutes = Math.ceil(remainingMs / 60000)
-
-      return c.json(
-        {
-          error: 'Too Many Requests',
-          message: `You have exceeded the allowed limit of ${maxRequests} requests for this ${endpointLabel}. Please try again in ${remainingMinutes} minute(s).`,
-          retryAfterMs: remainingMs,
-        },
-        429,
-        {
-          'Retry-After': String(Math.ceil(remainingMs / 1000)),
-        }
-      )
+    if (rawData) {
+      const data = JSON.parse(rawData) as { count: number; expiresAt: number }
+      
+      // Check if window expired
+      if (now < data.expiresAt) {
+        count = data.count + 1
+        expiresAt = data.expiresAt
+      }
     }
 
-    // 4. Record current request timestamp and save to history
-    timestamps.push(now)
-    ipRequestHistory.set(clientIp, timestamps)
+    if (count > MAX_REQUESTS) {
+      return c.json({ success: false, error: 'Too many requests. Please try again later.' }, 429)
+    }
 
-    await next()
+    // Write back to KV
+    // TTL is in seconds. We use expirationTtl to ensure KV cleans it up automatically
+    const ttlSeconds = Math.max(60, Math.ceil((expiresAt - now) / 1000))
+    await c.env.RATE_LIMITER_KV.put(key, JSON.stringify({ count, expiresAt }), {
+      expirationTtl: ttlSeconds
+    })
+  } catch (error) {
+    console.error('Rate Limiter Error:', error)
+    // Fail open if KV fails
   }
+
+  return next()
 }
