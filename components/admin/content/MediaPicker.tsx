@@ -67,6 +67,7 @@ export function MediaPicker({ onSelect, trigger, isOpen, onOpenChange }: MediaPi
     const file = e.target.files[0]
     
     setIsUploading(true)
+    try {
       const formData = new FormData()
       formData.append('file', file)
       formData.append('altText', file.name)
