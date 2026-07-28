@@ -32,7 +32,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://api.paystack.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://*; font-src 'self' data: https://fonts.gstatic.com https://*; frame-src 'self' https://*; connect-src 'self' http://localhost:* http://127.0.0.1:* https://* wss://*;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com https://api.paystack.co https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' blob: data: https://*; font-src 'self' data: https://fonts.gstatic.com https://*; frame-src 'self' https://*; connect-src 'self' http://localhost:* http://127.0.0.1:* https://* wss://*;",
           },
         ],
       },
