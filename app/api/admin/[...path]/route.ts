@@ -81,14 +81,20 @@ async function handleProxy(req: NextRequest, pathSegments: string[]) {
 
     const headers = new Headers()
     headers.set('Authorization', `Bearer ${bearerToken}`)
-    headers.set('Content-Type', 'application/json')
+    
+    const incomingContentType = req.headers.get('content-type')
+    if (incomingContentType) {
+      headers.set('Content-Type', incomingContentType)
+    } else {
+      headers.set('Content-Type', 'application/json')
+    }
 
     const method = req.method
     const isBodyMethod = ['POST', 'PUT', 'PATCH'].includes(method)
     let body: any = undefined
 
     if (isBodyMethod) {
-      body = await req.text().catch(() => '')
+      body = await req.arrayBuffer().catch(() => '')
     }
 
     const res = await fetch(targetUrl, {
