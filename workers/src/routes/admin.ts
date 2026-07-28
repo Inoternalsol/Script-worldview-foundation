@@ -1129,7 +1129,7 @@ adminRoutes.post('/media', async (c) => {
     const altText = body['altText'] as string | undefined
     const category = body['category'] as string | undefined
 
-    if (!file || !(file instanceof File)) {
+    if (!file || typeof file === 'string') {
       return c.json({ error: 'No file uploaded' }, 400)
     }
 
