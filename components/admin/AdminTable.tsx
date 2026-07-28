@@ -60,21 +60,21 @@ export function TableSearch({
   placeholder?: string
 }) {
   return (
-    <div className="relative w-full max-w-xs">
-      <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brand-muted" />
+    <div className="relative w-full max-w-xs group">
+      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted transition-colors group-focus-within:text-brand-primary" />
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-9 pl-8 pr-8 text-sm"
+        className="h-10 pl-9 pr-8 text-sm shadow-sm transition-all bg-card hover:bg-accent/50 focus:bg-card focus:ring-2 focus:ring-brand-primary/20 rounded-xl"
       />
       {value && (
         <button
           onClick={() => onChange('')}
           aria-label="Clear search"
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-brand-muted hover:text-foreground"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-brand-muted hover:text-foreground transition-colors"
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="h-4 w-4" />
         </button>
       )}
     </div>
@@ -99,7 +99,7 @@ export function TableFilter({
       onChange={(e) => onChange(e.target.value)}
       aria-label={placeholder ?? 'Filter'}
       title={placeholder ?? 'Filter'}
-      className="h-9 rounded-lg border border-input bg-card px-3 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+      className="h-10 rounded-xl border border-input bg-card px-3 text-sm text-foreground shadow-sm transition-all hover:bg-accent/50 focus:bg-card focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
     >
       <option value="">{placeholder ?? 'All'}</option>
       {options.map((opt) => (

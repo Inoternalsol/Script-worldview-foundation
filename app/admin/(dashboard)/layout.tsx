@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { auth } from '@/auth'
 import { SignOutButton } from '@/components/admin/SignOutButton'
 import { SidebarNavigation } from '@/components/admin/SidebarNavigation'
+import { MobileSidebar } from '@/components/admin/MobileSidebar'
 import { ThemeToggle } from '@/components/public/shared/ThemeToggle'
 
 import { Suspense } from 'react'
@@ -69,12 +70,15 @@ export default async function AdminLayout({
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-10 border-b border-border bg-background/90 px-4 py-3.5 backdrop-blur-sm md:px-8">
           <div className="flex items-center justify-between">
-            <div className="min-w-0">
-              <div className="truncate font-heading text-base font-semibold text-foreground">
-                Script Worldview Foundation
-              </div>
-              <div className="truncate text-xs text-brand-muted">
-                Content Management System
+            <div className="flex items-center min-w-0">
+              <MobileSidebar user={user} />
+              <div className="min-w-0">
+                <div className="truncate font-heading text-base font-semibold text-foreground">
+                  Script Worldview Foundation
+                </div>
+                <div className="truncate text-xs text-brand-muted">
+                  Content Management System
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-3">

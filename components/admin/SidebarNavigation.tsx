@@ -72,8 +72,11 @@ export function SidebarNavigation() {
     <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
       {navSections.map((section) => (
         <div key={section.label}>
-          <div className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-widest text-brand-muted/50">
-            {section.label}
+          <div className="mb-2 px-3 flex items-center gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-brand-muted/70">
+              {section.label}
+            </span>
+            <span className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
           </div>
           <div className="space-y-0.5">
             {section.items.map((item) => (
