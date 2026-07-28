@@ -75,7 +75,7 @@ mediaRoutes.post('/', requireRole(['super_admin', 'dept_admin', 'content_editor'
       type,
       sizeBytes: file.size,
       altText,
-      uploadedBy: user.id
+      uploadedBy: user.id || null
     }
 
     await db.insert(mediaLibrary).values(newMedia)
