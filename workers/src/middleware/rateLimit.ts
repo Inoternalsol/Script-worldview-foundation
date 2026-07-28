@@ -1,10 +1,11 @@
 import { Context, Next } from 'hono'
+import { createMiddleware } from 'hono/factory'
 import { Env } from '../types'
 
 const WINDOW_SIZE_MS = 60 * 1000 // 1 minute
 const MAX_REQUESTS = 30 // 30 requests per minute
 
-export const rateLimitMiddleware = async (c: Context<{ Bindings: Env }>, next: Next) => {
+export const rateLimitMiddleware = createMiddleware<{ Bindings: Env }>(async (c, next) => {
   const method = c.req.method
   // Only rate limit mutating methods
   if (['GET', 'OPTIONS', 'HEAD'].includes(method)) {
@@ -56,4 +57,6 @@ export const rateLimitMiddleware = async (c: Context<{ Bindings: Env }>, next: N
   }
 
   return next()
-}
+})
+
+export { rateLimitMiddleware as rateLimit }

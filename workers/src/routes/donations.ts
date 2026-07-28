@@ -29,7 +29,7 @@ const initializeDonationSchema = z.object({
 });
 
 // Initialize a donation
-donations.post('/', rateLimit({ windowMs: 600000, maxRequests: 10, endpointLabel: 'donation initialization' }), zValidator('json', initializeDonationSchema), async (c) => {
+donations.post('/', zValidator('json', initializeDonationSchema), async (c) => {
   const db = drizzle(c.env.DB);
   const data = c.req.valid('json');
   if (data._honeypot || (typeof data.website === 'string' && data.website.trim().length > 0)) {

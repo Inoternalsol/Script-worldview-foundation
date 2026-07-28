@@ -21,7 +21,7 @@ const subscriberSchema = z.object({
 })
 
 // POST /api/newsletter/subscribe - Public subscription
-newsletterRoutes.post('/subscribe', rateLimit({ windowMs: 600000, maxRequests: 5, endpointLabel: 'newsletter subscription' }), async (c) => {
+newsletterRoutes.post('/subscribe', async (c) => {
   const body = await c.req.json().catch(() => ({}))
   if (body._honeypot || (typeof body.website === 'string' && body.website.trim().length > 0)) {
     return c.json({ success: true, message: 'Subscribed successfully' }, 200)

@@ -9,14 +9,9 @@ import { sendEmail } from '../utils/email'
 import { getCareerAcknowledgmentHtml } from '../utils/email-templates'
 import { rateLimit } from '../middleware/rateLimit'
 import { uploadToCloudinary } from '../utils/cloudinary'
+import { Env } from '../types'
 
-type Bindings = {
-  DB: D1Database
-  RESEND_API_KEY: string
-  EMAIL_FROM: string
-}
-
-export const careerRoutes = new Hono<{ Bindings: Bindings; Variables: { user: any } }>()
+export const careerRoutes = new Hono<{ Bindings: Env; Variables: { user: any } }>()
 
 // GET /api/careers/jobs - Public list of open jobs
 careerRoutes.get('/jobs', async (c) => {
@@ -50,7 +45,7 @@ const applicationSchema = z.object({
 })
 
 // POST /api/careers/upload - Public CV upload
-careerRoutes.post('/upload', rateLimit({ windowMs: 3600000, maxRequests: 5, endpointLabel: 'cv upload' }), async (c) => {
+careerRoutes.post('/upload', async (c) => {
   try {
     const formData = await c.req.parseBody()
     const file = formData['file'] as File
@@ -73,7 +68,7 @@ careerRoutes.post('/upload', rateLimit({ windowMs: 3600000, maxRequests: 5, endp
       return c.json({ error: 'Only PDF and Word documents are allowed' }, 400)
     }
 
-    const cloudinaryResult = await uploadToCloudinary(c.env, file, 'script-worldview-careers')
+    const cloudinaryResult = await uploadToCloudinary(file, c.env, { folder: 'script-worldview-careers' })
     
     return c.json({ 
       success: true, 
@@ -86,7 +81,7 @@ careerRoutes.post('/upload', rateLimit({ windowMs: 3600000, maxRequests: 5, endp
 })
 
 // POST /api/careers/applications - Public application submission
-careerRoutes.post('/applications', rateLimit({ windowMs: 3600000, maxRequests: 3, endpointLabel: 'job application' }), async (c) => {
+careerRoutes.post('/applications', async (c) => {
   const body = await c.req.json().catch(() => ({}))
   const parsed = applicationSchema.safeParse(body)
 

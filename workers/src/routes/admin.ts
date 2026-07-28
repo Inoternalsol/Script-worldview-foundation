@@ -175,6 +175,10 @@ adminRoutes.post('/volunteers', async (c) => {
 adminRoutes.get('/donations/export', async (c) => {
   const { streamText } = await import('hono/streaming')
   
+  c.header('Content-Type', 'text/csv')
+  c.header('Content-Disposition', 'attachment; filename="donations.csv"')
+  c.header('Access-Control-Expose-Headers', 'Content-Disposition')
+  
   return streamText(c, async (stream) => {
     const headers = [
       'ID', 'Donor Name', 'Donor Email', 'Donor Phone', 'Amount', 'Currency',
@@ -216,12 +220,6 @@ adminRoutes.get('/donations/export', async (c) => {
       
       await stream.write(chunkRows.map((row) => row.map(escapeCsv).join(',')).join('\n') + '\n')
       offset += limit
-    }
-  }, {
-    headers: {
-      'Content-Type': 'text/csv',
-      'Content-Disposition': 'attachment; filename="donations.csv"',
-      'Access-Control-Expose-Headers': 'Content-Disposition'
     }
   })
 })
@@ -1151,7 +1149,7 @@ adminRoutes.post('/media', async (c) => {
       id: nanoid(),
       filename: file.name || cloudinaryResult.public_id,
       url: cloudinaryResult.secure_url,
-      type: resourceType === 'raw' ? 'document' : resourceType,
+      type: (resourceType === 'raw' ? 'document' : resourceType) as 'image' | 'video' | 'document',
       sizeBytes: file.size || cloudinaryResult.bytes,
       altText: altText || null,
       category: category || null,
